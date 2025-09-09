@@ -1,0 +1,296 @@
+.hero-section {
+  position: relative; /* relative */
+  overflow: hidden; /* overflow-hidden */
+
+  /* Gradiente de fundo da esquerda para a direita */
+  background: linear-gradient(to top, #be185d, #6b21a8, #312e81);
+  /* As cores acima são equivalentes ao:
+     from-indigo-900 (#312e81)
+     via-purple-900 (#6b21a8)
+     to-pink-900 (#be185d) */
+
+  /* Se tiver um background grid como decorativo */
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* Se "cyber-grid" for uma classe personalizada que você criou (decorativa ou animada),
+   você precisa definir esse estilo manualmente também. Exemplo básico: */
+.cyber-grid {
+  background-image: url("/public/images/background-grid.jpg");
+  opacity: 0.1;
+  mix-blend-mode: overlay;
+}
+
+/* ======= Background Animation ======= */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-circle-1,
+.hero-circle-2,
+.hero-circle-3 {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(40px);
+  animation: pulse 2s infinite;
+  opacity: 0.2;
+}
+
+.hero-circle-1 {
+  top: 25%;
+  left: 25%;
+  width: 8rem;
+  height: 8rem;
+  background-color: #3b82f6;
+}
+
+.hero-circle-2 {
+  bottom: 25%;
+  right: 25%;
+  width: 10rem;
+  height: 10rem;
+  background-color: #8b5cf6;
+  animation-delay: 1s;
+}
+
+.hero-circle-3 {
+  top: 50%;
+  left: 50%;
+  width: 7rem;
+  height: 7rem;
+  background-color: #ec4899;
+  animation-delay: 0.5s;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.05);
+  }
+}
+
+/* ======= Container Section ======= */
+.hero-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 5rem 1rem;
+  position: relative;
+  z-index: 10;
+}
+
+/* ======= Grid Layout ======= */
+.hero-grid {
+  display: grid;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ======= Typography ======= */
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: 500;
+  color: white;
+  font-family: "Press Start 2P", system-ui;
+}
+
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: 4.5rem;
+  }
+}
+
+.hero-title span.gradient {
+  background: linear-gradient(to right, #60a5fa, #be185d);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: #d1d5db;
+  max-width: 28rem;
+}
+
+/* ======= Buttons ======= */
+.button-primary {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.button-primary:hover {
+  background: linear-gradient(to right, #2563eb, #7c3aed);
+}
+
+.button-secondary {
+  background-color: rgba(31, 41, 55, 0.5);
+  backdrop-filter: blur(4px);
+  color: white;
+  border: 1px solid #4b5563;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.button-secondary:hover {
+  border-color: #60a5fa;
+  background-color: rgba(55, 65, 81, 0.5);
+}
+
+/* ======= Stats ======= */
+.stats {
+  display: flex;
+  gap: 2rem;
+  padding-top: 2rem;
+}
+
+.stats .stat {
+  text-align: center;
+}
+
+.stats .stat .value {
+  font-size: 1.875rem;
+  font-weight: bold;
+}
+
+.stats .stat .label {
+  color: #9ca3af;
+}
+
+/* ======= Featured Game Card ======= */
+.featured-card {
+  position: relative;
+  background: linear-gradient(
+    to bottom right,
+    rgba(31, 41, 55, 0.5),
+    rgba(17, 24, 39, 0.5)
+  );
+  backdrop-filter: blur(4px);
+  border-radius: 1rem;
+  padding: 2rem;
+  border: 1px solid rgba(55, 65, 81, 0.5);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.featured-badge {
+  position: absolute;
+  top: -1rem;
+  right: -1rem;
+  background-color: #facc15;
+  color: black;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: bold;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.featured-preview {
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(to bottom right, #10b981, #3b82f6);
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.featured-preview .text {
+  text-align: center;
+  color: white;
+}
+
+.featured-preview .text .title {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.featured-preview .text .subtitle {
+  color: #e5e7eb;
+}
+
+.featured-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.featured-info h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: white;
+}
+
+.featured-info p {
+  color: #9ca3af;
+}
+
+.price .current {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #34d399;
+}
+
+.price .old {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+.button-buy {
+  width: 100%;
+  background: linear-gradient(to right, #10b981, #3b82f6);
+  color: white;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  border: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.button-buy:hover {
+  background: linear-gradient(to right, #059669, #2563eb);
+}
+
+.featured-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}

@@ -1,0 +1,220 @@
+/* Checkout.css */
+.checkout-page {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(to top, #312e81, #6b21a8, #be185d);
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+/* Reutilizando estilos da Hero */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-circle-1,
+.hero-circle-2,
+.hero-circle-3 {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(40px);
+  animation: pulse 2s infinite;
+  opacity: 0.2;
+}
+
+.hero-circle-1 {
+  top: 25%;
+  left: 25%;
+  width: 8rem;
+  height: 8rem;
+  background-color: #3b82f6;
+}
+
+.hero-circle-2 {
+  bottom: 25%;
+  right: 25%;
+  width: 10rem;
+  height: 10rem;
+  background-color: #8b5cf6;
+  animation-delay: 1s;
+}
+
+.hero-circle-3 {
+  top: 50%;
+  left: 50%;
+  width: 7rem;
+  height: 7rem;
+  background-color: #ec4899;
+  animation-delay: 0.5s;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.05);
+  }
+}
+
+/* Cards */
+.featured-card {
+  position: relative;
+  background: linear-gradient(
+    to bottom right,
+    rgba(31, 41, 55, 0.5),
+    rgba(17, 24, 39, 0.5)
+  );
+  backdrop-filter: blur(4px);
+  border-radius: 1rem;
+  padding: 2rem;
+  border: 1px solid rgba(55, 65, 81, 0.5);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Tipografia */
+.title-retro {
+  font-family: "Press Start 2P", system-ui;
+  font-weight: 700;
+  color: white;
+}
+
+.gradient {
+  background: linear-gradient(to right, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-text {
+  background: linear-gradient(to right, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Botões */
+.button-primary {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none !important;
+}
+
+.button-primary:hover {
+  background: linear-gradient(to right, #2563eb, #7c3aed);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.button-secondary {
+  background-color: rgba(31, 41, 55, 0.5);
+  backdrop-filter: blur(4px);
+  color: white;
+  border: 1px solid #4b5563;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none !important;
+}
+
+.button-secondary:hover {
+  border-color: #60a5fa;
+  background-color: rgba(55, 65, 81, 0.5);
+  transform: translateY(-2px);
+}
+
+.button-buy {
+  background: linear-gradient(to right, #10b981, #3b82f6);
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  border: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.button-buy:hover {
+  background: linear-gradient(to right, #059669, #2563eb);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+}
+
+.button-delete {
+  transition: all 0.2s;
+}
+
+.button-delete:hover {
+  transform: scale(1.1);
+  background-color: rgba(220, 53, 69, 0.2);
+}
+
+/* Cores de ícones */
+.text-blue {
+  color: #60a5fa;
+}
+
+.text-purple {
+  color: #a78bfa;
+}
+
+/* Formulários */
+.bg-gray-700 {
+  background-color: #2d3748 !important;
+}
+
+.form-control,
+.form-select {
+  background-color: #2d3748 !important;
+  color: white !important;
+  border: 1px solid #4a5568 !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: #2d3748 !important;
+  color: white !important;
+  border-color: #63b3ed !important;
+  box-shadow: 0 0 0 0.25rem rgba(99, 179, 237, 0.25) !important;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .title-retro {
+    font-size: 1.5rem !important;
+  }
+  
+  .button-primary,
+  .button-secondary {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+}

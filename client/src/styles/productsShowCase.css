@@ -1,0 +1,109 @@
+.product-grid-section {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+  background: linear-gradient(to bottom, transparent, rgba(17, 24, 39, 0.5));
+}
+
+.product-grid-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.product-grid-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.product-grid-title {
+  font-size: 2.125rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.text-glow {
+  color: #be185d;
+  text-shadow: 0 0 10px #f53890e0;
+  opacity: 0.9;
+}
+
+.product-grid-subtitle {
+  color: #9ca3af;
+  font-size: 1.125rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.product-grid-filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 3rem;
+}
+
+.filter-button {
+  padding: 0.5rem 1rem;
+  background: rgba(31, 41, 55, 0.5);
+  color: #d1d5db;
+  border: 1px solid #4b5563;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.filter-button:hover {
+  background: linear-gradient(
+    to right,
+    rgba(59, 130, 246, 0.5),
+    rgba(139, 92, 246, 0.5)
+  );
+  color: white;
+  border-color: #60a5fa;
+}
+
+.product-grid-list {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .product-grid-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-grid-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .product-grid-list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.product-grid-load-more {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.load-more-button {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.load-more-button:hover {
+  background: linear-gradient(to right, #2563eb, #7c3aed);
+  box-shadow: 0 0 10px #60a5fa;
+}

@@ -1,0 +1,130 @@
+.header {
+  background: linear-gradient(to right, rgba(20, 20, 57, 0.9), rgb(48, 30, 55));
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.904);
+  backdrop-filter: blur(8px);
+}
+
+.header__container {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header__logo img {
+  width: 90px;
+  height: 90px;
+  transition: transform 0.3s ease;
+  color: white;
+}
+
+.header__logo:hover img {
+  transform: scale(1.05);
+}
+
+.header__nav {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.header__nav li a {
+  color: #f3f3f3;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
+}
+
+.header__nav li a:hover {
+  color: #ffa500;
+}
+
+.header__nav li a.active {
+  color: #ffa500;
+}
+
+.header__cart {
+  position: relative;
+  margin-left: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  display: none;
+}
+
+.cart-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-icon {
+  color: white;
+  font-size: 1.5rem;
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px; /* ou experimente -6px */
+  right: -6px; /* ajuste horizontal fino */
+  background-color: #007bff;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  line-height: 1;
+  min-width: 16px;
+  text-align: center;
+}
+
+.header__menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+  .header__menu-toggle {
+    display: block;
+  }
+
+  .header__nav {
+    display: none;
+    flex-direction: column;
+    background-color: rgba(15, 15, 25, 0.95);
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 100%;
+    padding: 1.5rem 2rem;
+  }
+
+  .header__cart{
+    display: flex;
+  }
+
+  .header__nav.is-open {
+    display: flex;
+  }
+
+  .header__nav li {
+    margin-bottom: 1rem;
+  }
+
+  .cart-count {
+    top: 0px;
+    right: -8px;
+  }
+}

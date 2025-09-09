@@ -1,0 +1,61 @@
+.randomizer-section {
+  padding: 4rem 1rem;
+  background: linear-gradient(to bottom, #be185d, #6b21a8, #1e3a8a);
+  opacity: calc();
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* .product-grid-title {
+  font-size: 2.125rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 1rem;
+}
+  */
+
+.randomizer-title {
+  font-family: "Press Start 2P", system-ui;
+  font-size: 2.125rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.randomizer-subtitle {
+  font-size: 1.125rem;
+  font-weight: normal;
+  color: gray;
+}
+
+.btn-group {
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.btn-randomizer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-randomize {
+  font-family: "Press Start 2P", system-ui;
+  color: grey;
+  font-size: 1.125rem;
+  font-weight: 500;
+  position: relative;
+  background-color: #6b21a8;
+  margin: 20px 20px 20px 20px;
+  box-shadow: 0 2px 4px rgb(14, 46, 170);
+  border-radius: 20px;
+  align-items: center;
+}

@@ -7,31 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Gêneros dos jogos
-enum Genre {
-  rpg
-  ação
-  esportes
-  estratégia
-  aventura
-}
-
-// Cargos que um usuário pode ter
-enum Role {
-  USER
-  SELLER
-  ADMIN
-}
-
 model Game{
   id Int @id @default(autoincrement())
   title String
   description String
-  image String
+  image String @default("uploads/games/default.png")
   price Float
   stock Int
   sellerID String
-  genre Genre
+  genre String
   
   seller User @relation(fields: [sellerID], references: [CPF])
   
@@ -44,12 +28,12 @@ model Game{
 
 model User{
   CPF String @id 
-  name String
-  phone String
-  image String
+  name String?
+  phone String?
+  image String @default("uploads/games/default.png")
   password String
   email String @unique
-  role Role @default(USER)
+  role String @default("User")
   
   addresses Address[] @relation("UserAddresses")
   
@@ -64,7 +48,7 @@ model User{
 model Address{
   id Int @id @default(autoincrement())
   userID String
-  label String
+  label String?
   street String
   number String
   complemento String

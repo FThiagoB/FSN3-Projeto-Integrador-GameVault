@@ -27,3 +27,10 @@ Dentro da pasta do servidor use o comando:
 ```
 npx prisma migrate dev --name init
 ```
+
+4. Popule as tabelas com alguns exemplos:
+Ainda dentro da pasta do servidor use o comando:
+
+```
+npm run seed
+```

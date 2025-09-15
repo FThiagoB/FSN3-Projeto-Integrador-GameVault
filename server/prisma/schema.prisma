@@ -1,15 +1,149 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// Gêneros dos jogos
+enum Genre {
+  rpg
+  ação
+  esportes
+  estratégia
+  aventura
+}
+
+// Cargos que um usuário pode ter
+enum Role {
+  USER
+  SELLER
+  ADMIN
+}
+
+model Game{
+  id Int @id @default(autoincrement())
+  title String
+  description String
+  image String
+  price Float
+  stock Int
+  sellerID String
+  genre Genre
+  
+  seller User @relation(fields: [sellerID], references: [CPF])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  itemsSold OrderItem[]
+  itemsCart CartItem[]
+}
+
+model User{
+  CPF String @id 
+  name String
+  phone String
+  image String
+  password String
+  email String @unique
+  role Role @default(USER)
+  
+  addresses Address[] @relation("UserAddresses")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  gamesSold Game[]
+  orders Order[]
+  cart Cart
+}
+
+model Address{
+  id Int @id @default(autoincrement())
+  userID String
+  label String
+  street String
+  number String
+  complemento String
+  neighborhood String
+  city String
+  state String
+  zipCode String
+  isDefaultShipping Boolean @default(false)
+  
+  user User @relation("UserAddresses", fields: [userID], references: [CPF])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  orders Order[]
+}
+
+model Order{
+  id Int @id @default(autoincrement())
+  userID String
+  status String
+  total Float
+  subtotal Float
+  discount Float
+  tax Float
+  shippingCost Float
+  shippingAddressID Int
+  shippingMethod String
+  paymentMethod String
+  paymentStatus String
+  
+  user User @relation(fields: [userID], references: [CPF])
+  address Address @relation(fields: [shippingAddressID], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  items OrderItem[]
+}
+
+model OrderItem{
+	id Int @id @default(autoincrement())
+	orderID Int
+	gameID Int
+	quantity Int
+	unitPrice Float
+	
+	order Order @relation(fields: [orderID], references: [id])
+	game Game @relation(fields: [gameID], references: [id])
+}
+
+model Cart{
+  id Int @id @default(autoincrement())
+  userID String
+  total Float
+  subtotal Float
+  discount Float
+  tax Float
+  shippingCost Float
+  couponCode String?
+  shippingAddressID Int?
+  shippingMethod String?
+  
+  user User @relation(fields: [userID], references: [CPF])
+  address Address @relation(fields: [shippingAddressID], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  items CartItem[]
+}
+
+model CartItem{
+	id Int @id @default(autoincrement())
+	cartID Int
+	gameID Int
+	quantity Int
+	unitPrice Float
+	
+	cart Cart @relation(fields: [cartID], references: [id])
+	game Game @relation(fields: [gameID], references: [id])
 }

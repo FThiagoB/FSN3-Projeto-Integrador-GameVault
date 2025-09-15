@@ -58,7 +58,7 @@ model User{
   
   gamesSold Game[]
   orders Order[]
-  cart Cart
+  cart Cart?
 }
 
 model Address{
@@ -80,6 +80,7 @@ model Address{
   updatedAt DateTime @updatedAt
   
   orders Order[]
+  carts Cart[]
 }
 
 model Order{
@@ -118,7 +119,7 @@ model OrderItem{
 
 model Cart{
   id Int @id @default(autoincrement())
-  userID String
+  userID String @unique
   total Float
   subtotal Float
   discount Float
@@ -129,7 +130,7 @@ model Cart{
   shippingMethod String?
   
   user User @relation(fields: [userID], references: [CPF])
-  address Address @relation(fields: [shippingAddressID], references: [id])
+  address Address? @relation(fields: [shippingAddressID], references: [id])
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

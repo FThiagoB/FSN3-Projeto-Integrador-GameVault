@@ -6,6 +6,7 @@ import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { Pagination } from "react-bootstrap";
 
 import { ToastContainer } from "react-toastify";
+import SearchBar from "../components/searchBar/Searchbar";
 
 const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState("Todos");
@@ -101,6 +102,7 @@ const Products = () => {
             Mergulhe na nostalgia dos videogames com jogos lançados até o ano de
             2010.
           </p>
+          <SearchBar />
           <div className="category-list">
             {categories.map((category) => (
               <button

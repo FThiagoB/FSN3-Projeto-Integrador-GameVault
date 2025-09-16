@@ -1,0 +1,54 @@
+/* Container principal da barra de busca */
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #312e81; /* Roxo escuro do tema */
+  border: 3px solid #a78bfa; /* Roxo claro do tema */
+  border-radius: 8px;
+  padding: 0.8rem 1rem; /* 4px 12px */
+  box-shadow: 0 0 10px rgba(167, 139, 250, 0.5);
+  transition: box-shadow 0.3s ease;
+  width: 100%;
+  max-width: 50%; /* Limita a largura em telas grandes */
+  margin: 0 auto;
+}
+
+.search-bar:focus-within {
+  box-shadow: 0 0 15px rgba(187, 30, 93, 0.7);
+  border-color: #be185d;
+}
+
+/* Campo de input */
+.search-bar__input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f0e9ff; /* Texto off-white do tema */
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.75rem; /* 12px */
+  padding: 0.5rem 0;
+}
+
+/* Estilo do placeholder do input */
+.search-bar__input::placeholder {
+  color: #a78bfa;
+  opacity: 0.7;
+}
+
+/* Botão de busca */
+.search-bar__button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: #a78bfa; /* Roxo claro do tema */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.search-bar__button:hover {
+  color: #f0e9ff; /* Texto off-white ao passar o mouse */
+}

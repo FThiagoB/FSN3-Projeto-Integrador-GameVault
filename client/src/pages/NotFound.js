@@ -1,42 +1,32 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { FaHome, FaExclamationTriangle } from "react-icons/fa";
+import "../styles/Notfound.css";
+
 const NotFoundPage = () => (
-  <div
-    style={{ height: "90vh", width: "100%" }}
-    className="d-flex flex-column mx-auto text-center align-items-center justify-content-center"
-  >
-    <div>
-      {/* ========== MAIN CONTENT ========== */}
-      <main id="content" className="flex-fill">
-        <div className="text-center py-5 px-3 px-md-5">
-          <h1 className="display-1 fw-bold text-dark">404</h1>
-          <p className="mt-3 text-secondary">Oops, something went wrong.</p>
-          <p className="text-secondary">Sorry, we couldn’t find your page.</p>
-          <div className="mt-4 d-flex flex-column flex-sm-row justify-content-center align-items-center gap-2 gap-sm-3">
-            <Link
-              to="/"
-              className="btn btn-primary btn-lg d-inline-flex align-items-center"
-            >
-              <svg
-                className="me-2"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-              Back to homepage
-            </Link>
-          </div>
+  <div className="notfound-retro">
+    <main id="content" className="notfound-main">
+      <div className="notfound-content">
+        <FaExclamationTriangle
+          style={{
+            fontSize: "3rem",
+            color: "#a78bfa",
+            marginBottom: "16px",
+            filter: "drop-shadow(0 0 8px #be185d80)",
+          }}
+        />
+        <h1 className="retro-404">404</h1>
+        <p className="retro-text">Oops! Algo deu errado.</p>
+        <p className="retro-text">Desculpe, não encontramos esta página.</p>
+        <div className="notfound-actions">
+          {/* A classe do Link agora é apenas a do botão estilizado */}
+          <Link to="/" className="btn-retro-home">
+            <FaHome className="me-2" style={{ fontSize: "1.3rem" }} />
+            Voltar para o início
+          </Link>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   </div>
 );
 

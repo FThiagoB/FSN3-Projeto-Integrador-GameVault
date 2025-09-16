@@ -1,0 +1,129 @@
+/* Estilos Globais da Sidebar */
+.sidebar {
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-image: linear-gradient(to bottom right, #312e81, #be185d);
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  color: white;
+  border-right: 4px solid #a78bfa;
+}
+
+.sidebar__nav {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabeçalho da Sidebar */
+.sidebar__header {
+  padding: 1rem 1rem 0.5rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar__logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sidebar__logo-container--collapsed {
+  width: 100%;
+  justify-content: center;
+}
+
+.sidebar__logo-icon {
+  font-size: 1.875rem; /* 30px */
+  flex-shrink: 0;
+}
+
+.sidebar__logo-text {
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+  color: #a78bfa;
+  text-shadow: 1px 1px 4px #000;
+}
+
+.sidebar__logo-text--visible {
+  width: 8rem; /* 128px */
+}
+
+/* Botão de Toggle (Desktop) */
+.sidebar__toggle-desktop {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: none; /* Escondido por padrão, visível em telas maiores */
+}
+
+.sidebar__toggle-desktop:hover {
+  background-color: rgba(167, 139, 250, 0.2);
+}
+
+.sidebar__toggle-icon {
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar__toggle-icon--collapsed {
+  transform: rotate(180deg);
+}
+
+/* Menu e Itens */
+.sidebar__menu {
+  flex-grow: 1;
+  padding: 0 1rem;
+  list-style: none;
+  margin: 0;
+}
+
+.sidebar__item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  border-radius: 0.5rem;
+  color: #f0e9ff;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar__item:hover {
+  background-color: rgba(167, 139, 250, 0.2);
+}
+
+.sidebar__item--active {
+  background-color: rgba(167, 139, 250, 0.3);
+  color: white;
+}
+
+.sidebar__item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar__item-text {
+  overflow: hidden;
+  white-space: nowrap;
+  transition: all 0.3s ease-in-out;
+  width: 0;
+  margin-left: 0;
+}
+
+.sidebar__item-text--visible {
+  width: 10rem; /* 160px */
+  margin-left: 1rem;
+}
+
+/* Media Query para Desktop */
+@media (min-width: 768px) {
+  .sidebar__toggle-desktop {
+    display: block;
+  }
+}

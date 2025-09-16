@@ -1,5 +1,5 @@
 import React from "react";
-import { Play, Star, Zap } from "lucide-react";
+import { Play, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { useNavigate } from "react-router-dom";

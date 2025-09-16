@@ -1,0 +1,102 @@
+.signup-retro {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to top, #312e81, #6b21a8, #be185d);
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  color: #d1d5db;
+  padding: 2rem 1rem;
+  user-select: none;
+}
+
+.signup-retro__container {
+  background: linear-gradient(
+    to bottom right,
+    rgba(31, 41, 55, 0.7),
+    rgba(17, 24, 39, 0.7)
+  );
+  padding: 3rem 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+  width: 100%;
+  max-width: 450px;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.signup-retro__title {
+  font-size: 2.5rem;
+  color: #a78bfa;
+  text-align: center;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 12px #be185daa;
+}
+
+.signup-retro__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+}
+
+.signup-retro__label {
+  font-size: 0.7rem;
+  color: #d1d5db;
+  letter-spacing: 0.05em;
+}
+
+.signup-retro__input {
+  background: rgba(31, 41, 55, 0.5);
+  color: white;
+  border: 1px solid #4b5563;
+  border-radius: 0.5rem;
+  padding: 0.7rem 1rem;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.signup-retro__input::placeholder {
+  color: #a78bfaaa;
+}
+
+.signup-retro__input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 9px #8b5cf6;
+  background: rgba(31, 41, 55, 0.7);
+}
+
+.signup-retro__btn {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  color: white;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 0.7rem;
+  padding: 1rem 0;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.6);
+}
+
+.signup-retro__btn:hover,
+.signup-retro__btn:focus {
+  background: linear-gradient(to right, #8b5cf6, #be185d);
+  box-shadow: 0 0 20px #a78bfa;
+  outline: none;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  }
+
+  100% {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+}

@@ -4,5 +4,6 @@ const router = Router();
 
 // Especifica os métodos do controlador que lidam com cada rota
 router.get("/games", gameController.getGames);
+router.delete("/games/:id", gameController.deleteGame);
 
 module.exports = router;

@@ -70,3 +70,52 @@ exports.getGames = async (req, res) => {
         await prisma.$disconnect();
     }
 };
+
+exports.deleteGame = async (req, res) => {
+    try {
+        const id_procurado = parseInt( req.params.id );
+
+        const jogo_deletado = await prisma.game.delete({
+            where:{
+                id: id_procurado,
+            },
+        });
+
+        res.status(200).json( jogo_deletado );
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ "message": e.message });
+    }
+    finally {
+        await prisma.$disconnect();
+    }
+};
+
+
+exports.updateGame = async (req, res) => {
+    try {
+        
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ "message": e.message });
+    }
+    finally {
+        await prisma.$disconnect();
+    }
+};
+
+
+exports.createGame = async (req, res) => {
+    try {
+        
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ "message": e.message });
+    }
+    finally {
+        await prisma.$disconnect();
+    }
+};

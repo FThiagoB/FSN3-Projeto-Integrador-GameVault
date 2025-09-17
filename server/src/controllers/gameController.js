@@ -1,29 +1,11 @@
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 
+const {generateFileHash, findExistingImage} = require("../utils/miscellaneous")
 const downloadImageFromUrl = require('../utils/downloadImage');
 
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-
-// Gera um hash usado como nome da imagem (garante unicidade e permite reverificar se o arquivo ja foi salvo)
-function generateFileHash({ seed_text, seed_id }) {
-  const rawString = `${seed_text}-${seed_id}`;
-  return crypto.createHash('md5').update(rawString).digest('hex');
-}
-
-// Verifica se um arquivo existe em um path
-function findExistingImage(baseName, folderPath) {
-  const files = fs.readdirSync(folderPath);
-
-  const match = files.find(file => {
-    const nameWithoutExt = path.parse(file).name;
-    return nameWithoutExt === baseName;
-  });
-
-  return match ? path.join(folderPath, match) : null;
-}
 
 // Usado para verificar se há u
 exports.getGames = async (req, res) => {

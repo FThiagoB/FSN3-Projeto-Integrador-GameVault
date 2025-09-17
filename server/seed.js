@@ -264,6 +264,9 @@ async function seed() {
     await createSellers();
     await createAddresses();
     await createGames();
+
+    // Como o id é informado de forma explicita devemos atualizar o contador do autoincrement da tabela de jogos
+    await prisma.$executeRaw`SELECT setval('"Game_id_seq"', (SELECT MAX(id) FROM "Game"))`;
 }
 
 seed()

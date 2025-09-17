@@ -37,3 +37,11 @@ Ainda dentro da pasta do servidor use o comando:
 ```
 npm run seed
 ```
+
+6. Rode o servidor
+
+Dentro da pasta `src/` do servidor, executar:
+
+```
+node server.js
+```

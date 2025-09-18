@@ -138,6 +138,40 @@ exports.infoGame = async (req, res) => {
   }
 };
 
+exports.getRandomGame = async (req, res) => {
+  try {
+    // 1. Conta o total de jogos no banco de dados
+    const gameCount = await prisma.game.count();
+
+    // 2. Gera um número aleatório para pular (skip)
+    const randomSkip = Math.floor(Math.random() * gameCount);
+
+    // 3. Busca um único jogo, pulando a quantidade aleatória de registros
+    const randomGame = await prisma.game.findFirst({
+      skip: randomSkip,
+    });
+
+    if (!randomGame) {
+      return res
+        .status(404)
+        .json({ message: "Nenhum jogo encontrado para sortear." });
+    }
+
+    // 4. Adiciona a URL completa da imagem, como nas outras funções
+    const gameWithImageUrl = {
+      ...randomGame,
+      imageUrl: `${req.protocol}://${req.get("host")}/uploads/games/${
+        randomGame.image
+      }`,
+    };
+
+    res.status(200).json(gameWithImageUrl);
+  } catch (error) {
+    console.error("Erro ao buscar jogo aleatório:", error);
+    res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
+  }
+};
+
 exports.updateGame = async (req, res) => {
   try {
     const id_jogo = parseInt(req.params.id);

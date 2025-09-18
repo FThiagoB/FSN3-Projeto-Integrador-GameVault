@@ -181,7 +181,8 @@ const CartFloat = () => {
                       >
                         <div className="position-relative">
                           <img
-                            src={item.image}
+                            // ✅ A CORREÇÃO ESTÁ AQUI
+                            src={item.imageUrl}
                             alt={item.name}
                             className="rounded-sm"
                             style={{

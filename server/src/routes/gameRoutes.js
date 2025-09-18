@@ -12,6 +12,8 @@ router.get("/games", gameController.getGames);
 // ✅ ROTA ESPECÍFICA ANTES DA ROTA GENÉRICA
 router.get("/games/genres", gameController.getGenres);
 
+router.get("/games/random", gameController.getRandomGame);
+
 // A rota com :id (genérica) vem DEPOIS
 router.get("/games/:id", gameController.infoGame);
 

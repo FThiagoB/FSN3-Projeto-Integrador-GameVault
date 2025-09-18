@@ -1,9 +1,8 @@
-import "../styles/ProductDetail.css";
+import "./Products.css";
 
 import { useState, useEffect } from "react";
 import { useParams, Navigate, Link } from "react-router-dom";
-//import products from "../data/products";
-import { useCart } from "../contexts/CartContext";
+import { useCart } from "../../contexts/CartContext";
 
 import {
   ButtonGroup,

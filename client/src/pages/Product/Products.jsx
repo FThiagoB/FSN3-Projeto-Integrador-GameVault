@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import ProductCard from "../components/ProductCard/ProductCard";
-// import productsData from "../data/products"; // 1. Não vamos mais usar dados locais
-import "../styles/Products.css";
+import ProductCard from "../../components/ProductCard/ProductCard";
+import "./Products.css";
 import { useParams, useNavigate } from "react-router-dom";
 import { Pagination } from "react-bootstrap";
 import { ToastContainer } from "react-toastify";
-import SearchBar from "../components/searchBar/Searchbar";
+import SearchBar from "../../components/searchBar/Searchbar";
 
 const Products = () => {
   // 2. Novos estados para gerenciar os dados da API

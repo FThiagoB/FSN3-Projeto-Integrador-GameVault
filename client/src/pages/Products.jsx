@@ -1,94 +1,110 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard/ProductCard";
-import productsData from "../data/products";
+// import productsData from "../data/products"; // 1. Não vamos mais usar dados locais
 import "../styles/Products.css";
-import { useParams, Navigate, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Pagination } from "react-bootstrap";
-
 import { ToastContainer } from "react-toastify";
 import SearchBar from "../components/searchBar/Searchbar";
 
 const Products = () => {
-  const [selectedCategory, setSelectedCategory] = useState("Todos");
-  const currentCategory = useParams().category;
+  // 2. Novos estados para gerenciar os dados da API
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPagination, setCurrentPagination] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const numberProductsPerPage = 10; // Mantemos isso para enviar à API
+
+  const { category: currentCategory } = useParams();
   const navigate = useNavigate();
 
-  const [currentPagination, setCurrentPagination] = useState(1);
-  const numberProductsPerPage = 10;
-  let numberPagination = undefined;
-  let itemsPagination = [];
+  // 3. O useEffect principal para buscar os produtos
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      setError(null);
 
-  const selectPaginationItem = (pageNumber) => {
-    setCurrentPagination(pageNumber);
+      const categoryParam = currentCategory ? `&genre=${currentCategory}` : "";
+      const searchParam = searchTerm ? `&search=${searchTerm}` : "";
+
+      const url = `http://localhost:4500/games?page=${currentPagination}&limit=10${categoryParam}${searchParam}`;
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("Falha ao carregar os produtos.");
+        }
+        const data = await response.json();
+        setProducts(data.games);
+        setTotalPages(data.totalPages);
+      } catch (err) {
+        setError(err.message);
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
     window.scrollTo(0, 0);
+  }, [currentCategory, currentPagination, searchTerm]);
+
+  const handleSearch = (query) => {
+    setSearchTerm(query);
+    setCurrentPagination(1); // Importante: volta para a primeira página ao fazer uma nova busca
   };
 
-  const categories = [
-    "Todos",
-    "Corrida",
-    "RPG",
-    "Ação",
-    "Survival Horror",
-    "FPS",
-    "Plataforma",
-    "Luta",
-    "Aventura",
-    "Combate Veicular",
-    "Estratégia",
-    "Simulação",
-    "Ação-Aventura",
-    "RPG Tático",
-    "Card Game",
-    "Ação-RPG",
-    "Mech Combat",
-    "Tiro",
-    "RPG de Ação",
-    "RPG de Sobrevivência",
-    "Beat 'em up",
-    "Simulador de Voo de Combate",
-    "Shoot 'em up",
-  ];
+  // (Opcional, mas recomendado) useEffect para buscar as categorias apenas uma vez
+  useEffect(() => {
+    const fetchCategories = async () => {
+      // Crie um endpoint no backend que retorne todas as categorias/gêneros únicos
+      // Ex: GET http://localhost:4500/games/genres
+      try {
+        const response = await fetch("http://localhost:4500/games/genres");
+        const data = await response.json();
+        setCategories(["Todos", ...data]); // Adiciona "Todos" no início
+      } catch (err) {
+        console.error("Falha ao buscar categorias:", err);
+        // Se falhar, você pode usar uma lista estática como fallback
+        const fallbackCategories = [
+          "Todos",
+          "Ação",
+          "RPG",
+          "Aventura" /* ... */,
+        ];
+        setCategories(fallbackCategories);
+      }
+    };
+    fetchCategories();
+  }, []); // [] significa que roda apenas uma vez
+  const handleSearchChange = (newQuery) => {
+    setSearchTerm(newQuery);
+    setCurrentPagination(1); // Sempre volta para a primeira página ao buscar
+  };
+  const selectPaginationItem = (pageNumber) => {
+    setCurrentPagination(pageNumber);
+  };
 
-  // Verificar a categoria selecionada na URL
-  if (currentCategory !== undefined) {
-    if (selectedCategory != currentCategory) {
-      // Procura a categoria na lista
-      const category = categories.find(
-        (categoria) =>
-          categoria.toLowerCase() === currentCategory.toLocaleLowerCase()
-      );
-
-      // Verifica se a URL tem uma categoria válida
-      if (category !== undefined) {
-        setSelectedCategory(currentCategory);
-      } else return <Navigate to="/produtos" />;
-    }
-  } else if (selectedCategory != "Todos") setSelectedCategory("Todos");
-
-  const filteredProducts =
-    selectedCategory === "Todos"
-      ? productsData
-      : productsData.filter(
-          (product) =>
-            product.category.toLowerCase() === selectedCategory.toLowerCase()
-        );
-
-  numberPagination = Math.ceil(filteredProducts.length / numberProductsPerPage);
-  for (let number = 1; number <= numberPagination; number++) {
+  // 5. A lógica de paginação agora usa o total de páginas vindo da API
+  let itemsPagination = [];
+  for (let number = 1; number <= totalPages; number++) {
     itemsPagination.push(
       <Pagination.Item
         key={number}
         active={number === currentPagination}
-        onClick={() =>
-          number !== currentPagination
-            ? selectPaginationItem(number)
-            : undefined
-        }
+        onClick={() => selectPaginationItem(number)}
       >
         {number}
       </Pagination.Item>
     );
   }
+
+  // Define a categoria ativa com base na URL
+  const selectedCategory = currentCategory || "Todos";
 
   return (
     <div className="products-page-container">
@@ -102,7 +118,10 @@ const Products = () => {
             Mergulhe na nostalgia dos videogames com jogos lançados até o ano de
             2010.
           </p>
-          <SearchBar />
+          <SearchBar
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+          />
           <div className="category-list">
             {categories.map((category) => (
               <button
@@ -114,9 +133,9 @@ const Products = () => {
                 }
                 onClick={() => {
                   navigate(
-                    category == "Todos" ? "/produtos" : `/produtos/${category}`
+                    category === "Todos" ? "/produtos" : `/produtos/${category}`
                   );
-                  setCurrentPagination(1);
+                  setCurrentPagination(1); // Reseta para a primeira página ao mudar de categoria
                 }}
                 aria-label={category}
               >
@@ -126,26 +145,38 @@ const Products = () => {
           </div>
         </aside>
 
-        <div className="product-grid">
-          {filteredProducts
-            .slice(
-              currentPagination > 1
-                ? (currentPagination - 1) * numberProductsPerPage
-                : 0,
-              currentPagination * numberProductsPerPage
-            )
-            .map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-        </div>
+        <main className="main-content">
+          {isLoading ? (
+            <p>Carregando produtos...</p>
+          ) : error ? (
+            <p>Erro: {error}</p>
+          ) : (
+            <>
+              <div className="product-grid">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={{
+                      id: product.id,
+                      name: product.title,
+                      price: product.price,
+                      category: product.genre,
+                      imageUrl: product.imageUrl,
+                    }}
+                  />
+                ))}
+              </div>
 
-        {numberPagination > 1 ? (
-          <div className="pagination-container">
-            <div className="pagination-items">
-              <Pagination className="m-0">{itemsPagination}</Pagination>
-            </div>
-          </div>
-        ) : undefined}
+              {totalPages > 1 && (
+                <div className="pagination-container">
+                  <div className="pagination-items">
+                    <Pagination className="m-0">{itemsPagination}</Pagination>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </main>
       </div>
     </div>
   );

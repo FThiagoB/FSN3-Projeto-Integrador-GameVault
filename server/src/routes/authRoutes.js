@@ -3,7 +3,7 @@ const authController = require("../controllers/authController");
 
 const router = Router();
 
-// Especifica os métodos do controlador que lidam com cada rota
-router.get("/login", authController.logging);
+router.get("/login", authController.login);
+router.get("/logout", authController.logout);
 
 module.exports = router;

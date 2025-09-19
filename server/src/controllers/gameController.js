@@ -11,7 +11,6 @@ const downloadImageFromUrl = require("../utils/downloadImage");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// Usado para verificar se há u
 exports.getGames = async (req, res) => {
   try {
     // 1. Extrai e define os parâmetros da requisição com valores padrão

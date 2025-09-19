@@ -4,6 +4,7 @@ const cors = require("cors");
 const path = require("path");
 
 const gamesRoutes = require("./routes/gameRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 app = express();
 const porta = 4500;
@@ -21,6 +22,7 @@ app.use(
 
 // Usa as rotas definidas no arquivo de rotas
 app.use(gamesRoutes);
+app.use(authRoutes);
 
 app.listen(porta, () => {
   console.log(`Servidor iniciado na porta http://localhost:${porta}`);

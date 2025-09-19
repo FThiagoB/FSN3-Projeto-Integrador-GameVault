@@ -4,23 +4,32 @@ const { Router } = require("express");
 const gameController = require("../controllers/gameController");
 const upload = require("../utils/uploadConfig");
 
+const {authVerifyToken, authorization} = require("./../controllers/authController");
+
 const router = Router();
 
-// Rotas de Games
+// Rota para listar os jogos
 router.get("/games", gameController.getGames);
 
-// ✅ ROTA ESPECÍFICA ANTES DA ROTA GENÉRICA
+// Rota para obter os gêneros dos jogos
 router.get("/games/genres", gameController.getGenres);
 
+// Obtém informações sobre um jogo aleatório da lista
 router.get("/games/random", gameController.getRandomGame);
 
-// A rota com :id (genérica) vem DEPOIS
+// Obtém informações sobre um jogo específico
 router.get("/games/:id", gameController.infoGame);
 
-router.get("/uploads/games/:image", gameController.getGameImage);
+// Rota para acessar uma imagem especifica (atualmente desnecessário)
+// router.get("/uploads/games/:image", gameController.getGameImage);
 
-router.post("/games", upload.single("image"), gameController.createGame);
-router.delete("/games/:id", gameController.deleteGame);
-router.put("/games/:id", upload.single("image"), gameController.updateGame);
+// Cadastro de um jogo
+router.post("/games", authVerifyToken, authorization["onlySellers"], upload.single("image"), gameController.createGame);
+
+// Deleta um jogo especifico
+router.delete("/games/:id", authVerifyToken, authorization["onlySellers"], gameController.deleteGame);
+
+// Atualiza as informações de um jogo específico
+router.put("/games/:id", authVerifyToken, authorization["onlySellers"], upload.single("image"), gameController.updateGame);
 
 module.exports = router;

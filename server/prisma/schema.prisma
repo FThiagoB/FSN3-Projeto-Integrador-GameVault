@@ -14,10 +14,10 @@ model Game{
   image String @default("default.png")
   price Float
   stock Int
-  sellerID String
+  sellerID Int
   genre String
   
-  seller User @relation(fields: [sellerID], references: [CPF])
+  seller User @relation(fields: [sellerID], references: [id])
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -27,7 +27,8 @@ model Game{
 }
 
 model User{
-  CPF String @id 
+  id Int @id @default(autoincrement())
+  CPF String? 
   name String?
   phone String?
   image String @default("uploads/games/default.png")
@@ -47,7 +48,7 @@ model User{
 
 model Address{
   id Int @id @default(autoincrement())
-  userID String
+  userID Int
   label String?
   street String
   number String
@@ -58,7 +59,7 @@ model Address{
   zipCode String
   isDefaultShipping Boolean @default(false)
   
-  user User @relation("UserAddresses", fields: [userID], references: [CPF])
+  user User @relation("UserAddresses", fields: [userID], references: [id])
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -69,7 +70,7 @@ model Address{
 
 model Order{
   id Int @id @default(autoincrement())
-  userID String
+  userID Int
   status String
   total Float
   subtotal Float
@@ -81,7 +82,7 @@ model Order{
   paymentMethod String
   paymentStatus String
   
-  user User @relation(fields: [userID], references: [CPF])
+  user User @relation(fields: [userID], references: [id])
   address Address @relation(fields: [shippingAddressID], references: [id])
   
   createdAt DateTime @default(now())
@@ -103,7 +104,7 @@ model OrderItem{
 
 model Cart{
   id Int @id @default(autoincrement())
-  userID String @unique
+  userID Int @unique
   total Float
   subtotal Float
   discount Float
@@ -113,7 +114,7 @@ model Cart{
   shippingAddressID Int?
   shippingMethod String?
   
-  user User @relation(fields: [userID], references: [CPF])
+  user User @relation(fields: [userID], references: [id])
   address Address? @relation(fields: [shippingAddressID], references: [id])
   
   createdAt DateTime @default(now())

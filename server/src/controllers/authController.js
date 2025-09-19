@@ -27,7 +27,7 @@ exports.login = async ( req, res ) => {
             select: {
                 password: true,
                 role: true,
-                CPF: true
+                id: true
             }
         });
 
@@ -38,7 +38,7 @@ exports.login = async ( req, res ) => {
         }
 
         const token = jwt.sign({
-            id: user.CPF,
+            id: user.id,
             role: user.role
         }, SECRET_JWT_KEY, { expiresIn: "24h" });
 

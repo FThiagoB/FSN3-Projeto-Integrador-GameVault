@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 exports.getUsers = async (req, res) => {
     try{
         const users = await prisma.user.findMany({
-            orderBy: { CPF: "asc" }
+            orderBy: { id: "asc" }
         });
 
         res.status(200).json({message: users});
@@ -17,8 +17,8 @@ exports.getUsers = async (req, res) => {
 
 exports.getUserByID = async (req, res) => {
     try{
-        const userID = req.params.id;
-        const queryPrisma = { where: {CPF: userID} };
+        const userID = parseInt(req.params.id);
+        const queryPrisma = { where: {id: userID} };
 
         // Realiza a requisição
         const user = await prisma.user.findUnique( queryPrisma );
@@ -40,8 +40,8 @@ exports.getUserByID = async (req, res) => {
 
 exports.getUserByJWT = async (req, res) => {
     try{
-        const userID = req.user.id;
-        const queryPrisma = { where: {CPF: userID} };
+        const userID = parseInt(req.user.id);
+        const queryPrisma = { where: {id: userID} };
 
         // Realiza a requisição
         const user = await prisma.user.findUnique( queryPrisma );

@@ -5,20 +5,25 @@ const prisma = new PrismaClient();
 // JSON com informações sobre 100 jogos para preenchimento inicial
 const games = require('./game_data/products_info.json');
 
+// Função que servirá para sortear um vendedor (id de 1 à 9)
+const getRandomSeller = () => {
+    return parseInt(Math.floor(Math.random() * 9) + 1)
+};
+
 async function createAdmin() {
     try{
         // Cadastra o usuário Admin
         await prisma.user.create({
             data: {
-                CPF: "00000000000",
-                email: "admin@gamevault.com",
+                id: 0,
+                email: "admin@gmail.com",
                 password: await hashPassword("admin"),
                 role: "admin"
             }
         });
     }
-    catch( e ){
-        console.error(`createAdmin() error : ${e}`)
+    catch( error ){
+        console.error(`createAdmin() error : ${error.message}`)
     }
 }
 
@@ -28,14 +33,16 @@ async function createSellers() {
         await prisma.user.createMany({
             data: [
                 {
+                    id: 1,
                     CPF: "12345678901",
                     name: "Carlos Silva",
                     phone: "11999990001",
-                    password: await hashPassword("carlos@123"),
-                    email: "carlos.silva@example.com",
+                    password: await hashPassword("senha1234"),
+                    email: "vendedor@gmail.com",
                     role: "seller"
                 },
                 {
+                    id: 2,
                     CPF: "23456789012",
                     name: "Fernanda Souza",
                     phone: "11999990002",
@@ -44,6 +51,7 @@ async function createSellers() {
                     role: "seller"
                 },
                 {
+                    id: 3,
                     CPF: "34567890123",
                     name: "João Oliveira",
                     phone: "11999990003",
@@ -52,6 +60,7 @@ async function createSellers() {
                     role: "seller"
                 },
                 {
+                    id: 4,
                     CPF: "45678901234",
                     name: "Mariana Costa",
                     phone: "11999990004",
@@ -60,6 +69,7 @@ async function createSellers() {
                     role: "seller"
                 },
                 {
+                    id: 5,
                     CPF: "56789012345",
                     name: "Rafael Lima",
                     phone: "11999990005",
@@ -68,6 +78,7 @@ async function createSellers() {
                     role: "seller"
                 },
                 {
+                    id: 6,
                     CPF: "67890123456",
                     name: "Aline Martins",
                     phone: "11999990006",
@@ -76,6 +87,7 @@ async function createSellers() {
                     role: "seller"
                 },
                 {
+                    id: 7,
                     CPF: "78901234567",
                     name: "Bruno Rocha",
                     phone: "11999990007",
@@ -84,6 +96,7 @@ async function createSellers() {
                     role: "seller"
                 },
                 {
+                    id: 8,
                     CPF: "89012345678",
                     name: "Patrícia Almeida",
                     phone: "11999990008",
@@ -92,6 +105,7 @@ async function createSellers() {
                     role: "seller"
                 },
                 {
+                    id: 9,
                     CPF: "90123456789",
                     name: "Lucas Ferreira",
                     phone: "11999990009",
@@ -100,18 +114,19 @@ async function createSellers() {
                     role: "seller"
                 },
                 {
+                    id: 10,
                     CPF: "01234567890",
                     name: "Juliana Mendes",
                     phone: "11999990010",
-                    password: await hashPassword("senha123"),
-                    email: "juliana.mendes@example.com",
-                    role: "user"
+                    password: await hashPassword("senha1234"),
+                    email: "cliente@gmail.com",
+                    role: "client"
                 }
             ]
         });
     }
-    catch( e ){
-        console.error(`createSellers() error : ${e}`)
+    catch( error ){
+        console.error(`createSellers() error : ${error.message}`)
     }
 }
 
@@ -121,7 +136,7 @@ async function createAddresses() {
         await prisma.address.createMany({
             data: [
                 {
-                    userID: "12345678901",
+                    userID: 1,
                     street: "Rua das Palmeiras",
                     number: "123",
                     complemento: "Apto 202",
@@ -131,7 +146,7 @@ async function createAddresses() {
                     zipCode: "01435-000"
                 },
                 {
-                    userID: "23456789012",
+                    userID: 2,
                     street: "Avenida Brasil",
                     number: "456",
                     complemento: "Casa",
@@ -141,7 +156,7 @@ async function createAddresses() {
                     zipCode: "20040-002"
                 },
                 {
-                    userID: "34567890123",
+                    userID: 3,
                     street: "Rua do Sol",
                     number: "789",
                     complemento: "Bloco B, Apto 101",
@@ -151,7 +166,7 @@ async function createAddresses() {
                     zipCode: "51020-010"
                 },
                 {
-                    userID: "45678901234",
+                    userID: 4,
                     street: "Travessa das Flores",
                     number: "321",
                     complemento: "Fundos",
@@ -161,7 +176,7 @@ async function createAddresses() {
                     zipCode: "31170-010"
                 },
                 {
-                    userID: "56789012345",
+                    userID: 5,
                     street: "Rua das Acácias",
                     number: "654",
                     complemento: "Apto 305",
@@ -171,7 +186,7 @@ async function createAddresses() {
                     zipCode: "60175-080"
                 },
                 {
-                    userID: "67890123456",
+                    userID: 6,
                     street: "Avenida Independência",
                     number: "987",
                     complemento: "Sala 12",
@@ -181,7 +196,7 @@ async function createAddresses() {
                     zipCode: "90035-076"
                 },
                 {
-                    userID: "78901234567",
+                    userID: 7,
                     street: "Rua das Laranjeiras",
                     number: "159",
                     complemento: "Casa 2",
@@ -191,7 +206,7 @@ async function createAddresses() {
                     zipCode: "20241-270"
                 },
                 {
-                    userID: "89012345678",
+                    userID: 8,
                     street: "Rua do Comércio",
                     number: "753",
                     complemento: "Loja 1",
@@ -201,7 +216,7 @@ async function createAddresses() {
                     zipCode: "40020-000"
                 },
                 {
-                    userID: "90123456789",
+                    userID: 9,
                     street: "Avenida das Nações",
                     number: "852",
                     complemento: "Cobertura",
@@ -211,7 +226,7 @@ async function createAddresses() {
                     zipCode: "70390-100"
                 },
                 {
-                    userID: "01234567890",
+                    userID: 10,
                     street: "Rua do Cedro",
                     number: "246",
                     complemento: "Apto 401",
@@ -223,22 +238,13 @@ async function createAddresses() {
             ]
         });
     }
-    catch( e ){
-        console.error(`createAddress() error : ${e}`)
+    catch( error ){
+        console.error(`createAddress() error : ${error.message}`)
     }
 }
 
 async function createGames() {
     try{
-        // Cria as entradas para os jogos
-        const sellersID = ["12345678901", "23456789012", "34567890123", "45678901234", "56789012345", "67890123456", "78901234567", "89012345678", "90123456789", "01234567890"]
-
-        const getRandomSeller = () => {
-            return sellersID[
-                Math.floor(Math.random() * sellersID.length)
-            ]
-        };
-
         for( const game of games ){
             await prisma.game.create({
                 data:{
@@ -254,8 +260,8 @@ async function createGames() {
             });
         }
     }
-    catch( e ){
-        console.error(`createGames() error : ${e}`)
+    catch( error ){
+        console.error(`createGames() error : ${error.message}`)
     }
 }
 

@@ -16,7 +16,7 @@ router.get("/games/genres", gameController.getGenres);
 router.get("/games/random", gameController.getRandomGame);
 
 // Obtém informações sobre um jogo específico
-router.get("/games/:id", gameController.infoGame);
+router.get("/games/:id", gameController.getGamesByID);
 
 // Rota para acessar uma imagem especifica
 router.get("/uploads/games/:image", gameController.getGameImage);

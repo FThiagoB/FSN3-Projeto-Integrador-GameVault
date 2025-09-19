@@ -33,7 +33,11 @@ const ProductCard = ({ product }) => {
           {product.category}
         </Link>
       </div>
-      <img src={product.image} alt={product.name} className="product-image" />
+      <img
+        src={product.imageUrl}
+        alt={product.name}
+        className="product-image"
+      />
       <div className="product-info">
         <h3 className="product-name">{product.name}</h3>
         <p

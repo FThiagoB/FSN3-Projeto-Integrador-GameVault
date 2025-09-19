@@ -9,7 +9,7 @@ import {
   FaEnvelope,
   FaChevronLeft,
 } from "react-icons/fa";
-import "../../styles/Sidebar.css";
+import "./Sidebar.css";
 
 const SidebarItem = ({ icon, text, to, isExpanded }) => {
   const location = useLocation();

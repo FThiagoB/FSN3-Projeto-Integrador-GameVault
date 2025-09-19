@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../styles/Login.css";
+import "./LoginPage.css";
 import { Link } from "react-router-dom";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -7,7 +7,6 @@ const LoginPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Aqui você pode inserir lógica de autenticação
     alert(`Login com email: ${email}`);
   };
 

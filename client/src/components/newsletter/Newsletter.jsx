@@ -1,5 +1,5 @@
 import { Mail, Zap } from "lucide-react";
-import "../../styles/newsletter.css";
+import "./Newsletter.css";
 
 const Newsletter = () => {
   return (

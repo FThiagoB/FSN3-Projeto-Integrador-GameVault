@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../Sidebar/Sidebar"; // Ajuste o caminho se necessário
 import { FaBars } from "react-icons/fa";
-import "../../styles/Layout.css"; // Importa o CSS dedicado
+import "./Layout.css"; // Importa o CSS dedicado
 
 const Layout = ({ children }) => {
   const [isSidebarExpanded, setSidebarExpanded] = useState(true);

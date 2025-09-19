@@ -1,17 +1,17 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Footer from "./components/Footer/Footer";
-import HomePage from "./pages/HomePage";
-import Products from "./pages/Products";
-import ProductDetail from "./pages/ProductDetail";
-import Cart from "./pages/Cart";
-import Contact from "./pages/Contact";
-import NotFound from "./pages/NotFound";
-import StaticFaqSection from "./pages/faq";
-import CartFloat from "./components/cartFloat/CartFloat";
-import CheckoutPage from "./pages/Checkout";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import Layout from "./components/Layout/Layout";
+import HomePage from "./pages/Home/HomePage.jsx";
+import Products from "./pages/Product/Products.jsx";
+import ProductDetail from "./pages/Product/ProductDetail.jsx";
+import Cart from "./pages/Cart/Cart.jsx";
+import Contact from "./pages/Contact/Contact.jsx";
+import NotFound from "./pages/404/NotFound.jsx";
+import StaticFaqSection from "./pages/Faq/Faqs.jsx";
+import CartFloat from "./components/cartFloat/CartFloat.jsx";
+import CheckoutPage from "./pages/Checkout/Checkout.jsx";
+import LoginPage from "./pages/LoginPage/LoginPage.jsx";
+import SignupPage from "./pages/Signup/SignupPage.jsx";
+import Layout from "./components/Layout/Layout.jsx";
 function App() {
   return (
     <Router>

@@ -12,10 +12,10 @@ import {
   FaCcPaypal,
   FaTrash,
 } from "react-icons/fa";
-import { useCart } from "../contexts/CartContext";
+import { useCart } from "../../contexts/CartContext";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import "../styles/Checkout.css";
+import "./Checkout.css";
 const CheckoutPage = () => {
   // Estados para endereço
   const [firstName, setFirstName] = useState("Jhon");
@@ -111,7 +111,7 @@ const CheckoutPage = () => {
                       style={{ borderColor: "rgba(75, 85, 99, 0.5)" }}
                     >
                       <Image
-                        src={item.image}
+                        src={item.imageUrl}
                         alt={item.name}
                         style={{
                           width: "80px",

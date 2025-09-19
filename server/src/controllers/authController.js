@@ -81,7 +81,7 @@ exports.authVerifyToken = async (req, res, next) => {
         if( err || blacklistedTokens.has(token) )
             return res.status(403).json({message: "Invalid token"});
 
-        req.user = user;    // Armazena o email e a role do usuário
+        req.user = user;    // Armazena o id e a role do usuário
         next();             // Passa o controle para a próxima função
     })
 }

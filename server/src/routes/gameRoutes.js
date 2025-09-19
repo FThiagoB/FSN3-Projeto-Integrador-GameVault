@@ -1,5 +1,3 @@
-// server/src/routes/gameRoutes.js (ou seu arquivo de rotas)
-
 const { Router } = require("express");
 const gameController = require("../controllers/gameController");
 const upload = require("../utils/uploadConfig");

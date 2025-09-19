@@ -391,26 +391,3 @@ exports.deleteGame = async (req, res) => {
     await prisma.$disconnect();
   }
 };
-
-exports.getGamesBySeller = async (req, res) => {
-  try{
-    const userID = req.user.id;
-
-    // Realiza a requisição
-    const games = await prisma.user.findUnique({
-      where: {
-        id: userID
-      }
-    });
-
-    // Verifica se encontrou algum jogo
-    if( !games )
-      return res.status(404).json({message: "Games not found."});
-
-    res.status(200).json( games );
-  }
-  catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error.message });
-  }
-}

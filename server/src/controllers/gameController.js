@@ -206,7 +206,7 @@ exports.updateGame = async (req, res) => {
     // Preenche a query de acordo com os campos informados na requisição (só precisa passar o que for mudar)
     if (req.body.title) query_prisma.data.title = new_title;
     if (req.body.description) query_prisma.data.description = new_description;
-    if (req.body.price) query_prisma.data.price = novo_preco;
+    if (req.body.price) query_prisma.data.price = new_price;
     if (req.body.stock !== undefined) query_prisma.data.stock = new_stock;
     if (req.body.genre) query_prisma.data.genre = new_genre;
 

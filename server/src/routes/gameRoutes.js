@@ -20,9 +20,10 @@ router.get("/games/random", gameController.getRandomGame);
 // Obtém informações sobre um jogo específico
 router.get("/games/:id", gameController.infoGame);
 
-// Rota para acessar uma imagem especifica (atualmente desnecessário)
-// router.get("/uploads/games/:image", gameController.getGameImage);
+// Rota para acessar uma imagem especifica
+router.get("/uploads/games/:image", gameController.getGameImage);
 
+// As rotas abaixo são acessíveis apenas para vendedores ou o admin
 // Cadastro de um jogo
 router.post("/games", authVerifyToken, authorization["onlySellers"], upload.single("image"), gameController.createGame);
 

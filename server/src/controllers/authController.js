@@ -26,11 +26,11 @@ exports.login = async ( req, res ) => {
             },
             select: {
                 password: true,
-                role: true
+                role: true,
+                CPF: true
             }
         });
 
-        console.log(user)
         const match = await comparePassword( password, user.password );
         
         if( !match ){
@@ -38,7 +38,7 @@ exports.login = async ( req, res ) => {
         }
 
         const token = jwt.sign({
-            email: email,
+            id: user.CPF,
             role: user.role
         }, SECRET_JWT_KEY, { expiresIn: "24h" });
 
@@ -50,7 +50,7 @@ exports.login = async ( req, res ) => {
     }
 }
 
-exports.logout = async (res, req) => {
+exports.logout = async (req, res) => {
     const authorization = req.headers["authorization"];
     const token = authorization?.split(' ')[1]; // Remove a string "Bearer "
 
@@ -89,31 +89,31 @@ exports.authVerifyToken = async (req, res, next) => {
 // Middleware que facilita a verificação da autorização das rotas
 exports.authorization = {
     onlySellers : async (req, res, next) => {
-        const {email, role} = req.user;
+        const {id, role} = req.user;
 
         if( !role )
             return res.status(403).json({message: "Permissions not found"});
         
-        if( role !== "seller" || role !== "admin" )
+        if( role !== "seller" && role !== "admin" )
             return res.status(403).json({message: "Unauthorized user"});
 
         next();
     },
 
     onlyClients : async (req, res, next) => {
-        const {email, role} = req.user;
+        const {id, role} = req.user;
 
         if( !role )
             return res.status(403).json({message: "Permissions not found"});
         
-        if( role !== "user" || role !== "admin" )
+        if( role !== "user" && role !== "admin" )
             return res.status(403).json({message: "Unauthorized user"});
 
         next();
     },
 
     onlyAdmin : async (req, res, next) => {
-        const {email, role} = req.user;
+        const {id, role} = req.user;
 
         if( !role )
             return res.status(403).json({message: "Permissions not found"});

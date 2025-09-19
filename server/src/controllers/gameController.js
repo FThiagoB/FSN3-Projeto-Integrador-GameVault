@@ -56,15 +56,19 @@ exports.getGames = async (req, res) => {
       }`,
     }));
 
-    // 6. Retorna a resposta formatada para o frontend
+    // 6. Verifica se existem jogos com esses filtros
+    if( !gamesWithImageUrl )
+      return res.status(404).json({message: "No games found."});
+
+    // 7. Retorna a resposta formatada para o frontend
     res.status(200).json({
       games: gamesWithImageUrl,
       totalPages: Math.ceil(total / limitNum),
       currentPage: pageNum,
     });
   } catch (error) {
-    console.error("Erro ao buscar jogos:", error);
-    res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
+    console.error("Error fetching games: ", error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -79,9 +83,9 @@ exports.getGenres = async (req, res) => {
     // Extrai apenas os nomes dos gêneros do array de objetos
     const genres = distinctGenres.map((item) => item.genre);
     res.status(200).json(genres);
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ message: e.message });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -96,9 +100,9 @@ exports.deleteGame = async (req, res) => {
     });
 
     res.status(200).json(jogo_deletado);
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ message: e.message });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
   } finally {
     await prisma.$disconnect();
   }
@@ -109,7 +113,7 @@ exports.infoGame = async (req, res) => {
     const id_procurado = parseInt(req.params.id);
 
     if (isNaN(id_procurado)) {
-      return res.status(400).json({ message: "ID inválido." });
+      return res.status(400).json({ message: "Invalid ID" });
     }
 
     const jogo_encontrado = await prisma.game.findUnique({
@@ -119,7 +123,7 @@ exports.infoGame = async (req, res) => {
     });
 
     if (!jogo_encontrado) {
-      return res.status(404).json({ message: "Jogo não encontrado" });
+      return res.status(404).json({ message: "Game not found" });
     }
 
     // ✅ ADICIONE A URL COMPLETA DA IMAGEM AQUI
@@ -131,9 +135,9 @@ exports.infoGame = async (req, res) => {
     };
 
     res.status(200).json(jogoComUrl); // Envie o objeto com a imageUrl
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ message: e.message });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -153,7 +157,7 @@ exports.getRandomGame = async (req, res) => {
     if (!randomGame) {
       return res
         .status(404)
-        .json({ message: "Nenhum jogo encontrado para sortear." });
+        .json({ message: "No games found." });
     }
 
     // 4. Adiciona a URL completa da imagem, como nas outras funções
@@ -167,7 +171,7 @@ exports.getRandomGame = async (req, res) => {
     res.status(200).json(gameWithImageUrl);
   } catch (error) {
     console.error("Erro ao buscar jogo aleatório:", error);
-    res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -188,14 +192,14 @@ exports.updateGame = async (req, res) => {
     if ((req.body.stock && Number.isNaN(new_stock)) || new_stock < 0)
       return res.status(400).json({
         message:
-          "Requisição inválida: o estoque deve ser um número inteiro positivo.",
+          "stock must be a positive integer..",
       });
 
     // Verifica se o preço foi informado mas a conversão para float retornou NaN (erro na conversão) ou se for um número negativo
     if ((req.body.price && Number.isNaN(new_price)) || new_price <= 0)
       return res.status(400).json({
         message:
-          "Requisição inválida: o preço deve ser um número positivo diferente de zero.",
+          "price must be a positive non-zero number.",
       });
 
     // Monta a query do prisma por meio de uma variável
@@ -218,7 +222,7 @@ exports.updateGame = async (req, res) => {
         select: { title: true, image: true, sellerID: true },
       });
 
-      if (!gameInfo) throw new Error("Deu errado.");
+      if (!gameInfo) throw new Error("Problems retrieving game information.");
 
       const image_title = generateFileHash(
         new_title || gameInfo.title,
@@ -247,16 +251,16 @@ exports.updateGame = async (req, res) => {
         }
 
         query_prisma.data.image = filename;
-      } catch (e) {
-        return res.status(500).json({ message: e.message });
+      } catch (error) {
+        return res.status(500).json({ message: error.message });
       }
     }
 
     const game = await prisma.game.update(query_prisma);
     res.status(200).json(game);
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ message: e.message });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
   } finally {
     await prisma.$disconnect();
   }
@@ -286,21 +290,21 @@ exports.createGame = async (req, res) => {
     )
       return res.status(400).json({
         message:
-          "Requisição inválida: informe todos os campos necessários para o cadastro.",
+          "fill in all fields required for registration.",
       });
 
     // Verifica se o estoque foi informado mas a conversão para int retornou NaN (erro na conversão) ou se for um número negativo
     if ((req.body.stock && Number.isNaN(stock)) || stock < 0)
       return res.status(400).json({
         message:
-          "Requisição inválida: o estoque deve ser um número inteiro positivo.",
+          "stock must be a positive integer.",
       });
 
     // Verifica se o preço foi informado mas a conversão para float retornou NaN (erro na conversão) ou se for um número negativo
     if ((req.body.price && Number.isNaN(price)) || price <= 0)
       return res.status(400).json({
         message:
-          "Requisição inválida: o preço deve ser um número positivo diferente de zero.",
+          "price must be a positive non-zero number.",
       });
 
     const prismaQuery = {
@@ -341,8 +345,8 @@ exports.createGame = async (req, res) => {
 
             relativeUploadPath = path.join("/uploads", "games", filename);
           }
-        } catch (e) {
-          return res.status(500).json({ message: e.message });
+        } catch (error) {
+          return res.status(500).json({ message: error.message });
         }
       } else {
         const ext = path.extname(existingFile);
@@ -353,20 +357,20 @@ exports.createGame = async (req, res) => {
     }
 
     const game = await prisma.game.create(prismaQuery);
-    res.status(200).json(game);
-  } catch (e) {
-    console.log(e);
+    res.status(201).json(game);
+  } catch (error) {
+    console.log(error);
 
-    switch (e.code) {
+    switch (error.code) {
       // Problemas de restrição (id já existe ou problemas com o ID do vendedor)
       case "P2003":
         res.status(400).json({
-          message: `Violação de restrição ${e.meta.constraint} em ${e.meta.modelName}`,
+          message: `Violation of restriction ${e.meta.constraint} in ${e.meta.modelName}`,
         });
         break;
 
       default:
-        res.status(500).json({ message: e.message });
+        res.status(500).json({ message: error.message });
     }
   } finally {
     await prisma.$disconnect();
@@ -385,5 +389,5 @@ exports.getGameImage = async (req, res) => {
 
   // Verifica se o arquivo existe
   if (fs.existsSync(imagePath)) res.sendFile(imagePath);
-  else res.status(404).json({ error: "Imagem não encontrada." });
+  else res.status(404).json({ error: "Image not found." });
 };

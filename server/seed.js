@@ -1,3 +1,4 @@
+const {hashPassword} = require("./src/utils/miscellaneous");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
@@ -11,7 +12,7 @@ async function createAdmin() {
             data: {
                 CPF: "00000000000",
                 email: "admin@gamevault.com",
-                password: "admin",
+                password: await hashPassword("admin"),
                 role: "admin"
             }
         });
@@ -30,7 +31,7 @@ async function createSellers() {
                     CPF: "12345678901",
                     name: "Carlos Silva",
                     phone: "11999990001",
-                    password: "carlos@123",
+                    password: await hashPassword("carlos@123"),
                     email: "carlos.silva@example.com",
                     role: "seller"
                 },
@@ -38,7 +39,7 @@ async function createSellers() {
                     CPF: "23456789012",
                     name: "Fernanda Souza",
                     phone: "11999990002",
-                    password: "fernanda2025",
+                    password: await hashPassword("fernanda2025"),
                     email: "fernanda.souza@example.com",
                     role: "seller"
                 },
@@ -46,7 +47,7 @@ async function createSellers() {
                     CPF: "34567890123",
                     name: "João Oliveira",
                     phone: "11999990003",
-                    password: "JoãoOliveira",
+                    password: await hashPassword("JoãoOliveira"),
                     email: "joao.oliveira@example.com",
                     role: "seller"
                 },
@@ -54,7 +55,7 @@ async function createSellers() {
                     CPF: "45678901234",
                     name: "Mariana Costa",
                     phone: "11999990004",
-                    password: "Mariana2025",
+                    password: await hashPassword("Mariana2025"),
                     email: "mariana.costa@example.com",
                     role: "seller"
                 },
@@ -62,7 +63,7 @@ async function createSellers() {
                     CPF: "56789012345",
                     name: "Rafael Lima",
                     phone: "11999990005",
-                    password: "R@f@3l2025",
+                    password: await hashPassword("R@f@3l2025"),
                     email: "rafael.lima@example.com",
                     role: "seller"
                 },
@@ -70,7 +71,7 @@ async function createSellers() {
                     CPF: "67890123456",
                     name: "Aline Martins",
                     phone: "11999990006",
-                    password: "@lin3.2025",
+                    password: await hashPassword("@lin3.2025"),
                     email: "aline.martins@example.com",
                     role: "seller"
                 },
@@ -78,7 +79,7 @@ async function createSellers() {
                     CPF: "78901234567",
                     name: "Bruno Rocha",
                     phone: "11999990007",
-                    password: "sEnHa123",
+                    password: await hashPassword("sEnHa123"),
                     email: "bruno.rocha@example.com",
                     role: "seller"
                 },
@@ -86,7 +87,7 @@ async function createSellers() {
                     CPF: "89012345678",
                     name: "Patrícia Almeida",
                     phone: "11999990008",
-                    password: "S1E2N3H4A",
+                    password: await hashPassword("S1E2N3H4A"),
                     email: "patricia.almeida@example.com",
                     role: "seller"
                 },
@@ -94,7 +95,7 @@ async function createSellers() {
                     CPF: "90123456789",
                     name: "Lucas Ferreira",
                     phone: "11999990009",
-                    password: "LucasFerreiraVendedor",
+                    password: await hashPassword("LucasFerreiraVendedor"),
                     email: "lucas.ferreira@example.com",
                     role: "seller"
                 },
@@ -102,9 +103,9 @@ async function createSellers() {
                     CPF: "01234567890",
                     name: "Juliana Mendes",
                     phone: "11999990010",
-                    password: "senha123",
+                    password: await hashPassword("senha123"),
                     email: "juliana.mendes@example.com",
-                    role: "seller"
+                    role: "user"
                 }
             ]
         });

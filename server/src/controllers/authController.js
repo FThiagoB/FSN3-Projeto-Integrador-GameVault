@@ -65,6 +65,8 @@ exports.logout = async (res, req) => {
     setTimeout(() => {
         blacklistedTokens.delete(token)
     }, (decoded.exp * 1000) - Date.now());
+
+    res.status(200).json({message: 'Logged out successfully'});
 };
 
 // Middleware para validar o token JWT (usado nas rotas que necessitam de autenticação)
@@ -76,7 +78,7 @@ exports.authVerifyToken = async (req, res, next) => {
         return res.status(403).json({message: "Token is missing"});
     
     jwt.verify( token, SECRET_JWT_KEY, (err, user) => {
-        if( err )
+        if( err || blacklistedTokens.has(token) )
             return res.status(403).json({message: "Invalid token"});
 
         req.user = user;    // Armazena o email e a role do usuário

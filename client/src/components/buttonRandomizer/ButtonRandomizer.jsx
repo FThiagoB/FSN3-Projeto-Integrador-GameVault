@@ -13,6 +13,7 @@ export default function ButtonRandomizer() {
     try {
       const response = await fetch("http://localhost:4500/games/random");
       if (!response.ok) {
+        console.log(response)
         throw new Error("Não foi possível sortear um jogo.");
       }
       const game = await response.json();

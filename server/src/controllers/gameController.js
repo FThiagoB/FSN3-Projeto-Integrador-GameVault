@@ -136,7 +136,13 @@ exports.getGamesByID = async (req, res) => {
 exports.getRandomGame = async (req, res) => {
   try {
     // 1. Conta o total de jogos no banco de dados
-    const gameCount = await prisma.game.count();
+    const gameCount = await prisma.game.count({
+      where: {
+        seller: {
+          isDeleted: false,
+        },
+      }
+  });
 
     // 2. Gera um número aleatório para pular (skip)
     const randomSkip = Math.floor(Math.random() * gameCount);

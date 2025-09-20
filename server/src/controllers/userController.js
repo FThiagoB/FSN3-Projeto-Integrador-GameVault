@@ -1,6 +1,8 @@
 const {hashPassword} = require("./../utils/miscellaneous");
 const {blacklist} = require("./authController");
 
+const { handleImageUpload } = require("../utils/imageHandler");
+
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
@@ -13,7 +15,7 @@ exports.getUsers = async (req, res) => {
         res.status(200).json(users);
     }
     catch( error ){
-        console.log( error );
+        console.error( error );
         res.status(500).json({message: error.message});
     }
 };
@@ -84,7 +86,7 @@ exports.getGamesBySeller = async (req, res) => {
     res.status(200).json( users );
   }
   catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 }
@@ -110,7 +112,7 @@ exports.getGamesBySellerByID = async (req, res) => {
     res.status(200).json( users );
   }
   catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 }
@@ -151,7 +153,7 @@ exports.deleteUserByID = async (req, res) => {
         res.status(200).json( user );
     }
     catch( error ){
-        console.log( error );
+        console.error( error );
         res.status(500).json({message: error.message});
     }
 };
@@ -198,24 +200,68 @@ exports.deleteUserByJWT = async (req, res) => {
         res.status(200).json({message: "User deleted successfully"});
     }
     catch( error ){
-        console.log( error );
+        console.error( error );
         res.status(500).json({message: error.message});
     }
 };
 
 exports.createUser = async (req, res) => {
     try{
-        res.status(501).json({});
+        const allowedRoles = ["user", "seller"];
+
+        // Campos usados diretamente no cadastro do jogo
+        if(!req.body) req.body = {};
+
+        const email = req.body.email;
+        const password = req.body.password;
+        const role = req.body.role;
+
+        // Verifica se todos os campos foram preenchidos
+        if ( !email || !password || !role ){
+            return res.status(400).json({
+                message: "fill in all fields required for registration.",
+            });
+        }
+
+        // Valida os campos 
+        if( !allowedRoles.includes(role) ){
+            return res.status(400).json({
+                message: "The specified role is invalid",
+            });
+        }
+
+        // Cria o usuário
+        const user = await prisma.user.create({
+            data: {
+                email: email,
+                password: await hashPassword(password),
+                role: role,
+            }
+        })
+
+        res.status(201).json( user );
     }
     catch( error ){
-        console.log( error );
-        res.status(500).json({message: error.message});
+        console.error( error );
+
+        switch (error.code) {
+            // Restrição : Email escolhido já está em uso
+            case "P2002":
+                res.status(400).json({
+                    message: `the desired email is already in use.`,
+                });
+                break;
+
+            default:
+                res.status(500).json({ message: error.message });
+        }
     }
 };
 
 exports.updateUser = async (req, res) => {
     try{
         const userID = parseInt(req.user.id);
+        let user;
 
         // Monta a query do prisma por meio de uma variável
         const query_prisma = {};
@@ -228,11 +274,9 @@ exports.updateUser = async (req, res) => {
         const cpf = req.body.cpf;
         const name = req.body.name;
         const phone = req.body.phone;
+
         const email = req.body.email;
         const password = req.body.password;
-
-        // O usuário pode especificar o link da imagem que se quer usar
-        const imageURL = req.body.imageURL;
 
         // Preenche a query de acordo com os campos informados na requisição (só precisa passar o que for mudar)
         if (req.body.cpf) query_prisma.data.CPF = cpf;
@@ -241,11 +285,33 @@ exports.updateUser = async (req, res) => {
         if (req.body.email) query_prisma.data.email = email;
         if (req.body.password) query_prisma.data.password = await hashPassword(password);
 
-        const user = await prisma.user.update(query_prisma);
+        user = await prisma.user.update(query_prisma);
+
+        // Se a imagem foi passada, realiza o download e seta
+        const filename = await handleImageUpload( req, userID, "user" )
+
+        if( filename ){
+            user = await prisma.user.update({
+                where: { id: userID },
+                data: { image: filename }
+            });
+        }
+
         res.status(200).json(user);
     }
     catch( error ){
-        console.log( error );
-        res.status(500).json({message: error.message});
+        console.error( error );
+        
+        switch (error.code) {
+            // Restrição : Email escolhido já está em uso
+            case "P2002":
+                res.status(400).json({
+                    message: `the desired email is already in use.`,
+                });
+                break;
+
+            default:
+                res.status(500).json({ message: error.message });
+        }
     }
 };

@@ -43,6 +43,10 @@ exports.login = async ( req, res ) => {
                 id: true
             }
         });
+        
+        if( !user ){
+            return res.status(401).json({message: "Incorrect email/password."});
+        }
 
         const match = await comparePassword( password, user.password );
         

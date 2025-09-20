@@ -274,6 +274,9 @@ async function seed() {
 
     // Como o id é informado de forma explicita devemos atualizar o contador do autoincrement da tabela de jogos
     await prisma.$executeRaw`SELECT setval('"Game_id_seq"', (SELECT MAX(id) FROM "Game"))`;
+
+    // Como o id é informado de forma explicita devemos atualizar o contador do autoincrement da tabela de usuários
+    await prisma.$executeRaw`SELECT setval('"User_id_seq"', (SELECT MAX(id) FROM "User"))`;
 }
 
 seed()

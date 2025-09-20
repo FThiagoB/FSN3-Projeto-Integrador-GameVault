@@ -1,12 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const {
-  generateFileHash,
-  findExistingImage,
-} = require("../utils/miscellaneous");
-
-const downloadImageFromUrl = require("../utils/downloadImage");
+const { handleImageUpload } = require("../utils/imageHandler");
 
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
@@ -73,7 +68,6 @@ exports.getGames = async (req, res) => {
       currentPage: pageNum,
     });
   } catch (error) {
-    console.error("Error fetching games: ", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -95,7 +89,7 @@ exports.getGenres = async (req, res) => {
     const genres = distinctGenres.map((item) => item.genre);
     res.status(200).json(genres);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -128,7 +122,7 @@ exports.getGamesByID = async (req, res) => {
 
     res.status(200).json(jogoComUrl); // Envie o objeto com a imageUrl
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -202,18 +196,16 @@ exports.createGame = async (req, res) => {
     const description = req.body.description;
     const price = parseFloat(req.body.price);
     const stock = parseInt(req.body.stock);
-    const sellerID = req.body.seller;
+    const sellerID = parseInt(req.user.id);
     const genre = req.body.genre;
 
-    // O usuário pode especificar o link da imagem que se quer usar
-    const imageURL = req.body.imageURL;
+    let game;
 
     // Verifica se todos os campos foram especificados
     if (
       !req.body.title ||
       !req.body.description ||
       !req.body.price ||
-      !req.body.seller ||
       !req.body.genre ||
       req.body.stock === undefined
     )
@@ -247,48 +239,22 @@ exports.createGame = async (req, res) => {
       },
     };
 
-    // Verifica se a imagem foi especificada de alguma forma (url ou arquivo)
-    if (imageURL || req.file) {
-      const image_title = generateFileHash(title, sellerID);
-      const fileFolder = path.resolve(__dirname, "..", "uploads", "games");
-      const existingFile = findExistingImage(image_title, fileFolder);
-      let filename;
+    // Primeiro cadastra o jogo (garante que tudo esteja certo para fazer upload da imagem)
+    game = await prisma.game.create(prismaQuery);
 
-      // Verifica se o arquivo já existe
-      if (!existingFile) {
-        try {
-          if (req.file && req.file.buffer) {
-            const ext = path.extname(req.file.originalname);
-            filename = `${image_title}${ext}`;
+    // Se a imagem foi passada, realiza o download e seta
+    const filename = await handleImageUpload( req, game.id, "game" )
 
-            const localFilePath = path.resolve(fileFolder, filename);
-            fs.writeFileSync(localFilePath, req.file.buffer);
-
-            relativeUploadPath = path.join("/uploads", "games", filename);
-          } else {
-            const ext = path.extname(imageURL).split("?")[0] || ".jpg";
-            filename = `${image_title}${ext}`;
-
-            const localFilePath = path.resolve(fileFolder, filename);
-            downloadImageFromUrl(imageURL, localFilePath);
-
-            relativeUploadPath = path.join("/uploads", "games", filename);
-          }
-        } catch (error) {
-          return res.status(500).json({ message: error.message });
-        }
-      } else {
-        const ext = path.extname(existingFile);
-        filename = `${image_title}${ext}`;
-      }
-
-      prismaQuery.data.image = filename;
+    if( filename ){
+      game = await prisma.game.update({
+        where: { id: game.id },
+        data: { image: filename }
+      });
     }
-
-    const game = await prisma.game.create(prismaQuery);
+    
     res.status(201).json(game);
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     switch (error.code) {
       // Problemas de restrição (id já existe ou problemas com o ID do vendedor)
@@ -308,18 +274,32 @@ exports.createGame = async (req, res) => {
 
 exports.updateGame = async (req, res) => {
   try {
-    const id_jogo = parseInt(req.params.id);
+    const gameID = parseInt(req.params.id);
+    const sellerID = parseInt(req.user.id);
+
+    let game;
 
     if(!req.body) req.body = {};
-    
     const new_title = req.body.title;
     const new_description = req.body.description;
     const new_price = parseFloat(req.body.price);
     const new_stock = parseInt(req.body.stock);
     const new_genre = req.body.genre;
 
-    // O usuário pode especificar o link da imagem que se quer usar
-    const imageURL = req.body.imageURL;
+    // Verifica se o jogo existe e se pertence ao vendedor do token
+    const originGame = await prisma.game.findFirst({
+      where: {
+        id: gameID,
+        sellerID: sellerID
+      }
+    });
+
+    if(!originGame){
+      return res.status(400).json({
+        message:
+          "Game not found",
+      });
+    }
 
     // Verifica se o estoque foi informado mas a conversão para int retornou NaN (erro na conversão) ou se for um número negativo
     if ((req.body.stock && Number.isNaN(new_stock)) || new_stock < 0)
@@ -337,7 +317,7 @@ exports.updateGame = async (req, res) => {
 
     // Monta a query do prisma por meio de uma variável
     const query_prisma = {};
-    query_prisma.where = { id: id_jogo };
+    query_prisma.where = { id: gameID };
     query_prisma.data = {};
 
     // Preenche a query de acordo com os campos informados na requisição (só precisa passar o que for mudar)
@@ -347,52 +327,22 @@ exports.updateGame = async (req, res) => {
     if (req.body.stock !== undefined) query_prisma.data.stock = new_stock;
     if (req.body.genre) query_prisma.data.genre = new_genre;
 
+    game = await prisma.game.update(query_prisma);
+
     // Foi especificado uma nova imagem
-    if (imageURL || req.file) {
-      // O ID do vendedor é usado para gerar o hash do nome da imagem
-      const gameInfo = await prisma.game.findUnique({
-        where: { id: id_jogo },
-        select: { title: true, image: true, sellerID: true },
+    // Se a imagem foi passada, realiza o download e seta
+    const filename = await handleImageUpload( req, gameID, "game" )
+
+    if( filename ){
+      game = await prisma.game.update({
+        where: { id: gameID },
+        data: { image: filename }
       });
-
-      if (!gameInfo) throw new Error("Problems retrieving game information.");
-
-      const image_title = generateFileHash(
-        new_title || gameInfo.title,
-        gameInfo.sellerID
-      );
-      const fileFolder = path.resolve(__dirname, "..", "uploads", "games");
-      let filename;
-
-      try {
-        if (req.file && req.file.buffer) {
-          const ext = path.extname(req.file.originalname);
-          filename = `${image_title}${ext}`;
-
-          const localFilePath = path.resolve(fileFolder, filename);
-          fs.writeFileSync(localFilePath, req.file.buffer);
-
-          relativeUploadPath = path.join("/uploads", "games", filename);
-        } else {
-          const ext = path.extname(imageURL).split("?")[0] || ".jpg";
-          filename = `${image_title}${ext}`;
-
-          const localFilePath = path.resolve(fileFolder, filename);
-          downloadImageFromUrl(imageURL, localFilePath);
-
-          relativeUploadPath = path.join("/uploads", "games", filename);
-        }
-
-        query_prisma.data.image = filename;
-      } catch (error) {
-        return res.status(500).json({ message: error.message });
-      }
     }
 
-    const game = await prisma.game.update(query_prisma);
     res.status(200).json(game);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: error.message });
   } finally {
     await prisma.$disconnect();
@@ -411,7 +361,7 @@ exports.deleteGame = async (req, res) => {
 
     res.status(200).json(jogo_deletado);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     switch (error.code) {
       // Jogo não encontrado
       case "P2025":

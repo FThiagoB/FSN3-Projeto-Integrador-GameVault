@@ -1,4 +1,5 @@
 const {hashPassword} = require("./../utils/miscellaneous");
+const {blacklist} = require("./authController");
 
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
@@ -64,10 +65,10 @@ exports.getUserByJWT = async (req, res) => {
 
 exports.getGamesBySeller = async (req, res) => {
   try{
-    const userID = req.user.id;
+    const userID = parseInt(req.user.id);
 
     // Realiza a requisição
-    const games = await prisma.game.findMany({
+    const users = await prisma.game.findMany({
       where: {
         sellerID: userID
       },
@@ -77,10 +78,10 @@ exports.getGamesBySeller = async (req, res) => {
     });
 
     // Verifica se encontrou algum jogo
-    if( !games )
-      return res.status(404).json({message: "Games not found."});
+    if( !users )
+      return res.status(404).json({message: "Users not found."});
 
-    res.status(200).json( games );
+    res.status(200).json( users );
   }
   catch (error) {
     console.log(error);
@@ -88,9 +89,66 @@ exports.getGamesBySeller = async (req, res) => {
   }
 }
 
+exports.getGamesBySellerByID = async (req, res) => {
+  try{
+    const userID = parseInt(req.params.id);
+
+    // Realiza a requisição
+    const users = await prisma.game.findMany({
+      where: {
+        sellerID: userID
+      },
+      orderBy: {
+        id: "asc"
+      }
+    });
+
+    // Verifica se encontrou algum jogo
+    if( !users )
+      return res.status(404).json({message: "Users not found."});
+
+    res.status(200).json( users );
+  }
+  catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+}
+
+// Apagar um usuário pode causar inconsistência entre tabelas (jogos, compras, endereços), o que gera um erro
+// Nesse caso se manteve o registro e apagou-se as informações sensíveis, mantendo a rastreabilidade e consistência
 exports.deleteUserByID = async (req, res) => {
     try{
-        res.status(501).json({});
+        const userID = parseInt(req.params.id);
+        
+        // Apaga as informações sensíveis do perfil do usuário
+        const user = await prisma.user.update({
+            where: { id: userID },
+            data: {
+                isDeleted: true,
+                name: 'Usuário removido',          
+                email: `deleted-user-${userID}`, 
+                phone: "",
+                CPF: '',
+                image: "uploads/games/default.png",
+                password: await hashPassword( `deleted-user-${userID}` ),
+            }
+        });
+        
+        // Apaga as informações sensíveis nos endereços do usuário
+        const addresses = await prisma.address.updateMany({
+            where: { userID: userID },
+            data: {
+                label: " ",
+                street: " ",          
+                number: " ", 
+                complemento: " ",
+                neighborhood: " ",
+                zipCode: " ",
+            }
+        });
+        
+        res.status(200).json( user );
     }
     catch( error ){
         console.log( error );
@@ -98,9 +156,46 @@ exports.deleteUserByID = async (req, res) => {
     }
 };
 
+// Deleta um usuário via seu ID do JWT (requisição do usuário ou vendedor)
 exports.deleteUserByJWT = async (req, res) => {
     try{
-        res.status(501).json({});
+        const userID = parseInt(req.user.id);
+
+        // Recupera o token
+        const authorization = req.headers["authorization"];
+        const token = authorization?.split(' ')[1]; // Remove a string "Bearer "
+
+        // Apaga as informações sensíveis do perfil do usuário
+        const user = await prisma.user.update({
+            where: { id: userID },
+            data: {
+                isDeleted: true,
+                name: 'Usuário removido',          
+                email: `deleted-user-${userID}`, 
+                phone: "",
+                CPF: '',
+                image: "uploads/games/default.png",
+                password: await hashPassword( `deleted-user-${userID}` ),
+            }
+        });
+        
+        // Apaga as informações sensíveis nos endereços do usuário
+        const addresses = await prisma.address.updateMany({
+            where: { userID: userID },
+            data: {
+                label: " ",
+                street: " ",          
+                number: " ", 
+                complemento: " ",
+                neighborhood: " ",
+                zipCode: " ",
+            }
+        });
+
+        // Adiciona o JWT à lista negra (token se tornará inválido durante seu tempo de validade)
+        blacklist.add( token );
+
+        res.status(200).json({message: "User deleted successfully"});
     }
     catch( error ){
         console.log( error );
@@ -120,32 +215,31 @@ exports.createUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     try{
-        const userID = req.user.id;
+        const userID = parseInt(req.user.id);
 
         // Monta a query do prisma por meio de uma variável
         const query_prisma = {};
         query_prisma.where = { id: userID };
         query_prisma.data = {};
 
-        if( req.body ){
-            const cpf = req.body.cpf;
-            const name = req.body.name;
-            const phone = req.body.phone;
-            const email = req.body.email;
-            const password = req.body.password;
+        // Obtém os campos passados que devem ser atualizados
+        if(!req.body) req.body = {};
 
-            // O usuário pode especificar o link da imagem que se quer usar
-            const imageURL = req.body.imageURL;
+        const cpf = req.body.cpf;
+        const name = req.body.name;
+        const phone = req.body.phone;
+        const email = req.body.email;
+        const password = req.body.password;
 
-            // Preenche a query de acordo com os campos informados na requisição (só precisa passar o que for mudar)
-            if (req.body.cpf) query_prisma.data.CPF = cpf;
-            if (req.body.name) query_prisma.data.name = name;
-            if (req.body.phone) query_prisma.data.phone = phone;
-            if (req.body.email) query_prisma.data.email = email;
-            if (req.body.password) query_prisma.data.password = await hashPassword(password);
+        // O usuário pode especificar o link da imagem que se quer usar
+        const imageURL = req.body.imageURL;
 
-            // ToDo : Procedimento para mudar a imagem <- criar um middleware
-        }
+        // Preenche a query de acordo com os campos informados na requisição (só precisa passar o que for mudar)
+        if (req.body.cpf) query_prisma.data.CPF = cpf;
+        if (req.body.name) query_prisma.data.name = name;
+        if (req.body.phone) query_prisma.data.phone = phone;
+        if (req.body.email) query_prisma.data.email = email;
+        if (req.body.password) query_prisma.data.password = await hashPassword(password);
 
         const user = await prisma.user.update(query_prisma);
         res.status(200).json(user);

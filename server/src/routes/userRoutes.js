@@ -5,19 +5,20 @@ const userController = require("./../controllers/userController");
 
 const router = Router();
 
-// Lista de usuários cadastrados no sistema
-router.get("/users", userController.getUsers);          // Liberada por enquanto, mas é uma rota apenas para o admin
+// Rotas para o admin ====================================================================
+router.get("/users", authVerifyToken, authorization["onlyAdmin"], userController.getUsers); // Lista de todos os usuários cadastrados no sistema
+router.get("/users/:id", authVerifyToken, authorization["onlyAdmin"], userController.getUserByID); // Informações sobre um usuário específico
+router.delete("/users/:id", authVerifyToken, authorization["onlyAdmin"], userController.deleteUserByID); // Deleta um usuário específico
 
-// Informações sobre um usuário específico
-router.get("/users/:id", userController.getUserByID);   // Liberada por enquanto, mas é uma rota apenas para o admin
+// Obtém as informações sobre os jogos vendidos por um vendedor por meio de um id especificado
+router.get("/seller/:id/games", authVerifyToken, authorization["onlyAdmin"], userController.getGamesBySellerByID);
 
-// Obtém as próprias informações via id do token JWT
-router.get("/user", authVerifyToken, userController.getUserByJWT); // Retorna as informações do usuário do JWT 
+// Rotas comuns =========================================================================
+router.get("/user", authVerifyToken, userController.getUserByJWT); // Obtém as próprias informações via token JWT
+router.put("/user", authVerifyToken, userController.updateUser); // Atualiza as informações do usuário via token JWT
+router.delete("/user", authVerifyToken, userController.deleteUserByJWT); // Deleta a própria conta de usuário via token JWT
 
-// Atualiza as informações do usuário via id do token JWT
-router.put("/user", authVerifyToken, userController.updateUser);
-
-// Obtém informações sobre os jogos vendidos por um vendedor
-router.get("/seller/games", authVerifyToken, authorization["onlySellers"], userController.getGamesBySeller);
+// Rotas de vendedor ==============================================
+router.get("/seller/games", authVerifyToken, authorization["onlySellers"], userController.getGamesBySeller); // informações sobre seus jogos cadastrados via token JWT
 
 module.exports = router;

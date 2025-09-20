@@ -28,13 +28,14 @@ model Game{
 
 model User{
   id Int @id @default(autoincrement())
-  CPF String? 
+  CPF String? @unique
   name String?
   phone String?
   image String @default("uploads/games/default.png")
   password String
   email String @unique
-  role String @default("User")
+  role String @default("user")
+  isDeleted  Boolean @default(false)
   
   addresses Address[] @relation("UserAddresses")
   

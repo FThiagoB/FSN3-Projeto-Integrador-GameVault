@@ -9,6 +9,19 @@ const SECRET_JWT_KEY = "57b9a0531894bc0f375ca77e731ad465c6bc5a5b";
 // Lista com os tokens de usuários que fizeram logout
 const blacklistedTokens = new Set();
 
+function deleteToken( token ) {
+    const decoded = jwt.decode(token);
+    blacklistedTokens.add(token);
+
+    setTimeout(() => {
+        blacklistedTokens.delete(token)
+    }, (decoded.exp * 1000) - Date.now());
+}
+
+function hasToken( token ) {
+  return blacklistedTokens.has(token);
+}
+
 exports.login = async ( req, res ) => {
     try{
         const email = req.body?.email;
@@ -57,15 +70,7 @@ exports.logout = async (req, res) => {
     if( !token )
         return res.status(403).json({message: "Token is missing"});
 
-    blacklistedTokens.add( token );
-
-    // Adiciona um callback para remover o token da lista quando expirar
-    const decoded = jwt.decode(token);
-
-    setTimeout(() => {
-        blacklistedTokens.delete(token)
-    }, (decoded.exp * 1000) - Date.now());
-
+    deleteToken(token);
     res.status(200).json({message: 'Logged out successfully'});
 };
 
@@ -78,12 +83,18 @@ exports.authVerifyToken = async (req, res, next) => {
         return res.status(403).json({message: "Token is missing"});
     
     jwt.verify( token, SECRET_JWT_KEY, (err, user) => {
-        if( err || blacklistedTokens.has(token) )
+        if( err || hasToken(token) )
             return res.status(403).json({message: "Invalid token"});
 
         req.user = user;    // Armazena o id e a role do usuário
         next();             // Passa o controle para a próxima função
     })
+}
+
+// Exporta as funções para manipular a blacklist
+exports.blacklist = {
+    add: deleteToken,
+    has: hasToken,
 }
 
 // Middleware que facilita a verificação da autorização das rotas

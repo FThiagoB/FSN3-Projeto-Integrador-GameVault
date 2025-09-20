@@ -33,6 +33,12 @@ exports.getGames = async (req, res) => {
         contains: search,
         mode: "insensitive",
       },
+
+      // Remove os jogos de usuários deletados
+      seller: {
+        isDeleted: false,
+      },
+
       // Adiciona o filtro de gênero apenas se ele for fornecido na URL
       ...(genre && { genre: { equals: genre, mode: "insensitive" } }),
     };
@@ -55,9 +61,9 @@ exports.getGames = async (req, res) => {
         game.image
       }`,
     }));
-
+    
     // 6. Verifica se existem jogos com esses filtros
-    if( !gamesWithImageUrl )
+    if( !(gamesWithImageUrl.length) )
       return res.status(404).json({message: "No games found."});
 
     // 7. Retorna a resposta formatada para o frontend
@@ -77,6 +83,11 @@ exports.getGenres = async (req, res) => {
     const distinctGenres = await prisma.game.findMany({
       select: {
         genre: true,
+      },
+      where: {
+        seller: {
+          isDeleted: false,
+        },
       },
       distinct: ["genre"],
     });
@@ -133,6 +144,11 @@ exports.getRandomGame = async (req, res) => {
     // 3. Busca um único jogo, pulando a quantidade aleatória de registros
     const randomGame = await prisma.game.findFirst({
       skip: randomSkip,
+      where: {
+        seller: {
+          isDeleted: false,
+        },
+      }
     });
 
     if (!randomGame) {
@@ -174,6 +190,8 @@ exports.getGameImage = async (req, res) => {
 exports.createGame = async (req, res) => {
   try {
     // Campos usados diretamente no cadastro do jogo
+    if(!req.body) req.body = {};
+
     const title = req.body.title;
     const description = req.body.description;
     const price = parseFloat(req.body.price);
@@ -286,6 +304,8 @@ exports.updateGame = async (req, res) => {
   try {
     const id_jogo = parseInt(req.params.id);
 
+    if(!req.body) req.body = {};
+    
     const new_title = req.body.title;
     const new_description = req.body.description;
     const new_price = parseFloat(req.body.price);
@@ -386,7 +406,17 @@ exports.deleteGame = async (req, res) => {
     res.status(200).json(jogo_deletado);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: error.message });
+    switch (error.code) {
+      // Jogo não encontrado
+      case "P2025":
+        res.status(404).json({
+          message: `No record was found for a delete.`,
+        });
+        break;
+
+      default:
+        res.status(500).json({ message: error.message });
+    }
   } finally {
     await prisma.$disconnect();
   }

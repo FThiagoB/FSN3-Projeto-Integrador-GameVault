@@ -31,7 +31,7 @@ model User{
   CPF String? @unique
   name String?
   phone String?
-  image String @default("uploads/games/default.png")
+  image String @default("default.png")
   password String
   email String @unique
   role String @default("user")

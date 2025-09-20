@@ -1,6 +1,8 @@
+const fs = require("fs");
+const path = require("path");
+
 const {hashPassword} = require("./../utils/miscellaneous");
 const {blacklist} = require("./authController");
-
 const { handleImageUpload } = require("../utils/imageHandler");
 
 const { PrismaClient } = require("@prisma/client");
@@ -12,7 +14,15 @@ exports.getUsers = async (req, res) => {
             orderBy: { id: "asc" }
         });
 
-        res.status(200).json(users);
+        // Mapeia os resultados para adicionar a URL completa da imagem
+        const usersWithImageUrl = users.map((user) => ({
+            ...user,
+            imageUrl: `${req.protocol}://${req.get("host")}/uploads/users/${
+                user.image
+            }`,
+        }));
+
+        res.status(200).json(usersWithImageUrl);
     }
     catch( error ){
         console.error( error );
@@ -35,7 +45,14 @@ exports.getUserByID = async (req, res) => {
         // Remove o campo "password" da resposta
         const {password, ...filteredUser} = user;
 
-        res.status(200).json( filteredUser );
+        const userWithImageUrl = {
+            ...filteredUser,
+            imageUrl: `${req.protocol}://${req.get("host")}/uploads/users/${
+                user.image
+            }`,
+        };
+
+        res.status(200).json( userWithImageUrl );
     }
     catch( error ){
         console.error(error);
@@ -57,7 +74,15 @@ exports.getUserByJWT = async (req, res) => {
 
         // Remove o campo "password" da resposta
         const {password, ...filteredUser} = user;
-        res.status(200).json( filteredUser );
+
+        const userWithImageUrl = {
+            ...filteredUser,
+            imageUrl: `${req.protocol}://${req.get("host")}/uploads/users/${
+                user.image
+            }`,
+        };
+
+        res.status(200).json( userWithImageUrl );
     }
     catch( error ){
         console.error(error);
@@ -70,7 +95,7 @@ exports.getGamesBySeller = async (req, res) => {
     const userID = parseInt(req.user.id);
 
     // Realiza a requisição
-    const users = await prisma.game.findMany({
+    const games = await prisma.game.findMany({
       where: {
         sellerID: userID
       },
@@ -80,10 +105,18 @@ exports.getGamesBySeller = async (req, res) => {
     });
 
     // Verifica se encontrou algum jogo
-    if( !users )
-      return res.status(404).json({message: "Users not found."});
+    if( !games.length )
+      return res.status(404).json({message: "Games not found."});
 
-    res.status(200).json( users );
+    // Mapeia os resultados para adicionar a URL completa da imagem
+    const gamesWithImageUrl = games.map((game) => ({
+        ...game,
+        imageUrl: `${req.protocol}://${req.get("host")}/uploads/games/${
+            game.image
+        }`,
+    }));
+
+    res.status(200).json( gamesWithImageUrl );
   }
   catch (error) {
     console.error(error);
@@ -96,7 +129,7 @@ exports.getGamesBySellerByID = async (req, res) => {
     const userID = parseInt(req.params.id);
 
     // Realiza a requisição
-    const users = await prisma.game.findMany({
+    const games = await prisma.game.findMany({
       where: {
         sellerID: userID
       },
@@ -106,10 +139,18 @@ exports.getGamesBySellerByID = async (req, res) => {
     });
 
     // Verifica se encontrou algum jogo
-    if( !users )
-      return res.status(404).json({message: "Users not found."});
+    if( !games.length )
+      return res.status(404).json({message: "Games not found."});
 
-    res.status(200).json( users );
+    // Mapeia os resultados para adicionar a URL completa da imagem
+    const gamesWithImageUrl = games.map((game) => ({
+        ...game,
+        imageUrl: `${req.protocol}://${req.get("host")}/uploads/games/${
+            game.image
+        }`,
+    }));
+
+    res.status(200).json( gamesWithImageUrl );
   }
   catch (error) {
     console.error(error);
@@ -314,4 +355,19 @@ exports.updateUser = async (req, res) => {
                 res.status(500).json({ message: error.message });
         }
     }
+};
+
+exports.getUserImage = async (req, res) => {
+  const imageName = req.params.image;
+  const imagePath = path.resolve(
+    __dirname,
+    "..",
+    "uploads",
+    "users",
+    imageName
+  );
+
+  // Verifica se o arquivo existe
+  if (fs.existsSync(imagePath)) res.sendFile(imagePath);
+  else res.status(404).json({ error: "Image not found." });
 };

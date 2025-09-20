@@ -7,6 +7,7 @@ const router = Router();
 
 // Rotas comuns =========================================================================
 router.get("/signin", userController.createUser);  // Rota para cadastrar um usuário
+router.get("/uploads/users/:image", userController.getUserImage);
 
 router.get("/user", authVerifyToken, userController.getUserByJWT);          // Obtém as próprias informações via token JWT
 router.put("/user", authVerifyToken, userController.updateUser);            // Atualiza as informações do usuário via token JWT

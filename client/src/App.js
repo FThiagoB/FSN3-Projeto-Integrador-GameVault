@@ -12,26 +12,37 @@ import CheckoutPage from "./pages/Checkout/Checkout.jsx";
 import LoginPage from "./pages/LoginPage/LoginPage.jsx";
 import SignupPage from "./pages/Signup/SignupPage.jsx";
 import Layout from "./components/Layout/Layout.jsx";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoutes from "./contexts/RequireAuth.jsx";
+
 function App() {
   return (
     <Router>
-      <CartFloat />
-      <Layout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/produtos" element={<Products />} />
-          <Route path="/produtos/:category" element={<Products />} />
-          <Route path="/produto/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/contato" element={<Contact />} />
-          <Route path="/faq" element={<StaticFaqSection />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Layout>
-      <Footer />
+      <AuthProvider>
+        <CartFloat />
+        <Layout>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/produtos" element={<Products />} />
+            <Route path="/produtos/:category" element={<Products />} />
+            <Route path="/produto/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/contato" element={<Contact />} />
+            <Route path="/faq" element={<StaticFaqSection />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="*" element={<NotFound />} />
+
+            {/* Rotas acessíveis apenas depois do login */}
+            <Route element={<ProtectedRoutes/>}>
+                {/* <Route path="*" element={<Dashboard />} /> */}
+            </Route>
+
+          </Routes>
+        </Layout>
+        <Footer />
+      </AuthProvider>
     </Router>
   );
 }

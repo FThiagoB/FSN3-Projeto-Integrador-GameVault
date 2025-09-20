@@ -19,6 +19,7 @@ const LoginPage = () => {
     e.preventDefault();
     
     try{
+      // Realiza a requisição pro backend passando email e senha
       const response = await fetch(`http://localhost:4500/login`, {
         method: 'POST',
         headers: {
@@ -27,6 +28,7 @@ const LoginPage = () => {
         body: JSON.stringify({ email, password }),
       });
 
+      // Verifica se houve algum problema
       if (!response.ok) {
         const {message} = await response.json();
         throw new Error( message );
@@ -38,10 +40,9 @@ const LoginPage = () => {
       setCookie('authToken', token, {
         path: '/',
         maxAge: 60 * 60 * 24, // 1 dia
-        secure: true,
-        sameSite: 'strict',
       });
 
+      // Vai para a página de início (ou outra qualquer)
       navigate('/');
     }
     catch( error ){

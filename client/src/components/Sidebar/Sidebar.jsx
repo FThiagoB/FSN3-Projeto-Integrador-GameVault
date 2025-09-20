@@ -1,17 +1,20 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from '../../contexts/AuthContext';
+
 import {
   FaHome,
   FaBoxOpen,
   FaQuestionCircle,
   FaShoppingCart,
   FaSignInAlt,
+  FaSignOutAlt,
   FaEnvelope,
   FaChevronLeft,
 } from "react-icons/fa";
 import "./Sidebar.css";
 
-const SidebarItem = ({ icon, text, to, isExpanded }) => {
+const SidebarItem = ({ icon, text, to, isExpanded, onClickCallback = () => {} }) => {
   const location = useLocation();
   const isActive = location.pathname === to;
 
@@ -21,7 +24,7 @@ const SidebarItem = ({ icon, text, to, isExpanded }) => {
   }`;
 
   return (
-    <Link to={to} className={linkClasses}>
+    <Link to={to} className={linkClasses} onClick={onClickCallback}>
       <div className="sidebar__item-icon">{icon}</div>
       <span
         className={`sidebar__item-text ${
@@ -34,14 +37,20 @@ const SidebarItem = ({ icon, text, to, isExpanded }) => {
   );
 };
 
+
+
 const Sidebar = ({ isExpanded, onToggle }) => {
+  // Obtem as informações do usuário se logado
+  const { user, logout } = useAuth();
+
   const menuItems = [
     { icon: <FaHome size={22} />, text: "Home", to: "/" },
     { icon: <FaBoxOpen size={22} />, text: "Produtos", to: "/produtos" },
     { icon: <FaEnvelope size={22} />, text: "Contato", to: "/contato" },
     { icon: <FaQuestionCircle size={22} />, text: "FAQ", to: "/faq" },
     { icon: <FaShoppingCart size={22} />, text: "Carrinho", to: "/cart" },
-    { icon: <FaSignInAlt size={22} />, text: "Login", to: "/login" },
+    !user? { icon: <FaSignInAlt size={22} />, text: "Login", to: "/login" } :
+          { icon: <FaSignOutAlt size={22} />, text: "Logout", onClickCallback: logout },
   ];
 
   return (

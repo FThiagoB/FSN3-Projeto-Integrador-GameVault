@@ -165,9 +165,9 @@
 
 #product-detail {
   background-color: #221b3d;
-
-  margin: 20px auto;
-  width: fit-content;
+  margin: 5% auto;
+  width: 70%;
+  height: 80%;
   color: #e0e0e0;
 }
 

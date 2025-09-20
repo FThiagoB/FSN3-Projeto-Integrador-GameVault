@@ -12,11 +12,15 @@ import CheckoutPage from "./pages/Checkout/Checkout.jsx";
 import LoginPage from "./pages/LoginPage/LoginPage.jsx";
 import SignupPage from "./pages/Signup/SignupPage.jsx";
 import Layout from "./components/Layout/Layout.jsx";
+import Admin from "./pages/Adm/Admin.jsx";
+import Navbar from "./components/Navbar/Navbar.jsx";
+import ProfileSettings from "./pages/Profiles/Profile.jsx";
 function App() {
   return (
     <Router>
       <CartFloat />
       <Layout>
+        <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/produtos" element={<Products />} />
@@ -28,6 +32,8 @@ function App() {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/profile" element={<ProfileSettings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>

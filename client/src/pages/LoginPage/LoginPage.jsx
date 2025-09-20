@@ -1,13 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "./LoginPage.css";
 import { Link } from "react-router-dom";
+import { useCookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [erroLogin, setErroLogin] = useState(false);
 
-  const handleSubmit = (e) => {
+  const emailInputRef = useRef(null); // Aponta para o input de email
+  const navigate = useNavigate();
+
+  // Cookie para armazenar o token JWT
+  const [cookies, setCookie] = useCookies(['authToken']);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Login com email: ${email}`);
+    
+    try{
+      const response = await fetch(`http://localhost:4500/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const {message} = await response.json();
+        throw new Error( message );
+      }
+
+      // Armazena o token no cookie
+      const { token } = await response.json();
+
+      setCookie('authToken', token, {
+        path: '/',
+        maxAge: 60 * 60 * 24, // 1 dia
+        secure: true,
+        sameSite: 'strict',
+      });
+
+      navigate('/');
+    }
+    catch( error ){
+      console.error('Erro:', error);
+      setErroLogin( true );
+      emailInputRef.current?.focus();
+      alert( error );
+    }
   };
 
   return (
@@ -20,8 +62,9 @@ const LoginPage = () => {
           </label>
           <input
             id="email"
+            ref={emailInputRef}
             type="email"
-            className="login-retro__input"
+            className={`login-retro__input ${erroLogin? "invalid-input": ""}`}
             placeholder="voce@exemplo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -34,7 +77,7 @@ const LoginPage = () => {
           <input
             id="password"
             type="password"
-            className="login-retro__input"
+            className={`login-retro__input ${erroLogin? "invalid-input": ""}`}
             placeholder="********"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

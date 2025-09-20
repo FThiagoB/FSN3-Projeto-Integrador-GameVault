@@ -65,6 +65,12 @@
   background: rgba(31, 41, 55, 0.7);
 }
 
+.login-retro__input.invalid-input:focus {
+  border: 1px solid #c51902;
+  box-shadow: 0 0 9px #c51902;
+  background: rgba(31, 41, 55, 0.7);
+}
+
 .login-retro__btn {
   background: linear-gradient(to right, #3b82f6, #8b5cf6);
   color: white;

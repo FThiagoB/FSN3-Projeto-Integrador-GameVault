@@ -55,7 +55,7 @@ exports.login = async ( req, res ) => {
             role: user.role
         }, SECRET_JWT_KEY, { expiresIn: "24h" });
 
-        res.status(201).json({message: token});
+        res.status(201).json({token: token});
     }
     catch( error ){
         console.error( error );

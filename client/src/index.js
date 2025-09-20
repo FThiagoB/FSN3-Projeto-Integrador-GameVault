@@ -5,12 +5,15 @@ import App from "./App";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import { CartProvider } from "./contexts/CartContext";
+import { CookiesProvider } from 'react-cookie';
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <CartProvider>
-      <App />
-    </CartProvider>
+    <CookiesProvider>
+      <CartProvider>
+        <App />
+      </CartProvider>
+    </CookiesProvider>
   </React.StrictMode>
 );

@@ -5,38 +5,30 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from "react-router-dom";
 
+import moment from 'moment';
+
 const ProfileContent = () => {
   const { user, syncData } = useAuth();
   const [cookies] = useCookies(['authToken']);
   const navigate = useNavigate();
 
-  // Bloqueia essa rota caso o usuário esteja deslogado
-  if( !user )
-    navigate("/login");
-
-  console.log( {user} )
-
-  const [formData, setFormData] = useState({
-    name: user?.name || "",
-    cpf: user?.CPF || "",
-    phone: user?.phone || "",
-    email: user?.email || "",
-    createdAt: user?.createdAt || "",
-    updatedAt: user?.updatedAt || ""
-  });
-
-  console.log( {formData} )
-
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(user?.imageUrl || "");
 
-  useEffect(() => {handleReset()}, [user]);
-  
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
-  };
+  const [formData, setFormData] = useState({
+    name: "",
+    cpf: "",
+    phone: "",
+    email: "",
+    createdAt: "",
+    updatedAt: ""
+  });
 
-  // Função para resetar os campos
+  // Bloqueia essa rota caso o usuário esteja deslogado
+  useEffect(() => {
+    if(!user) navigate('/login');
+  }, [user, navigate]);
+
   const handleReset = () => {
     setFormData({
       name: user?.name || "",
@@ -50,6 +42,15 @@ const ProfileContent = () => {
     setFile(null);
     setPreviewUrl( user?.imageUrl || "" );
     document.getElementById("file").value = "";
+  }
+
+  // quando user muda, atualiza estado
+  useEffect(() => {
+    handleReset();
+  }, [user]);
+  
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
   const handleFileChange = (e) => {
@@ -104,7 +105,7 @@ const ProfileContent = () => {
       const result = await response.json();
       if (response.ok) {
         alert("Dados atualizados com sucesso!");
-        await syncData();
+        syncData();
         
       } else {
         alert("Erro: " + result.message);
@@ -163,7 +164,7 @@ const ProfileContent = () => {
               <input
                 type="text"
                 defaultValue=""
-                value={formData.createdAt}
+                value={moment(formData.createdAt).format("DD/MM/YYYY HH:mm:ss")}
                 disabled
                 className="profile-disabled-field"
               />
@@ -173,7 +174,7 @@ const ProfileContent = () => {
               <input
                 type="text"
                 defaultValue=""
-                value={formData.updatedAt}
+                value={moment(formData.updatedAt).format("DD/MM/YYYY HH:mm:ss")}
                 disabled
                 className="profile-disabled-field"
               />

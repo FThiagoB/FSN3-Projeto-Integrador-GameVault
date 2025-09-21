@@ -11,6 +11,7 @@ import {
   FaSignOutAlt,
   FaEnvelope,
   FaChevronLeft,
+  FaTachometerAlt 
 } from "react-icons/fa";
 import "./Sidebar.css";
 
@@ -43,6 +44,7 @@ const Sidebar = ({ isExpanded, onToggle }) => {
   // Obtem as informações do usuário se logado
   const { user, logout } = useAuth();
 
+  // Páginas comuns a todos os usuárops
   const menuItems = [
     { icon: <FaHome size={22} />, text: "Home", to: "/" },
     { icon: <FaEnvelope size={22} />, text: "Contato", to: "/contato" },
@@ -51,13 +53,22 @@ const Sidebar = ({ isExpanded, onToggle }) => {
           { icon: <FaSignOutAlt size={22} />, text: "Logout", onClickCallback: logout },
   ];
   
-  // Dinâmica das páginas conforme o usuários estiver logado e seu cargo
-  if(!user || !user.role === "user"){
-    console.log(menuItems)
+  // Páginas para os compradores ou usuários deslocados
+  if(!user || user.role === "client"){
     menuItems.splice(1, 0, {icon: <FaBoxOpen size={22} />, text: "Produtos", to: "/produtos"})
-    console.log(menuItems)
     menuItems.splice(4, 0, {icon: <FaShoppingCart size={22} />, text: "Carrinho", to: "/cart"})
-    console.log(menuItems)
+  }
+
+  if(user && !user.role !== "client"){
+    // Páginas comuns ao admin e o seller
+    
+    // Páginas do admin
+    if( user.role === "admin" ){
+      menuItems.splice(3, 0, {icon: <FaTachometerAlt size={22} />, text: "Dashboard", to: "/admin"})
+    }
+    // Páginas do vendedor
+    else if( user.role === "seller" ){
+    }
   }
 
   return (

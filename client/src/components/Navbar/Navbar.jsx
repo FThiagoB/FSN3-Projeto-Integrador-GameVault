@@ -59,64 +59,73 @@ const Navbar = () => {
         <h1 className="admin-navbar-title">RETRO</h1>
       </Link>
       <div className="admin-navbar-controls">
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Buscar jogos..."
-            className="admin-search-input"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {(isLoading ||
-            searchResults.length > 0 ||
-            (searchTerm && !isLoading)) && (
-            <ul className="search-results-list">
-              {isLoading && <li className="search-info-item">Buscando...</li>}
-              {!isLoading &&
-                searchResults.length > 0 &&
-                searchResults.map((game) => (
-                  <li key={game.id} className="search-result-item">
-                    <a href={`/produto/${game.id}`} onClick={handleResultClick}>
-                      {game.title}
-                    </a>
-                  </li>
-                ))}
-              {!isLoading && searchResults.length === 0 && searchTerm && (
-                <li className="search-info-item">Nenhum jogo encontrado.</li>
-              )}
-            </ul>
-          )}
-        </div>
-        { user && (
-            <>
-              <img
-                src={user.imageUrl}
-                className="admin-profile-icon"
-                onClick={() => setShowOptions(!showOptions)}
+
+        {(!user || (user && (user.role === "client")))  && (
+          <>
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Buscar jogos..."
+                className="admin-search-input"
+                id="search-field"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-              {showOptions && (
-                <div className="admin-profile-options">
-                  <ul className="admin-profile-options-list">
-                    <li>
-                      <Link to="/profile" onClick={() => setShowOptions(false)}>
-                        Perfil
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/settings" onClick={() => setShowOptions(false)}>
-                        Configurações
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/logout" onClick={() => setShowOptions(false)}>
-                        Sair
-                      </Link>
-                    </li>
+              {(isLoading ||
+                searchResults.length > 0 ||
+                (searchTerm && !isLoading)) && (
+                  <ul className="search-results-list">
+                    {isLoading && <li className="search-info-item">Buscando...</li>}
+                    {!isLoading &&
+                      searchResults.length > 0 &&
+                      searchResults.map((game) => (
+                        <li key={game.id} className="search-result-item">
+                          <a href={`/produto/${game.id}`} onClick={handleResultClick}>
+                            {game.title}
+                          </a>
+                        </li>
+                      ))}
+                    {!isLoading && searchResults.length === 0 && searchTerm && (
+                      <li className="search-info-item">Nenhum jogo encontrado.</li>
+                    )}
                   </ul>
-                </div>
-              )}
-            </>
-          )}
+                )}
+            </div>
+          </>
+        )}
+
+        { user && (
+          <>
+            <span className="profile-span">{user.role}</span>
+
+            <img
+              src={user.imageUrl}
+              className="admin-profile-icon"
+              onClick={() => setShowOptions(!showOptions)}
+            />
+            {showOptions && (
+              <div className="admin-profile-options">
+                <ul className="admin-profile-options-list">
+                  <li>
+                    <Link to="/profile" onClick={() => setShowOptions(false)}>
+                      Perfil
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/settings" onClick={() => setShowOptions(false)}>
+                      Configurações
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/logout" onClick={() => setShowOptions(false)}>
+                      Sair
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </header>
   );

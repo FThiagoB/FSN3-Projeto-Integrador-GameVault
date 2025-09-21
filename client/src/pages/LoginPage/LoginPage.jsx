@@ -18,8 +18,10 @@ const LoginPage = () => {
   const [cookies, setCookie] = useCookies(['authToken']);
 
   // Bloqueia essa rota caso o usuário esteja logado
-  if( user )
-    navigate("/profile");
+  if( user){
+    if( user.role === "admin" ) navigate("/admin");
+    else navigate("/profile");
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();

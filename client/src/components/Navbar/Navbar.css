@@ -1,3 +1,15 @@
+.profile-span {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 1.125rem;
+  transition: transform 0.2s ease;
+}
+
 .admin-navbar {
   background: linear-gradient(to bottom right, #312e81, #be185d);
   backdrop-filter: blur(8px);

@@ -3,9 +3,12 @@ import { Button } from "react-bootstrap";
 import { IoCloseCircleOutline, IoCart } from "react-icons/io5";
 import { useCart } from "../../contexts/CartContext";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from '../../contexts/AuthContext';
 
 const CartFloat = () => {
   const [showCart, setShowCart] = useState(false);
+  const { user } = useAuth();
+
   const { cartItems, itemCount, removeItem, updateQuantity, clearCart } =
     useCart();
 
@@ -26,6 +29,9 @@ const CartFloat = () => {
     return null;
   }
 
+  if( user && (user.role === "admin" || user.role === "seller"))
+    return null;
+  
   return (
     <div className="d-none d-md-block">
       <div

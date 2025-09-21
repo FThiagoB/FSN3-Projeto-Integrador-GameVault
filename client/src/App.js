@@ -12,6 +12,9 @@ import CheckoutPage from "./pages/Checkout/Checkout.jsx";
 import LoginPage from "./pages/LoginPage/LoginPage.jsx";
 import SignupPage from "./pages/Signup/SignupPage.jsx";
 import Layout from "./components/Layout/Layout.jsx";
+import Admin from "./pages/Adm/Admin.jsx";
+import Navbar from "./components/Navbar/Navbar.jsx";
+import ProfileSettings from "./pages/Profiles/Profile.jsx";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoutes from "./contexts/RequireAuth.jsx";
 
@@ -21,6 +24,7 @@ function App() {
       <AuthProvider>
         <CartFloat />
         <Layout>
+          <Navbar />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/produtos" element={<Products />} />
@@ -36,7 +40,8 @@ function App() {
 
             {/* Rotas acessíveis apenas depois do login */}
             <Route element={<ProtectedRoutes/>}>
-                {/* <Route path="*" element={<Dashboard />} /> */}
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/profile" element={<ProfileSettings />} />
             </Route>
 
           </Routes>

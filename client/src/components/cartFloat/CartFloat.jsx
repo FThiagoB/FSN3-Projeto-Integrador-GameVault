@@ -33,7 +33,7 @@ const CartFloat = () => {
           position: "fixed",
           zIndex: 1000,
           right: "1.5rem",
-          top: "16vh",
+          top: "25vh",
           transition: "all 0.3s ease",
         }}
       >

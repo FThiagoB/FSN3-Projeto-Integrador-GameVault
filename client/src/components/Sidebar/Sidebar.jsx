@@ -69,15 +69,6 @@ const Sidebar = ({ isExpanded, onToggle }) => {
             >
               🕹️
             </span>
-            {isExpanded && (
-              <h1
-                className={`sidebar__logo-text ${
-                  isExpanded ? "" : "sidebar__logo-text--visible"
-                }`}
-              >
-                RETRO
-              </h1>
-            )}
           </div>
           <button onClick={onToggle} className="sidebar__toggle-desktop">
             <FaChevronLeft

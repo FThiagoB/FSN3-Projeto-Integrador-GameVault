@@ -12,6 +12,7 @@
   /* Se tiver um background grid como decorativo */
   background-size: cover;
   background-repeat: no-repeat;
+  /* z-index: 2000; */
 }
 
 /* Se "cyber-grid" for uma classe personalizada que você criou (decorativa ou animada),

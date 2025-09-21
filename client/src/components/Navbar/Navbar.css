@@ -1,0 +1,170 @@
+.admin-navbar {
+  background: linear-gradient(to bottom right, #312e81, #be185d);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  padding: 1rem 2rem;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--admin-border-color);
+  color: var(--admin-text-light);
+  font-family: "Inter", sans-serif;
+  position: relative;
+  z-index: 2000;
+}
+
+.admin-navbar-title-link {
+  text-decoration: none;
+}
+
+.admin-navbar-title {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: var(--admin-text-blue);
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+  font-family: "Press Start 2P", sans-serif;
+  margin-left: 50px;
+}
+
+.admin-navbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative; /* Essencial para posicionar o menu dropdown */
+}
+
+.admin-search-input {
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--admin-border-color);
+  border-radius: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--admin-text-light);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.admin-search-input::placeholder {
+  color: var(--admin-text-muted);
+}
+
+.admin-search-input:focus {
+  border-color: var(--admin-text-blue);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.5);
+}
+
+.admin-profile-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background: var(--admin-primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 1.125rem;
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.7);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.admin-profile-icon:hover {
+  transform: scale(1.05);
+}
+
+.search-container {
+  position: relative;
+}
+
+.search-results-list {
+  position: absolute; /* Mudado para absolute para seguir o container */
+  top: calc(100% + 10px); /* Posiciona abaixo do input */
+  left: 0;
+  width: 100%;
+  background: rgba(31, 41, 55, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--admin-border-color);
+  border-radius: 0.75rem;
+  list-style: none;
+  padding: 0.5rem;
+  margin: 0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.search-result-item a {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: var(--admin-text-light);
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.search-result-item a:hover {
+  background-color: rgba(96, 165, 250, 0.2);
+}
+
+.search-info-item {
+  padding: 0.75rem 1rem;
+  color: var(--admin-text-muted);
+  text-align: center;
+}
+
+/* --- Estilização do Menu Dropdown do Perfil --- */
+@keyframes fadeInMenu {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-profile-options {
+  position: absolute;
+  top: calc(100% + 15px); /* Posiciona abaixo do ícone */
+  right: 0;
+  width: 200px;
+  background: linear-gradient(
+    to bottom right,
+    rgba(31, 41, 55, 0.7),
+    rgba(17, 24, 39, 0.7)
+  );
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+  z-index: 1000;
+  animation: fadeInMenu 0.3s ease forwards;
+  overflow: hidden; /* Garante que os filhos respeitem o border-radius */
+}
+
+.admin-profile-options-list {
+  list-style: none;
+  padding: 0.5rem;
+  margin: 0;
+}
+
+.admin-profile-options-list li a {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: var(--admin-text-light);
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-profile-options-list li a:hover {
+  background-color: rgba(139, 92, 246, 0.2);
+  color: white;
+}
+
+.admin-profile-options-list li:not(:last-child) {
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+}

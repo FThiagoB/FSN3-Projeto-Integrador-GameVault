@@ -88,6 +88,7 @@ model Order{
   updatedAt DateTime @updatedAt
   
   items OrderItem[]
+  @@unique([id, userID])
 }
 
 model OrderItem{

@@ -86,8 +86,11 @@ exports.auth = async (req, res, next) => {
     if( !token )
         return res.status(403).json({message: "Token is missing"});
     
-    jwt.verify( token, SECRET_JWT_KEY, (err, user) => {
-        if( err || hasToken(token) )
+    jwt.verify( token, SECRET_JWT_KEY, async (err, user) => {
+        // Verifica se o user.id existe no banco de dados (Token de um usuário de outra sessão)
+        const response = await prisma.user.findUnique({ where: {id: user.id} });
+
+        if( err || hasToken(token) || !response )
             return res.status(403).json({message: "Invalid token"});
 
         req.user = user;    // Armazena o id e a role do usuário

@@ -119,8 +119,8 @@ async function createSellers() {
                     name: "Juliana Mendes",
                     phone: "11999990010",
                     password: await hashPassword("senha1234"),
-                    email: "cliente@gmail.com",
-                    role: "client"
+                    email: "usuario@gmail.com",
+                    role: "user"
                 }
             ]
         });

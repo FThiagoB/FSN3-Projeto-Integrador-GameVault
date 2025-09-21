@@ -7,7 +7,7 @@ const upload = require("../utils/uploadConfig");
 const router = Router();
 
 // Rotas comuns =========================================================================
-router.get("/signin", userController.createUser);  // Rota para cadastrar um usuário
+router.post("/signin", userController.createUser);  // Rota para cadastrar um usuário
 router.get("/uploads/users/:image", userController.getUserImage);
 router.patch("/user/picture/remove", auth, userController.removeUserPicture);
 

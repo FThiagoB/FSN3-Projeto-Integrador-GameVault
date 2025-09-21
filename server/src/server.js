@@ -6,6 +6,7 @@ const path = require("path");
 const gamesRoutes = require("./routes/gameRoutes");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 app = express();
 const porta = 4500;
@@ -25,6 +26,7 @@ app.use(
 app.use(authRoutes);
 app.use(gamesRoutes);
 app.use(userRoutes);
+app.use(orderRoutes);
 
 app.listen(porta, () => {
   console.log(`Servidor iniciado na porta http://localhost:${porta}`);

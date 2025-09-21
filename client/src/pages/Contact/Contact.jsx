@@ -7,7 +7,7 @@ const Contact = () => {
   return (
     <section
       className="contact-retro position-relative overflow-hidden"
-      style={{ minHeight: "90vh", width: "100%", padding: "5rem 1rem" }}
+      style={{ minHeight: "100vh", width: "100%", padding: "5rem 1rem" }}
     >
       {/* Círculos animados no fundo */}
       <div className="contact-retro__background">
@@ -17,7 +17,7 @@ const Contact = () => {
       </div>
 
       {/* Container principal */}
-      <div className="px-5 py-5 position-relative" style={{ zIndex: 10 }}>
+      <div className="box-contact position-relative" style={{ zIndex: 10 }}>
         {/* Header */}
         <div className="text-center w-100 mb-4">
           <h1 className="contact-retro__title">Entre em Contato</h1>
@@ -29,10 +29,10 @@ const Contact = () => {
 
         {/* Form */}
         <div className="row justify-content-center">
-          <div className="col-lg-6 col-md-8">
+          <div className=""> {/* <div className="col-lg-6 col-md-8"> */}
             <div className="contact-retro__form-container">
               <form className="row g-3">
-                <div className="col-md-6">
+                <div className="content-input col-md-6">
                   <label
                     htmlFor="name"
                     className="form-label contact-retro__label"
@@ -43,11 +43,11 @@ const Contact = () => {
                     type="text"
                     id="name"
                     name="name"
-                    className="form-control contact-retro__input"
+                    className="contact-retro__input"
                     placeholder="Seu nome"
                   />
                 </div>
-                <div className="col-md-6">
+                <div className="content-input col-md-6">
                   <label
                     htmlFor="email"
                     className="form-label contact-retro__label"
@@ -58,11 +58,11 @@ const Contact = () => {
                     type="email"
                     id="email"
                     name="email"
-                    className="form-control contact-retro__input"
+                    className="contact-retro__input"
                     placeholder="voce@exemplo.com"
                   />
                 </div>
-                <div className="col-12">
+                <div className="content-input col-12">
                   <label
                     htmlFor="message"
                     className="form-label contact-retro__label"
@@ -72,7 +72,7 @@ const Contact = () => {
                   <textarea
                     id="message"
                     name="message"
-                    className="form-control contact-retro__input"
+                    className="contact-retro__input contact-retro__textarea"
                     rows="5"
                     placeholder="Sua mensagem..."
                   />
@@ -80,7 +80,7 @@ const Contact = () => {
                 <div className="col-12 text-center mt-4">
                   <button
                     type="submit"
-                    className="btn btn-lg contact-retro__btn"
+                    className="btn-lg contact-retro__btn"
                   >
                     Enviar Mensagem
                   </button>
@@ -107,12 +107,6 @@ const Contact = () => {
                   </Link>
                   <Link to="#" className="social-icon text-white">
                     <FaLinkedin size={20} />
-                  </Link>
-                </div>
-
-                <div className="mt-4">
-                  <Link to="/" className="btn btn-sm contact-retro__btn-back">
-                    ← Voltar para Home
                   </Link>
                 </div>
               </div>

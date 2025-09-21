@@ -1,20 +1,31 @@
 .faq-section {
+  margin: 0 auto;
   padding: 4rem 1rem;
-  background: linear-gradient(to right, #312e81, #6b21a8, #be185d);
+  background: linear-gradient(to top, #312e81, #6b21a8, #be185d);
   color: white;
   min-height: 100vh;
+  font-family: "Press Start 2P", system-ui, sans-serif;
 }
 
 .faq-container {
-  max-width: 768px;
+  max-width: 900px;
   margin: 0 auto;
+  background: linear-gradient(
+    to bottom right,
+    rgba(31, 41, 55, 0.7),
+    rgba(17, 24, 39, 0.7)
+  );
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
 }
 
 .faq-title {
-  text-align: center;
   font-size: 2rem;
-  font-weight: 700;
+  color: #a78bfa;
+  text-align: center;
   margin-bottom: 2rem;
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
 
 .faq-list {
@@ -24,37 +35,70 @@
 }
 
 .faq-item {
-  background-color: #222;
+  border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 0.5rem;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  border: 1px solid #333;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.faq-item.active {
+  background: rgba(139, 92, 246, 0.2);
 }
 
 .faq-question {
   width: 100%;
   text-align: left;
-  padding: 1rem 1.25rem;
-  font-size: 1rem;
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
   font-weight: 600;
   background: none;
-  color: white;
+  color: #f3f4f6;
   border: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.faq-question:hover {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .faq-icon {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   margin-left: 1rem;
   color: #8b5cf6;
+  transition: transform 0.3s ease;
+}
+
+.faq-item.active .faq-icon {
+  transform: rotate(180deg);
 }
 
 .faq-answer {
-  padding: 0.75rem 1.25rem 1.25rem;
-  font-size: 0.95rem;
-  color: #cbd5e1;
-  border-top: 1px solid #444;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  color: #e0e7ff;
+  border-top: 1px solid #8b5cf6;
+  line-height: 1.6;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@media (max-width: 1023px) {
+  .faq-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* Animação suave ao abrir a resposta */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

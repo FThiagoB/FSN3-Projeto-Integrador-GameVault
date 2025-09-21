@@ -8,6 +8,20 @@
   overflow: hidden;
 }
 
+.box-contact {
+  background: linear-gradient(
+    to bottom right,
+    rgba(31, 41, 55, 0.7),
+    rgba(17, 24, 39, 0.7)
+  );
+  padding: 3rem 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
 .contact-retro__background {
   position: absolute;
   top: 0;
@@ -62,43 +76,23 @@
 }
 
 .contact-retro__title {
-  font-size: 3rem;
-  background: linear-gradient(to right, #60a5fa, #a78bfa);
-  -webkit-background-clip: text;
-  color: transparent;
-  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  color: #a78bfa;
+  text-align: center;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
 
 .contact-retro__subtitle {
-  max-width: 600px;
   font-size: 1.25rem;
   color: #d1d5db;
   text-shadow: 0 0 8px #a78bfa60;
+  margin-bottom: 2rem;
 }
 
-.contact-retro__form-container {
-  background: linear-gradient(
-    to bottom right,
-    rgba(31, 41, 55, 0.5),
-    rgba(17, 24, 39, 0.5)
-  );
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(55, 65, 81, 0.5);
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
-  animation: float 3s ease-in-out infinite;
-  z-index: 10;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
+.content-input {
+  display: flex;
+  flex-direction: column;
 }
 
 .contact-retro__label {
@@ -109,43 +103,55 @@
 
 .contact-retro__input {
   background: rgba(31, 41, 55, 0.5);
-  color: white;
-  border: 1px solid #4b5563;
-  border-radius: 0.4rem;
-  padding: 0.4rem 0.6rem;
+  color: white !important;
+  border: 1px solid #4b5563 !important;
+  border-radius: 0.5rem !important;
+  padding: 0.7rem 1rem !important;
   font-family: "Press Start 2P", system-ui, sans-serif;
-  transition: border-color 0.3s ease;
+  font-size: 1rem !important;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.contact-retro__textarea {
+  height: 250px;
 }
 
 .contact-retro__input::placeholder {
-  color: #a78bfa;
-  opacity: 0.7;
+  color: #a78bfaaa !important;
+}
+
+.form-control:focus {
+  border-color: #8b5cf6 !important;
 }
 
 .contact-retro__input:focus {
-  outline: none;
-  border-color: #8b5cf6;
-  box-shadow: 0 0 8px #8b5cf6;
-  background: rgba(31, 41, 55, 0.7);
+  outline: none !important;
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 9px #8b5cf6 !important;
+  background: rgba(31, 41, 55, 0.7) !important;
 }
 
 .contact-retro__btn {
   background: linear-gradient(to right, #3b82f6, #8b5cf6);
   color: white;
-  border: none;
-  border-radius: 0.6rem;
   font-family: "Press Start 2P", system-ui, sans-serif;
   font-weight: bold;
   font-size: 1rem;
-  padding: 1rem 2rem;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  border-radius: 0.7rem;
+  padding: 1rem;
   cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.6);
+  width: 100%;
 }
 
 .contact-retro__btn:hover,
 .contact-retro__btn:focus {
   background: linear-gradient(to right, #8b5cf6, #be185d);
-  box-shadow: 0 0 15px #a78bfa;
+  box-shadow: 0 0 20px #a78bfa;
   outline: none;
 }
 
@@ -158,7 +164,7 @@
 }
 
 .contact-retro__email {
-  color: #60a5fa;
+  color: #d1d5db;
   font-weight: 700;
   text-decoration: none;
   display: block;
@@ -200,24 +206,8 @@
   outline: none;
 }
 
-.contact-retro__btn-back {
-  background: rgba(31, 41, 55, 0.5);
-  border: 1px solid #4b5563;
-  color: #d1d5db;
-  font-family: "Press Start 2P", system-ui, sans-serif;
-  font-weight: bold;
-  border-radius: 0.5rem;
-  padding: 0.5rem 1.5rem;
-  letter-spacing: 0.05em;
-  transition: background 0.3s ease, border-color 0.3s ease;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.contact-retro__btn-back:hover,
-.contact-retro__btn-back:focus {
-  background: #8b5cf6;
-  border-color: #a78bfa;
-  color: white;
-  outline: none;
+@media (max-width: 1023px) {
+.contact-retro__title {
+    font-size: 1.5rem;
+  }
 }

@@ -98,46 +98,26 @@ function ProductDetail() {
 
   // Se tudo deu certo, o JSX abaixo é renderizado com os dados da API
   return (
-    <Container fluid className="m-0 p-0 w-100 h-100" id="page-product-info">
-      {/* O resto do seu JSX permanece o mesmo */}
+    <Container
+      fluid
+      className="d-flex flex-column justify-content-center"
+      id="page-product-info"
+    >
       <Container
         fluid
         id="product-detail"
-        className="d-flex flex-column justify-content-center flex-md-row gap-1 gap-md-3 p-3"
       >
         <ToastContainer />
-        <Container
-          fluid
-          className="m-0 p-0 w-100 d-flex flex-column justify-content-center align-items-center"
-        >
-          <div className="w-100 d-flex justify-content-end">
-            <div className="w-100 mx-4">
-              <Breadcrumb
-                className="p-0 my-0 mx-auto d-flex justify-content-center"
-                style={{ height: "20px", "font-size": "10px" }}
-              >
-                <Breadcrumb.Item>
-                  <Link to="/">Home</Link>
-                </Breadcrumb.Item>
-                <Breadcrumb.Item>
-                  <Link to="/produtos">Produtos</Link>
-                </Breadcrumb.Item>
-                <Breadcrumb.Item>
-                  <Link to={`/produtos/${product.category}`}>
-                    {product.category}
-                  </Link>
-                </Breadcrumb.Item>
-                <Breadcrumb.Item active>{product.name}</Breadcrumb.Item>
-              </Breadcrumb>
-            </div>
-            <div id="product-category-tag">
-              <Link
-                to={`/produtos/${product.category}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                {product.category}
-              </Link>
-            </div>
+
+        {/* Imagem */}
+        <div className="product-image-wrapper">
+          <div id="product-category-tag">
+            <Link
+              to={`/produtos/${product.category}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              {product.genre}
+            </Link>
           </div>
           <Image
             src={product.imageUrl}
@@ -145,32 +125,42 @@ function ProductDetail() {
             id="product-image"
             alt={product.name}
           />
-        </Container>
-        <Container fluid className="d-flex flex-column" id="product-side">
-          <h1 className="display-5 fs-4" id="product-title">
-            {product.name}
-          </h1>
+        </div>
+
+        {/* Informações */}
+        <Container
+          fluid
+          className="d-flex flex-column justify-content-start"
+          id="product-side"
+        >
+          <Breadcrumb className="p-0 my-2" style={{ fontSize: "12px" }}>
+            <Breadcrumb.Item>
+              <Link to="/">Home</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link to="/produtos">Produtos</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link to={`/produtos/${product.genre}`}>{product.genre}</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>{product.title}</Breadcrumb.Item>
+          </Breadcrumb>
+
+          <h1 className="product-title">{product.title}</h1>
           <Container id="product-description" className="m-0 p-0">
             {product.description}
           </Container>
+
           <Container
             fluid
-            className="m-auto text-center d-flex flex-column gap-2 mt-4 mt-md-0"
+            className="text-center d-flex flex-column gap-3 mt-4"
             id="shopping-info"
           >
-            {quantity > 1 ? (
-              <h3 className="product-price">
-                R$ {String(total.toFixed(2)).replace(".", ",")}
-              </h3>
-            ) : (
-              <h3 className="product-price">
-                R$ {String(Number(product.price).toFixed(2)).replace(".", ",")}
-              </h3>
-            )}
-            <Container
-              flex
-              className="d-flex flex-row justify-content-center gap-3"
-            >
+            <h3 className="product-price">
+              R$ {String(total.toFixed(2)).replace(".", ",")}
+            </h3>
+
+            <div className="d-flex flex-lg-row justify-content-center gap-3">
               <ButtonGroup aria-label="Quantity Control" id="control-quantity">
                 <Button variant="light" onClick={decrementQuantity}>
                   -
@@ -181,7 +171,7 @@ function ProductDetail() {
                 </Button>
               </ButtonGroup>
               <Button
-                className="fs-5"
+                className="btn-add-cart"
                 onClick={() => {
                   addToCart(product, quantity);
                   setQuantity(1);
@@ -190,7 +180,7 @@ function ProductDetail() {
               >
                 Adicionar ao carrinho
               </Button>
-            </Container>
+            </div>
           </Container>
         </Container>
       </Container>

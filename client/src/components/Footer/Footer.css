@@ -1,8 +1,10 @@
 .footer {
-  background-color: #000000;
+  background-color: #221b3d;
   backdrop-filter: blur(6px);
-  border-top: 1px solid #1f2937;
-  color: #d1d5db;
+  border-top: 4px solid #a78bfa;
+  color: #9ca3af;
+    font-family: "Press Start 2P", system-ui, sans-serif;
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
 }
 
 .footer-container {
@@ -32,11 +34,12 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin-bottom: 20px;
 }
 
 .footer-logo-circle {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   background: linear-gradient(to right, #3b82f6, #8b5cf6);
   border-radius: 0.5rem;
   color: white;
@@ -56,11 +59,13 @@
 .footer-subtitle {
   color: #60a5fa;
   font-size: 0.75rem;
+  margin: 0;
 }
 
 .footer-description {
   font-size: 0.875rem;
   margin-top: 1rem;
+  color: #9ca3af;
 }
 
 .footer-social {
@@ -131,6 +136,7 @@
   align-items: center;
   gap: 0.75rem;
   font-size: 0.875rem;
+  color: #9ca3af;
 }
 
 .footer-icon {
@@ -189,4 +195,5 @@
 .footer-bottom-links {
   display: flex;
   gap: 1.5rem;
+  flex-wrap: wrap;
 }

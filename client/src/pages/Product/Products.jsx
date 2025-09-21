@@ -4,7 +4,6 @@ import "./Products.css";
 import { useParams, useNavigate } from "react-router-dom";
 import { Pagination } from "react-bootstrap";
 import { ToastContainer } from "react-toastify";
-import SearchBar from "../../components/searchBar/Searchbar";
 
 const Products = () => {
   // 2. Novos estados para gerenciar os dados da API
@@ -111,16 +110,12 @@ const Products = () => {
       <div className="container">
         <aside className="sidebar-content">
           <h2>
-            <span className="text-glow">Clássicos</span> Retrô em Evidência
+            Clássicos Retrô em Evidência
           </h2>
           <p>
             Mergulhe na nostalgia dos videogames com jogos lançados até o ano de
             2010.
           </p>
-          <SearchBar
-            searchTerm={searchTerm}
-            onSearchChange={handleSearchChange}
-          />
           <div className="category-list">
             {categories.map((category) => (
               <button

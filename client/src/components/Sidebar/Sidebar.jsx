@@ -45,13 +45,20 @@ const Sidebar = ({ isExpanded, onToggle }) => {
 
   const menuItems = [
     { icon: <FaHome size={22} />, text: "Home", to: "/" },
-    { icon: <FaBoxOpen size={22} />, text: "Produtos", to: "/produtos" },
     { icon: <FaEnvelope size={22} />, text: "Contato", to: "/contato" },
     { icon: <FaQuestionCircle size={22} />, text: "FAQ", to: "/faq" },
-    { icon: <FaShoppingCart size={22} />, text: "Carrinho", to: "/cart" },
     !user? { icon: <FaSignInAlt size={22} />, text: "Login", to: "/login" } :
           { icon: <FaSignOutAlt size={22} />, text: "Logout", onClickCallback: logout },
   ];
+  
+  // Dinâmica das páginas conforme o usuários estiver logado e seu cargo
+  if(!user || !user.role === "user"){
+    console.log(menuItems)
+    menuItems.splice(1, 0, {icon: <FaBoxOpen size={22} />, text: "Produtos", to: "/produtos"})
+    console.log(menuItems)
+    menuItems.splice(4, 0, {icon: <FaShoppingCart size={22} />, text: "Carrinho", to: "/cart"})
+    console.log(menuItems)
+  }
 
   return (
     <aside className="sidebar">

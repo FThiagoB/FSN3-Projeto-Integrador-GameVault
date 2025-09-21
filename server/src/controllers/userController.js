@@ -173,7 +173,7 @@ exports.deleteUserByID = async (req, res) => {
                 email: `deleted-user-${userID}`, 
                 phone: "",
                 CPF: '',
-                image: "uploads/games/default.png",
+                image: "default.png",
                 password: await hashPassword( `deleted-user-${userID}` ),
             }
         });
@@ -370,4 +370,23 @@ exports.getUserImage = async (req, res) => {
   // Verifica se o arquivo existe
   if (fs.existsSync(imagePath)) res.sendFile(imagePath);
   else res.status(404).json({ error: "Image not found." });
+};
+
+exports.removeUserPicture = async (req, res) => {
+  try{
+    const userID = parseInt(req.user.id);
+
+    const user = await prisma.user.update({
+        where: { id: userID },
+        data: {
+            image: "default.png",
+        }
+    });
+
+    res.status(200).send();
+  }
+  catch( error ){
+    console.error( error );
+    res.status(500).json({message: error.message});
+}
 };

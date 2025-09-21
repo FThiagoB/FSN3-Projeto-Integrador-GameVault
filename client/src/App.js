@@ -39,10 +39,8 @@ function App() {
             <Route path="*" element={<NotFound />} />
 
             {/* Rotas acessíveis apenas depois do login */}
-            <Route element={<ProtectedRoutes/>}>
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/profile" element={<ProfileSettings />} />
-            </Route>
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/profile" element={<ProfileSettings />} />
 
           </Routes>
         </Layout>

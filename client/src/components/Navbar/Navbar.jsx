@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "./Navbar.css";
 import { Link } from "react-router-dom";
+import { useAuth } from '../../contexts/AuthContext';
 
 const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!searchTerm.trim()) {
@@ -85,33 +87,36 @@ const Navbar = () => {
             </ul>
           )}
         </div>
-        <div
-          className="admin-profile-icon"
-          onClick={() => setShowOptions(!showOptions)}
-        >
-          SR
-        </div>
-        {showOptions && (
-          <div className="admin-profile-options">
-            <ul className="admin-profile-options-list">
-              <li>
-                <Link to="/profile" onClick={() => setShowOptions(false)}>
-                  Perfil
-                </Link>
-              </li>
-              <li>
-                <Link to="/settings" onClick={() => setShowOptions(false)}>
-                  Configurações
-                </Link>
-              </li>
-              <li>
-                <Link to="/logout" onClick={() => setShowOptions(false)}>
-                  Sair
-                </Link>
-              </li>
-            </ul>
-          </div>
-        )}
+        { user && (
+            <>
+              <img
+                src={user.imageUrl}
+                className="admin-profile-icon"
+                onClick={() => setShowOptions(!showOptions)}
+              />
+              {showOptions && (
+                <div className="admin-profile-options">
+                  <ul className="admin-profile-options-list">
+                    <li>
+                      <Link to="/profile" onClick={() => setShowOptions(false)}>
+                        Perfil
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/settings" onClick={() => setShowOptions(false)}>
+                        Configurações
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/logout" onClick={() => setShowOptions(false)}>
+                        Sair
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
       </div>
     </header>
   );

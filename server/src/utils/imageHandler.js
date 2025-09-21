@@ -35,7 +35,7 @@ async function handleImageUpload( req, id, type ){
             await downloadImageFromUrl(url, localFilePath);
         }
 
-        relative_filename = path.join("/uploads", folder, filename);
+        relative_filename = filename;
     }
 
     return relative_filename;

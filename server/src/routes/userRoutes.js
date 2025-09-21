@@ -2,15 +2,17 @@ const { Router } = require("express");
 
 const {auth, adminOnly, sellerOnly} = require("./../controllers/authController");
 const userController = require("./../controllers/userController");
+const upload = require("../utils/uploadConfig");
 
 const router = Router();
 
 // Rotas comuns =========================================================================
 router.get("/signin", userController.createUser);  // Rota para cadastrar um usuário
 router.get("/uploads/users/:image", userController.getUserImage);
+router.patch("/user/picture/remove", auth, userController.removeUserPicture);
 
 router.get("/user", auth, userController.getUserByJWT);          // Obtém as próprias informações via token JWT
-router.put("/user", auth, userController.updateUser);            // Atualiza as informações do usuário via token JWT
+router.put("/user", auth, upload.single("file"), userController.updateUser);            // Atualiza as informações do usuário via token JWT
 router.delete("/user", auth, userController.deleteUserByJWT);    // Deleta a própria conta de usuário via token JWT
 
 // Rotas para o admin ====================================================================

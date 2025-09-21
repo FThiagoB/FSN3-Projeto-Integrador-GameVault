@@ -3,17 +3,23 @@ import "./LoginPage.css";
 import { Link } from "react-router-dom";
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [erroLogin, setErroLogin] = useState(false);
+  const { user, logout } = useAuth();
 
   const emailInputRef = useRef(null); // Aponta para o input de email
   const navigate = useNavigate();
 
   // Cookie para armazenar o token JWT
   const [cookies, setCookie] = useCookies(['authToken']);
+
+  // Bloqueia essa rota caso o usuário esteja logado
+  if( user )
+    navigate("/profile");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,9 +47,6 @@ const LoginPage = () => {
         path: '/',
         maxAge: 60 * 60 * 24, // 1 dia
       });
-
-      // Vai para a página de início (ou outra qualquer)
-      navigate('/');
     }
     catch( error ){
       console.error('Erro:', error);

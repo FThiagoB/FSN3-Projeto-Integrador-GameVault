@@ -3,10 +3,26 @@ import "./Admin.css";
 import { FaPencilAlt, FaTrash, FaTimes, FaSave } from "react-icons/fa";
 import { useState } from "react";
 
+import { useAuth } from '../../contexts/AuthContext';
+import { useCookies } from 'react-cookie';
+import { useNavigate } from "react-router-dom";
+
 const Admin = () => {
+  const { user } = useAuth();
+  const [cookies] = useCookies(['authToken']);
+  const navigate = useNavigate();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [formData, setFormData] = useState({ name: "", email: "", role: "" });
+
+  // Bloqueia essa rota caso o usuário esteja deslogado
+  if( !user )
+    navigate("/login");
+
+  // Bloqueia essa rota caso o usuário não é admin
+  else if( user.role !== "admin" )
+    navigate("/profile");
 
   const users = [
     {

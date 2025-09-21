@@ -68,34 +68,52 @@ exports.login = async ( req, res ) => {
 }
 
 exports.logout = async (req, res) => {
-    const authorization = req.headers["authorization"];
-    const token = authorization?.split(' ')[1]; // Remove a string "Bearer "
+    try{
+        const authorization = req.headers["authorization"];
+        const token = authorization?.split(' ')[1]; // Remove a string "Bearer "
 
-    if( !token )
-        return res.status(403).json({message: "Token is missing"});
+        if( !token )
+            return res.status(403).json({message: "Token is missing"});
 
-    deleteToken(token);
-    res.status(200).json({message: 'Logged out successfully'});
+        deleteToken(token);
+        res.status(200).json({message: 'Logged out successfully'});
+    }
+    catch(error){
+        res.status(500).json({message: error});
+        deleteToken(token);
+    }
 };
 
 // Middleware para validar o token JWT (usado nas rotas que necessitam de autenticação)
 exports.auth = async (req, res, next) => {
-    const authorization = req.headers["authorization"];
-    const token = authorization?.split(' ')[1]; // Remove a string "Bearer "
-
-    if( !token )
-        return res.status(403).json({message: "Token is missing"});
+    try{
+        const authorization = req.headers["authorization"];
+        const token = authorization?.split(' ')[1]; // Remove a string "Bearer "
+        
+        if( !token )
+            return res.status(403).json({message: "Token is missing"});
     
-    jwt.verify( token, SECRET_JWT_KEY, async (err, user) => {
-        // Verifica se o user.id existe no banco de dados (Token de um usuário de outra sessão)
-        const response = await prisma.user.findUnique({ where: {id: user.id} });
+        // Usa o verify síncrono, que lança erro se inválido
+        let decoded;
+        try {
+            decoded = jwt.verify(token, SECRET_JWT_KEY);
+        } catch (err) {
+            return res.status(403).json({ message: "Invalid token" });
+        }
 
-        if( err || hasToken(token) || !response )
-            return res.status(403).json({message: "Invalid token"});
+        // Checa se o ID existe no token
+        if (!decoded?.id) return res.status(403).json({ message: "Invalid token payload" });
 
-        req.user = user;    // Armazena o id e a role do usuário
-        next();             // Passa o controle para a próxima função
-    })
+        // Busca o usuário no banco
+        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        req.user = user; // passa adiante
+        next();
+    }
+    catch( error ){
+        res.status(500).json({message: error});
+    }
 }
 
 // Exporta as funções para manipular a blacklist

@@ -172,7 +172,7 @@ exports.deleteUserByID = async (req, res) => {
                 name: 'Usuário removido',          
                 email: `deleted-user-${userID}`, 
                 phone: "",
-                CPF: '',
+                CPF: `deleted-user-${userID}`, 
                 image: "default.png",
                 password: await hashPassword( `deleted-user-${userID}` ),
             }
@@ -216,7 +216,7 @@ exports.deleteUserByJWT = async (req, res) => {
                 name: 'Usuário removido',          
                 email: `deleted-user-${userID}`, 
                 phone: "",
-                CPF: '',
+                CPF: `deleted-user-${userID}`, 
                 image: "uploads/games/default.png",
                 password: await hashPassword( `deleted-user-${userID}` ),
             }
@@ -252,10 +252,7 @@ exports.createUser = async (req, res) => {
 
         // Campos usados diretamente no cadastro do jogo
         if(!req.body) req.body = {};
-
-        const email = req.body.email;
-        const password = req.body.password;
-        const role = req.body.role;
+        const {email, password, role, phone = "", name = "", CPF = ""} = req.body;
 
         // Verifica se todos os campos foram preenchidos
         if ( !email || !password || !role ){
@@ -272,12 +269,14 @@ exports.createUser = async (req, res) => {
         }
 
         // Cria o usuário
+        let hashedPassword = await hashPassword( password );
+        const prismaData = {email, password: hashedPassword, role};
+        if( phone ) prismaData.phone = phone;
+        if( name ) prismaData.name = name;
+        if( CPF ) prismaData.CPF = CPF;
+
         const user = await prisma.user.create({
-            data: {
-                email: email,
-                password: await hashPassword(password),
-                role: role,
-            }
+            data: prismaData
         })
 
         res.status(201).json( user );

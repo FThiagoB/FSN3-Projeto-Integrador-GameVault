@@ -30,7 +30,7 @@
 }
 
 .sidebar-content h2 {
-  font-size: 3.5em;
+  font-size: 3em;
   letter-spacing: 2px;
   font-weight: bold;
   color: #a78bfa;
@@ -45,7 +45,7 @@
   line-height: 1.6;
   color: #d1d5db;
   text-shadow: 0 0 8px #a78bfa60;
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 
 .category-list {

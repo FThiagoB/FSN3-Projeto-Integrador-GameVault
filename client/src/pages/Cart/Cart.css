@@ -335,6 +335,12 @@
 .promo-code__group {
   display: flex;
 }
+@media (max-width: 767px) {
+  .promo-code__group {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
 .promo-code__input {
   flex-grow: 1;
   background: rgba(31, 41, 55, 0.5);
@@ -342,6 +348,7 @@
   color: white;
   padding: 0.75rem;
   border-radius: 0.5rem 0 0 0.5rem;
+  width: 100%;
 }
 .promo-code__button {
   background: linear-gradient(to right, #8b5cf6, #ec4899);

@@ -21,8 +21,8 @@ const Footer = () => {
   ];
 
   const atendimento = [
+    { name: "Contato", link: "/contato" },
     { name: "FAQ", link: "/faq" },
-    //{ name: "Política de Troca", link: "/politica-de-troca" },
     //{ name: "Garantia", link: "/garantia" },
     //{ name: "Frete Grátis", link: "/frete-gratis" },
     //{ name: "Suporte Técnico", link: "/suporte-tecnico" },
@@ -90,11 +90,11 @@ const Footer = () => {
               </div>
               <div className="footer-contact-item">
                 <Phone className="footer-icon" />
-                <span>(11) 9999-9999</span>
+                <span>(85) 99999-9999</span>
               </div>
               <div className="footer-contact-item">
                 <MapPin className="footer-icon" />
-                <span>São Paulo, SP</span>
+                <span>Fortaleza, CE</span>
               </div>
             </div>
 
@@ -110,7 +110,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="footer-bottom">
           <div className="footer-bottom-left">
-            © 2024 RetroPixel Games Store. Todos os direitos reservados.
+            © 2025 RetroPixel Games Store. Todos os direitos reservados.
           </div>
           <div className="footer-bottom-links">
             <Link to="/" className="footer-link">

@@ -1,6 +1,6 @@
 .newsletter-section {
   padding: 4rem 1rem;
-  background: linear-gradient(to bottom, #1e3a8a, #6b21a8, #be185d);
+  /* background: linear-gradient(to bottom, #1e3a8a, #6b21a8, #be185d); */
   opacity: calc();
   position: relative;
   overflow: hidden;
@@ -46,7 +46,7 @@
 .icon-wrapper {
   width: 4rem;
   height: 4rem;
-  background: linear-gradient(to right, #facc15, #f97316);
+  background: linear-gradient(45deg, rgb(139, 92, 246), rgb(236, 72, 153));
   border-radius: 9999px;
   margin: 0 auto 1.5rem;
   display: flex;
@@ -62,7 +62,7 @@
 }
 
 .title {
-  font-size: 2.25rem;
+  font-size: 2rem;
   font-weight: bold;
   color: white;
   margin-bottom: 1rem;
@@ -73,7 +73,7 @@
 }
 
 .subtitle {
-  font-size: 1.25rem;
+  font-size: 1rem;
   color: #d1d5db;
   max-width: 48rem;
   margin: 0 auto;
@@ -110,7 +110,7 @@
   left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: #d1d5db;
   width: 20px;
   height: 20px;
 }
@@ -127,7 +127,7 @@
 }
 
 .input::placeholder {
-  color: #9ca3af;
+  color: #d1d5db;
 }
 
 .input:focus {
@@ -154,10 +154,11 @@
 .newsletter-benefits {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 1.5rem;
   margin-top: 1.5rem;
   font-size: 0.875rem;
-  color: #9ca3af;
+  color: #d1d5db;
 }
 
 .benefit {
@@ -224,13 +225,13 @@
 
 .label {
   font-size: 0.875rem;
-  color: #9ca3af;
+  color: #d1d5db;
 }
 
 @keyframes pulseGlow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+    box-shadow: 0 0 0 0 rgb(236, 72, 153, 0.4);
   }
   50% {
     box-shadow: 0 0 0 16px rgba(251, 191, 36, 0);

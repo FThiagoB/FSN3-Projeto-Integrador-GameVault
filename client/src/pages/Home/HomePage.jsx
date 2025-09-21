@@ -49,12 +49,12 @@ const Hero = () => {
 
   return (
     <section className="hero-section">
-      <ToastContainer />
+      {/* <ToastContainer />
       <div className="hero-bg">
         <div className="hero-circle-1"></div>
         <div className="hero-circle-2"></div>
         <div className="hero-circle-3"></div>
-      </div>
+      </div> */}
 
       <div className="hero-container">
         <div className="hero-grid">
@@ -63,12 +63,8 @@ const Hero = () => {
 
             <div className="hero-left">
               <div className="hero-text">
-                <h1 className="hero-title title-retro">
-                  <span className="gradient">Reviva</span>
-
-                  <br />
-
-                  <span>os Clássicos</span>
+                <h1 className="hero-title">
+                  Reviva os Clássicos
                 </h1>
 
                 <p className="hero-subtitle">

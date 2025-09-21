@@ -1,7 +1,8 @@
 .product-grid-section {
   padding-top: 4rem;
   padding-bottom: 4rem;
-  background: linear-gradient(to bottom, transparent, rgba(17, 24, 39, 0.5));
+  /* background: linear-gradient(to bottom, transparent, rgba(17, 24, 39, 0.5)); */
+  font-family: "Press Start 2P", system-ui;
 }
 
 .product-grid-container {
@@ -16,7 +17,7 @@
 }
 
 .product-grid-title {
-  font-size: 2.125rem;
+  font-size: 2rem;
   font-weight: bold;
   color: white;
   margin-bottom: 1rem;
@@ -29,8 +30,8 @@
 }
 
 .product-grid-subtitle {
-  color: #9ca3af;
-  font-size: 1.125rem;
+  color: #d1d5db;
+  font-size: 0.8rem;
   max-width: 640px;
   margin: 0 auto;
 }
@@ -76,15 +77,15 @@
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1280px) {
   .product-grid-list {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (min-width: 1280px) {
-  .product-grid-list {
-    grid-template-columns: repeat(4, 1fr);
+@media (max-width: 767px) {
+  .product-grid-title{
+    font-size: 1.25rem;
   }
 }
 
@@ -106,4 +107,14 @@
 .load-more-button:hover {
   background: linear-gradient(to right, #2563eb, #7c3aed);
   box-shadow: 0 0 10px #60a5fa;
+}
+
+.content-btn{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.product-grid-section .button-primary{
+  margin-top: 50px;
 }

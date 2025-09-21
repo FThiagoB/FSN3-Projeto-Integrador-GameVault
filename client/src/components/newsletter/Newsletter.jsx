@@ -5,10 +5,10 @@ const Newsletter = () => {
   return (
     <section className="newsletter-section">
       {/* Background Effects */}
-      <div className="newsletter-bg">
+      {/* <div className="newsletter-bg">
         <div className="circle blue"></div>
         <div className="circle purple"></div>
-      </div>
+      </div> */}
 
       <div className="newsletter-container">
         <div className="newsletter-content">

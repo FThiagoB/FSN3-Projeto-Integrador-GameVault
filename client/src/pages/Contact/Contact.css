@@ -110,6 +110,7 @@
   font-family: "Press Start 2P", system-ui, sans-serif;
   font-size: 1rem !important;
   transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+  width: 100%;
 }
 
 .contact-retro__textarea {
@@ -210,4 +211,8 @@
 .contact-retro__title {
     font-size: 1.5rem;
   }
+  .contact-retro__email {
+    font-size: 0.625rem;
+  }
+
 }

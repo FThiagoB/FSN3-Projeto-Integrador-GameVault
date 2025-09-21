@@ -1,10 +1,11 @@
 .randomizer-section {
   padding: 4rem 1rem;
-  background: linear-gradient(to bottom, #be185d, #6b21a8, #1e3a8a);
+  /* background: linear-gradient(to bottom, #be185d, #6b21a8, #1e3a8a); */
   opacity: calc();
   position: relative;
   overflow: hidden;
   z-index: 1;
+  font-family: "Press Start 2P", system-ui;
 }
 
 /* .product-grid-title {
@@ -16,17 +17,16 @@
   */
 
 .randomizer-title {
-  font-family: "Press Start 2P", system-ui;
-  font-size: 2.125rem;
+  font-size: 2rem;
   font-weight: bold;
   color: white;
   margin-bottom: 1rem;
 }
 
 .randomizer-subtitle {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: normal;
-  color: gray;
+  color: #d1d5db;
 }
 
 .btn-group {
@@ -48,14 +48,24 @@
 }
 
 .btn-randomize {
-  font-family: "Press Start 2P", system-ui;
-  color: grey;
-  font-size: 1.125rem;
-  font-weight: 500;
-  position: relative;
-  background-color: #6b21a8;
-  margin: 20px 20px 20px 20px;
-  box-shadow: 0 2px 4px rgb(14, 46, 170);
-  border-radius: 20px;
-  align-items: center;
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+  white-space: nowrap;
+  font-size: 0.9rem !important;
+}
+
+.btn-randomize:hover {
+  background: linear-gradient(to right, #2563eb, #7c3aed);
+}
+
+@media (max-width: 767px) {
+  .randomizer-title {
+    font-size: 1.25rem;
+  }
 }

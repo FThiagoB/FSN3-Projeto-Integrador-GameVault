@@ -23,7 +23,7 @@ model Game{
   updatedAt DateTime @updatedAt
   
   itemsSold OrderItem[]
-  itemsCart CartItem[]
+  @@unique([title, sellerID])
 }
 
 model User{
@@ -44,7 +44,6 @@ model User{
   
   gamesSold Game[]
   orders Order[]
-  cart Cart?
 }
 
 model Address{
@@ -66,7 +65,6 @@ model Address{
   updatedAt DateTime @updatedAt
   
   orders Order[]
-  carts Cart[]
 }
 
 model Order{
@@ -101,36 +99,5 @@ model OrderItem{
 	
 	order Order @relation(fields: [orderID], references: [id])
 	game Game @relation(fields: [gameID], references: [id])
-}
-
-model Cart{
-  id Int @id @default(autoincrement())
-  userID Int @unique
-  total Float
-  subtotal Float
-  discount Float
-  tax Float
-  shippingCost Float
-  couponCode String?
-  shippingAddressID Int?
-  shippingMethod String?
-  
-  user User @relation(fields: [userID], references: [id])
-  address Address? @relation(fields: [shippingAddressID], references: [id])
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  items CartItem[]
-}
-
-model CartItem{
-	id Int @id @default(autoincrement())
-	cartID Int
-	gameID Int
-	quantity Int
-	unitPrice Float
-	
-	cart Cart @relation(fields: [cartID], references: [id])
-	game Game @relation(fields: [gameID], references: [id])
+  @@unique([orderID, gameID])
 }

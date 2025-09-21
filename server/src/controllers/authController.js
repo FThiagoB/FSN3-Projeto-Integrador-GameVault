@@ -79,7 +79,7 @@ exports.logout = async (req, res) => {
 };
 
 // Middleware para validar o token JWT (usado nas rotas que necessitam de autenticação)
-exports.authVerifyToken = async (req, res, next) => {
+exports.auth = async (req, res, next) => {
     const authorization = req.headers["authorization"];
     const token = authorization?.split(' ')[1]; // Remove a string "Bearer "
 
@@ -102,8 +102,7 @@ exports.blacklist = {
 }
 
 // Middleware que facilita a verificação da autorização das rotas
-exports.authorization = {
-    onlySellers : async (req, res, next) => {
+exports.sellerOnly = async (req, res, next) => {
         const {id, role} = req.user;
 
         if( !role )
@@ -113,21 +112,21 @@ exports.authorization = {
             return res.status(403).json({message: "Unauthorized user"});
 
         next();
-    },
+}
 
-    onlyClients : async (req, res, next) => {
+exports.clientOnly = async (req, res, next) => {
         const {id, role} = req.user;
 
         if( !role )
             return res.status(403).json({message: "Permissions not found"});
         
-        if( role !== "user" && role !== "admin" )
-            return res.status(403).json({message: "Unauthorized user"});
+        if( role !== "user" )
+            return res.status(403).json({message: "Invalid user"});
 
         next();
-    },
+}
 
-    onlyAdmin : async (req, res, next) => {
+exports.adminOnly = async (req, res, next) => {
         const {id, role} = req.user;
 
         if( !role )
@@ -137,5 +136,4 @@ exports.authorization = {
             return res.status(403).json({message: "Unauthorized user"});
 
         next();
-    },
-};
+}

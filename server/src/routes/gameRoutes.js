@@ -2,7 +2,7 @@ const { Router } = require("express");
 const gameController = require("../controllers/gameController");
 const upload = require("../utils/uploadConfig");
 
-const {authVerifyToken, authorization} = require("./../controllers/authController");
+const {auth, sellerOnly} = require("./../controllers/authController");
 
 const router = Router();
 
@@ -23,12 +23,12 @@ router.get("/uploads/games/:image", gameController.getGameImage);
 
 // As rotas abaixo são acessíveis apenas para vendedores ou o admin
 // Cadastro de um jogo
-router.post("/games", authVerifyToken, authorization["onlySellers"], upload.single("image"), gameController.createGame);
+router.post("/games", auth, sellerOnly, upload.single("image"), gameController.createGame);
 
 // Deleta um jogo especifico
-router.delete("/games/:id", authVerifyToken, authorization["onlySellers"], gameController.deleteGame);
+router.delete("/games/:id", auth, sellerOnly, gameController.deleteGame);
 
 // Atualiza as informações de um jogo específico
-router.put("/games/:id", authVerifyToken, authorization["onlySellers"], upload.single("image"), gameController.updateGame);
+router.put("/games/:id", auth, sellerOnly, upload.single("image"), gameController.updateGame);
 
 module.exports = router;

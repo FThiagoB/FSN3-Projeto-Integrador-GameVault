@@ -45,7 +45,7 @@ exports.getAddressByJWT = async (req, res) => {
 exports.createAddressByJWT = async (req, res) => {
     try {
         const userId = parseInt(req.user.id);
-        
+
         if( !req.body ) req.body = {};
         const { label = "", street, number, complemento="", neighborhood, city, state, zipCode, isDefaultShipping = false } = req.body;
 
@@ -85,6 +85,7 @@ exports.createAddressByJWT = async (req, res) => {
 exports.updateAddressByJWT = async (req, res) => {
     try {
         const userId = parseInt(req.user.id);
+        const addressId = parseInt(req.params.id)
 
         if( !req.body ) req.body = {};
         const { label = "", street, number, complemento="", neighborhood, city, state, zipCode, isDefaultShipping = false } = req.body;
@@ -100,19 +101,20 @@ exports.updateAddressByJWT = async (req, res) => {
         if(!existingAddress)
             return res.status(400).json({message: "Address not found"});
         
-        const updatedAddress = await prisma.address.create({
-            data: {
-                userID: userId,
-                label,
-                street,
-                number,
-                complemento,
-                neighborhood,
-                city,
-                state,
-                zipCode,
-                isDefaultShipping
-            }
+        const dataQuery = {};
+        if( street ) dataQuery.street = street;
+        if( number ) dataQuery.number = number;
+        if( complemento ) dataQuery.complemento = complemento;
+        if( neighborhood ) dataQuery.neighborhood = neighborhood;
+        if( city ) dataQuery.city = city;
+        if( state ) dataQuery.state = state;
+        if( zipCode ) dataQuery.zipCode = zipCode;
+        if( isDefaultShipping ) dataQuery.isDefaultShipping = isDefaultShipping;
+        if( label ) dataQuery.label = label;
+
+        const updatedAddress = await prisma.address.update({
+            where: {id: userId},
+            data: dataQuery
         });
 
         // Se este endereço for definido como padrão, remover o padrão dos outros

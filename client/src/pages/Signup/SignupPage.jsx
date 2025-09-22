@@ -6,7 +6,35 @@ import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
+import { ToastContainer, toast } from "react-toastify";
+
 const SignupPage = () => {
+
+  const notifySuccess = (Mensagem) =>
+  toast.success(Mensagem, {
+    position: "bottom-right",
+    autoClose: 1000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+  });
+
+const notifyError = (message) => {
+  toast.error(message, {
+    position: "bottom-right",
+    autoClose: 1500,       // um pouco mais de tempo para ler o erro
+    hideProgressBar: false,
+    closeOnClick: true,    // permitir fechar ao clicar
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+  });
+}
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +56,7 @@ const SignupPage = () => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      alert("As senhas não coincidem!");
+      notifyError("As senhas não coincidem!");
       return;
     }
 
@@ -56,12 +84,15 @@ const SignupPage = () => {
         throw new Error(message);
       }
 
-      alert("Usuário cadastrado com sucesso.");
-      navigate("/login");
+      notifySuccess("Usuário cadastrado com sucesso.");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+      
     }
     catch (error) {
       console.error('Erro:', error);
-      alert(error);
+      notifyError(error);
     }
   };
 
@@ -122,7 +153,7 @@ const SignupPage = () => {
             required
           />
 
-          <div style={{"display": "flex", "flex-direction": "row", "justifyContent": "space-around", "gap": "5"}}>
+          <div style={{ "display": "flex", "flex-direction": "row", "justifyContent": "space-around", "gap": "5" }}>
             <label>
               <input
                 type="radio"
@@ -130,7 +161,7 @@ const SignupPage = () => {
                 checked={role === 'user'}
                 onChange={() => setRole('user')}
               />
-              <span style={{padding: "0px 10px"}}>User</span>
+              <span style={{ padding: "0px 10px" }}>User</span>
             </label>
 
             <label>
@@ -140,7 +171,7 @@ const SignupPage = () => {
                 checked={role === 'seller'}
                 onChange={() => setRole('seller')}
               />
-              <span style={{padding: "0px 10px"}}>Seller</span>
+              <span style={{ padding: "0px 10px" }}>Seller</span>
             </label>
           </div>
 
@@ -148,10 +179,11 @@ const SignupPage = () => {
             Registrar
           </button>
         </form>
-        <p style={{"margin-top": "10px", "text-align": "center"}}>
+        <p style={{ "margin-top": "10px", "text-align": "center" }}>
           Já tem uma conta? <Link to="/login">Entrar</Link>
         </p>
       </div>
+      <ToastContainer/>
     </section>
   );
 };

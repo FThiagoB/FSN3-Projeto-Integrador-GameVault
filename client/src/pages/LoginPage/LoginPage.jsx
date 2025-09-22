@@ -5,6 +5,8 @@ import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
+import { ToastContainer, toast } from "react-toastify";
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,12 +58,26 @@ const LoginPage = () => {
       console.error('Erro:', error);
       setErroLogin( true );
       emailInputRef.current?.focus();
-      alert( error );
+      notifyError(` ${error} `);
     }
   };
 
+const notifyError = (message) => {
+  toast.error(message, {
+    position: "bottom-right",
+    autoClose: 1500,       // um pouco mais de tempo para ler o erro
+    hideProgressBar: false,
+    closeOnClick: true,    // permitir fechar ao clicar
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+  });
+}
+
   return (
     <section className="login-retro">
+      
       <div className="login-retro__container">
         <h1 className="login-retro__title">Login</h1>
         <form className="login-retro__form" onSubmit={handleSubmit}>
@@ -99,6 +115,8 @@ const LoginPage = () => {
         <p>
           Ainda sem conta? <Link to="/signup">Cadastre-se</Link>
         </p>
+
+        <ToastContainer/>
       </div>
     </section>
   );

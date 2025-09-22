@@ -5,7 +5,33 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from "react-router-dom";
 
+import { ToastContainer, toast } from "react-toastify";
 import moment from 'moment';
+
+const notifySuccess = (Mensagem) =>
+  toast.success(Mensagem, {
+    position: "bottom-right",
+    autoClose: 1000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+  });
+
+const notifyError = (message) => {
+  toast.error(message, {
+    position: "bottom-right",
+    autoClose: 1500,       // um pouco mais de tempo para ler o erro
+    hideProgressBar: false,
+    closeOnClick: true,    // permitir fechar ao clicar
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+  });
+}
 
 function formatCPF(value) {
   const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -130,14 +156,14 @@ const ProfileContent = () => {
       });
 
       if (response.ok) {
-        alert("Imagem removida com sucesso.");
+        notifySuccess("Imagem removida com sucesso.");
       } else {
-        alert("Erro: ");
+        notifyError("Não foi possível concluir a operação");
       }
 
       await syncData();
     } catch (error) {
-      console.error("Erro na requisição:", error);
+      notifyError(`Erro na requisição: ${error}`);
     }
   };
 
@@ -146,7 +172,7 @@ const ProfileContent = () => {
 
     // Valida o CPF. se informado
     if (formData.cpf && !validarCPF(formData.cpf)) {
-      alert("CPF inválido!");
+      notifyError("CPF inválido!");
       return;
     }
 
@@ -167,14 +193,14 @@ const ProfileContent = () => {
 
       const result = await response.json();
       if (response.ok) {
-        alert("Dados atualizados com sucesso!");
+        notifySuccess("Dados atualizados com sucesso!");
         syncData();
 
       } else {
-        alert("Erro: " + result.message);
+        notifyError(`Erro: ${result.message}`);
       }
     } catch (error) {
-      console.error("Erro na requisição:", error);
+      notifyError(`Erro na requisição: ${error}`);
     }
   }
 
@@ -262,6 +288,7 @@ const ProfileContent = () => {
           </div>
         </div>
       </form>
+      <ToastContainer />
     </main>
   );
 };

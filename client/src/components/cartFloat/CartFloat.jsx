@@ -207,7 +207,7 @@ const CartFloat = () => {
                               fontWeight: "bold",
                             }}
                           >
-                            {item.quantity}
+                            {item.quantity}/{item.stock}
                           </span>
                         </div>
 
@@ -261,6 +261,7 @@ const CartFloat = () => {
                             <input
                               type="number"
                               min="1"
+                              size="3"
                               value={item.quantity}
                               onChange={(e) =>
                                 updateQuantity(
@@ -270,7 +271,7 @@ const CartFloat = () => {
                               }
                               className="form-control text-center"
                               style={{
-                                width: "50px",
+                                width: "60px",
                                 background: "rgba(31, 41, 55, 0.5)",
                                 border: "1px solid rgba(139, 92, 246, 0.3)",
                                 color: "white",
@@ -280,7 +281,7 @@ const CartFloat = () => {
                               variant="outline"
                               size="sm"
                               onClick={() =>
-                                updateQuantity(item.id, item.quantity + 1)
+                                updateQuantity(item.id, (item.quantity + 1))
                               }
                               style={{
                                 background: "rgba(31, 41, 55, 0.5)",

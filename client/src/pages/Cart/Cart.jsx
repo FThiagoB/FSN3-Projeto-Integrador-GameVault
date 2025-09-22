@@ -23,20 +23,26 @@ const Cart = () => {
     updateQuantity: contextUpdateQuantity,
     clearCart: contextClearCart,
     validateCoupon: contextValidateCoupon,
-    shippingMethod: shippingMethods,
-    getAllShippingMethods
+    shippingMethods,
+    getShippingMethods,
+    shippingCost,
+    selectShippingMethodById,
+    shippingMethod,
+    tax,
+    discount
   } = useCart();
 
   // ... (toda a lógica e os estados permanecem os mesmos) ...
-  const [shippingMethodSelected, setshippingMethodSelected] = useState({});
+  const [shippingMethodSelected, setShippingMethodSelected] = useState({});
   const [promoCode, setPromoCode] = useState("");
   const [promoMessage, setPromoMessage] = useState("");
   const [promoValid, setPromoValid] = useState(false);
-  const [discount, setDiscount] = useState(0);
+  const [discountValue, setDiscountValue] = useState(0);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [itemToRemove, setItemToRemove] = useState(null);
 
+  console.log( shippingMethodSelected )
   const notifySuccess = (Mensagem) =>
     toast.success(Mensagem, {
       position: "bottom-right",
@@ -49,8 +55,8 @@ const Cart = () => {
       theme: "colored",
     });
 
-  useEffect( () => {
-    async function refreshMethodsShipping() {await getAllShippingMethods();}
+  useEffect(() => {
+    async function refreshMethodsShipping() { await getShippingMethods(); }
     refreshMethodsShipping();
   }, []);
 
@@ -77,9 +83,12 @@ const Cart = () => {
   const clearCart = () => {
     contextClearCart();
     setShowClearConfirm(false);
+    setDiscountValue(0)
   };
 
-  const incrementQuantity = (id, qty) => contextUpdateQuantity(id, qty + 1);
+  const incrementQuantity = (id, qty) => {
+    contextUpdateQuantity(id, qty + 1)
+  };
   const decrementQuantity = (id, qty) => {
     if (qty > 1) contextUpdateQuantity(id, qty - 1);
   };
@@ -101,14 +110,11 @@ const Cart = () => {
       setPromoValid(true);
       setPromoMessage(`Desconto aplicado com sucesso`);
       notifySuccess(promo.message);
-
-      if (promo?.discountPercent) {
-        setDiscount(subtotal * promo.discountPercent);
-      }
+      setDiscountValue( subtotal * discount );
     } else {
       setPromoValid(false);
       setPromoMessage(`${promo?.message}`);
-      setDiscount(0);
+      setDiscountValue(0);
     }
   };
 
@@ -118,13 +124,9 @@ const Cart = () => {
     0
   );
 
-  const calculateTax = () => (subtotal - discount) * 0.075;
-  const tax = calculateTax();
-
-  const shippingCost =
-    { standard: 5, express: 15, overnight: 25 }[shippingMethod] || 5;
-
-  const total = subtotal + shippingCost + tax - discount;
+  if( subtotal * discount !== discountValue )
+    setDiscountValue( subtotal * discount );
+  const total = subtotal + shippingCost + tax - discountValue;
 
   return (
     <div className="cart-page">
@@ -320,93 +322,20 @@ const Cart = () => {
               {/* Shipping Options */}
               <div className="cart-card">
                 <h5 className="cart-card__title">Opções de Envio</h5>
-                <div className="shipping-options">
-                  {/* Standard Shipping */}
-                  <div
-                    className={`shipping-option ${
-                      shippingMethod === "standard"
-                        ? "shipping-option--selected"
-                        : ""
-                    }`}
-                    onClick={() => setShippingMethod("standard")}
-                  >
-                    <input
-                      type="radio"
-                      name="shippingMethod"
-                      id="standardShipping"
-                      value="standard"
-                      checked={shippingMethod === "standard"}
-                      onChange={() => setShippingMethod("standard")}
-                    />
-                    <label htmlFor="standardShipping">
-                      <div>
-                        <div className="shipping-option__name">
-                          Chave do Produto
-                        </div>
-                        <div className="shipping-option__desc">
-                          Resgate uma chave exclusiva imediatamente
-                        </div>
-                      </div>
-                      <div className="shipping-option__price">R$5.00</div>
-                    </label>
-                  </div>
 
-                  {/* Express Shipping */}
-                  <div
-                    className={`shipping-option ${
-                      shippingMethod === "express"
-                        ? "shipping-option--selected"
-                        : ""
-                    }`}
-                    onClick={() => setShippingMethod("express")}
-                  >
-                    <input
-                      type="radio"
-                      name="shippingMethod"
-                      id="expressShipping"
-                      value="express"
-                      checked={shippingMethod === "express"}
-                      onChange={() => setShippingMethod("express")}
-                    />
-                    <label htmlFor="expressShipping">
+                {shippingMethods.map((method) => (
+                  <div key={method.id} className={`shipping-option ${shippingMethod?.id === method.id ? "shipping-option--selected" : ""}`} onClick={() => selectShippingMethodById(method.id)}>
+                    <input type="radio" name="shippingMethod" id={`shippingMethod${method.id}`} value={method.id} checked={shippingMethod?.id === method.id} onChange={() => selectShippingMethodById(method.id)} />
+                    <label htmlFor={`shippingMethod${method.id}`}>
                       <div>
-                        <div className="shipping-option__name">Express</div>
-                        <div className="shipping-option__desc">
-                          Entrega em 2-3 dias - Mídia física
-                        </div>
+                        <div className="shipping-option__name">{method.name}</div>
+                        <div className="shipping-option__desc">{method.description}</div>
                       </div>
-                      <div className="shipping-option__price">R$15.00</div>
+                      <div className="shipping-option__price">R${method.price.toFixed(2)}</div>
                     </label>
                   </div>
+                ))}
 
-                  {/* Overnight Shipping */}
-                  <div
-                    className={`shipping-option ${
-                      shippingMethod === "overnight"
-                        ? "shipping-option--selected"
-                        : ""
-                    }`}
-                    onClick={() => setShippingMethod("overnight")}
-                  >
-                    <input
-                      type="radio"
-                      name="shippingMethod"
-                      id="overnightShipping"
-                      value="overnight"
-                      checked={shippingMethod === "overnight"}
-                      onChange={() => setShippingMethod("overnight")}
-                    />
-                    <label htmlFor="overnightShipping">
-                      <div>
-                        <div className="shipping-option__name">Standard</div>
-                        <div className="shipping-option__desc">
-                          Entrega em 5-7 dias - Mídia física
-                        </div>
-                      </div>
-                      <div className="shipping-option__price">R$25.00</div>
-                    </label>
-                  </div>
-                </div>
               </div>
 
               {/* Promo Code */}
@@ -430,11 +359,10 @@ const Cart = () => {
                 </div>
                 {promoMessage && (
                   <div
-                    className={`promo-code__message ${
-                      promoValid
-                        ? "promo-code__message--success"
-                        : "promo-code__message--error"
-                    }`}
+                    className={`promo-code__message ${promoValid
+                      ? "promo-code__message--success"
+                      : "promo-code__message--error"
+                      }`}
                   >
                     {promoMessage}
                   </div>
@@ -455,10 +383,10 @@ const Cart = () => {
                     <span>Frete</span>
                     <span>R${shippingCost.toFixed(2)}</span>
                   </li>
-                  {discount > 0 && (
+                  {discountValue > 0 && (
                     <li className="order-summary__item order-summary__item--discount">
                       <span>Desconto</span>
-                      <span>-R${discount.toFixed(2)}</span>
+                      <span>-R${discountValue.toFixed(2)}</span>
                     </li>
                   )}
                   <li className="order-summary__item">

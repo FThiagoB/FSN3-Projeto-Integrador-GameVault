@@ -14,6 +14,7 @@ import {
 } from "react-icons/fa";
 
 import { useCart } from "../../contexts/CartContext";
+
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "./Checkout.css";
@@ -27,7 +28,7 @@ const CheckoutPage = () => {
   const redirect = useNavigate();
   console.log(user)
   //contexto carrinho
-  const { clearCart: contextClearCart } = useCart();
+  const { clearCart: contextClearCart, discount } = useCart();
 
   // Estados para pagamento
   const [cardNumber, setCardNumber] = useState("");
@@ -94,17 +95,14 @@ const CheckoutPage = () => {
 
 
   // Acessar o carrinho do contexto
-  const { cartItems, removeItem, updateQuantity } = useCart();
+  const { cartItems, removeItem, updateQuantity, tax: impostos, shippingCost: frete } = useCart();
 
   const subtotal = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
 
-  const frete = 0;
-  const desconto = 0;
-  const impostos = 0;
-
+  const desconto = subtotal * discount
   const total = subtotal + frete - desconto + impostos;
 
   const handleBuy = () => {
@@ -184,21 +182,7 @@ const CheckoutPage = () => {
                         </p>
                         <div className="d-flex align-items-center mt-1">
                           <span className="text-light me-2">Qtd:</span>
-                          <Form.Select
-                            size="sm"
-                            className="bg-gray-700 text-white border-secondary"
-                            style={{ width: "70px" }}
-                            value={item.quantity}
-                            onChange={(e) =>
-                              updateQuantity(item.id, parseInt(e.target.value))
-                            }
-                          >
-                            {[1, 2, 3, 4, 5].map((num) => (
-                              <option key={num} value={num}>
-                                {num}
-                              </option>
-                            ))}
-                          </Form.Select>
+                          <span className="text-light me-2">{item.quantity}</span>
                         </div>
                       </div>
                       <div className="text-end">
@@ -245,7 +229,7 @@ const CheckoutPage = () => {
                 </div>
               </div>
               <div className="text-center mt-4">
-                <Link className="mx-2 btn button-secondary" to="/cart">
+                <Link className="mx-2 btn button-primary" to="/cart">
                   Voltar ao carrinho
                 </Link>
                 <Link className="mx-2 btn button-primary" to="/produtos">

@@ -73,6 +73,7 @@ const ProductGrid = () => {
                 category: game.genre,
                 price: game.price,
                 imageUrl: game.imageUrl, // A URL completa que vem da API
+                stock: game.stock
               }}
             />
           ))}

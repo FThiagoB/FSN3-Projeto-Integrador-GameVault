@@ -156,6 +156,7 @@ const Products = () => {
                       price: product.price,
                       category: product.genre,
                       imageUrl: product.imageUrl,
+                      stock: product.stock
                     }}
                   />
                 ))}

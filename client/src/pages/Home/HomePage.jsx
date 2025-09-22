@@ -163,6 +163,7 @@ Ver Ofertas
                         price: featuredProduct.price,
                         category: featuredProduct.genre,
                         imageUrl: featuredProduct.imageUrl,
+                        stock: featuredProduct.stock
                       },
                       1
                     );

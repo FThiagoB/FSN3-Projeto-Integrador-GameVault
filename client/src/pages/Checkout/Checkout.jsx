@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Button, Image } from "react-bootstrap";
 import {
   FaMapMarkerAlt,
@@ -12,40 +12,65 @@ import {
   FaCcPaypal,
   FaTrash,
 } from "react-icons/fa";
+
 import { useCart } from "../../contexts/CartContext";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "./Checkout.css";
+
+import { useCookies } from 'react-cookie';
+import { useAuth } from '../../contexts/AuthContext';
+
 const CheckoutPage = () => {
-  // Estados para endereço
-  const [firstName, setFirstName] = useState("Jhon");
-  const [lastName, setLastName] = useState("Doe");
-  const [address, setAddress] = useState("Rua Exemplo, 123, Bairro Exemplo");
-  const [city, setCity] = useState("Fortaleza");
-  const [state, setState] = useState("Ceará");
-  const [zip, setZip] = useState("60000-000");
-  const [complement, setComplement] = useState("Apto 101");
-
+  const [cookies] = useCookies(['authToken']);
+  const { user, userAddress, syncData, loading } = useAuth();
   const redirect = useNavigate();
-
+  console.log(user)
   //contexto carrinho
   const { clearCart: contextClearCart } = useCart();
 
   // Estados para pagamento
-  const [cardNumber, setCardNumber] = useState("1234 5678 9012 3456");
-  const [expDate, setExpDate] = useState("01/33");
-  const [cvv, setCvv] = useState("324");
-  const [cardName, setCardName] = useState("John Doe");
+  const [cardNumber, setCardNumber] = useState("");
+  const [expDate, setExpDate] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [cardName, setCardName] = useState("");
   const [installments, setInstallments] = useState("1x sem juros");
+
+  // Estados para endereço
+  const [firstName, setFirstName] = useState(user?.name);
+  const [address, setAddress] = useState(`${userAddress.street}, ${userAddress.number}, ${userAddress.neighborhood} (${userAddress.state})`);
+  const [street, setStreet] = useState(userAddress.street);
+  const [number, setNumber] = useState(userAddress.number);
+  const [neighborhood, setNeighborhood] = useState(userAddress.neighborhood);
+  const [city, setCity] = useState(userAddress.city);
+  const [state, setState] = useState(userAddress.state);
+  const [zip, setZip] = useState(userAddress.zipCode);
+  const [complement, setComplement] = useState(userAddress.complemento);
+
+  const [lastName, setLastName] = useState("Doe");
 
   // Acessar o carrinho do contexto
   const { cartItems, removeItem, updateQuantity } = useCart();
+
+  // Bloqueia essa rota caso o usuário esteja deslogado
+  useEffect(() => {
+    if (!user && !loading) redirect("/login");
+
+    // Se não for um perfil de usuário redireciona
+    if (user?.role !== "user" && !loading) redirect("/profile");
+  }, [user, redirect]);
+
+  // Sincroniza as informações de endereço do usuário
+  useEffect(() => {
+    syncData();
+  }, [])
 
   // Calcular totais
   const subtotal = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
+
   const frete = 19.9;
   const desconto = 50.0;
   const impostos = 35.82;
@@ -217,7 +242,7 @@ const CheckoutPage = () => {
                 </h2>
 
                 <Row>
-                  <Col md={6} className="mb-3">
+                  <Col md={4} className="mb-3">
                     <Form.Group controlId="first_name">
                       <Form.Label className="text-light">Nome</Form.Label>
                       <Form.Control
@@ -225,34 +250,71 @@ const CheckoutPage = () => {
                         className="bg-gray-700 text-white border-secondary"
                         placeholder="Seu nome"
                         value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
+                        disabled
+                      // onChange={(e) => setFirstName(e.target.value)}
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={6} className="mb-3">
-                    <Form.Group controlId="last_name">
-                      <Form.Label className="text-light">Sobrenome</Form.Label>
+                  <Col md={8} className="mb-3">
+                    <Form.Group controlId="address" className="mb-3">
+                      <Form.Label className="text-light">Endereço</Form.Label>
                       <Form.Control
                         type="text"
                         className="bg-gray-700 text-white border-secondary"
-                        placeholder="Seu sobrenome"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Rua, número, bairro"
+                        value={address}
+                        disabled
+                      // onChange={(e) => setAddress(e.target.value)}
                       />
                     </Form.Group>
                   </Col>
                 </Row>
 
-                <Form.Group controlId="address" className="mb-3">
-                  <Form.Label className="text-light">Endereço</Form.Label>
-                  <Form.Control
-                    type="text"
-                    className="bg-gray-700 text-white border-secondary"
-                    placeholder="Rua, número, bairro"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                  />
-                </Form.Group>
+                <Row>
+                  <Col className="mb-3">
+                    <Form.Group controlId="street">
+                      <Form.Label className="text-light">Rua</Form.Label>
+                      <Form.Control
+                        type="text"
+                        className="bg-gray-700 text-white border-secondary"
+                        placeholder="Rua são miguel"
+                        value={street}
+                        onChange={(e) => setStreet(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={4} className="mb-3">
+                    <Form.Group controlId="number">
+                      <Form.Label className="text-light">
+                        Número
+                      </Form.Label>
+                      <Form.Control
+                        type="text"
+                        className="bg-gray-700 text-white border-secondary"
+                        placeholder="10"
+                        value={number}
+                        onChange={(e) => setNumber(e.target.value.replace(/[^0-9.]/g, ''))}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={8} className="mb-3">
+                    <Form.Group controlId="neighborhood">
+                      <Form.Label className="text-light">Bairro</Form.Label>
+                      <Form.Control
+                        type="text"
+                        className="bg-gray-700 text-white border-secondary"
+                        placeholder="Vila Lisboa"
+                        value={neighborhood}
+                        onChange={(e) => setNeighborhood(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
 
                 <Row>
                   <Col md={6} className="mb-3">
@@ -264,6 +326,7 @@ const CheckoutPage = () => {
                         placeholder="Sua cidade"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
+                        required
                       />
                     </Form.Group>
                   </Col>
@@ -299,6 +362,7 @@ const CheckoutPage = () => {
                         placeholder="00000-000"
                         value={zip}
                         onChange={(e) => setZip(e.target.value)}
+                        required
                       />
                     </Form.Group>
                   </Col>
@@ -337,6 +401,7 @@ const CheckoutPage = () => {
                       placeholder="1234 5678 9012 3456"
                       value={cardNumber}
                       onChange={(e) => setCardNumber(e.target.value)}
+                      required
                     />
                     <div className="position-absolute end-0 top-50 translate-middle-y me-3">
                       <FaCreditCard className="fs-4 text-light" />
@@ -351,9 +416,10 @@ const CheckoutPage = () => {
                       <Form.Control
                         type="text"
                         className="bg-gray-700 text-white border-secondary"
-                        placeholder="MM/AA"
+                        placeholder="01/33"
                         value={expDate}
                         onChange={(e) => setExpDate(e.target.value)}
+                        required
                       />
                     </Form.Group>
                   </Col>
@@ -367,6 +433,7 @@ const CheckoutPage = () => {
                           placeholder="123"
                           value={cvv}
                           onChange={(e) => setCvv(e.target.value)}
+                          required
                         />
                         <div className="position-absolute end-0 top-50 translate-middle-y me-3">
                           <FaQuestionCircle
@@ -388,7 +455,7 @@ const CheckoutPage = () => {
                       <Form.Control
                         type="text"
                         className="bg-gray-700 text-white border-secondary"
-                        placeholder="Como no cartão"
+                        placeholder="John Doe"
                         value={cardName}
                         onChange={(e) => setCardName(e.target.value)}
                       />

@@ -70,7 +70,7 @@ function ProductDetail() {
 
   const incrementQuantity = () =>
     setQuantity((prevQuantity) =>
-      prevQuantity < 99 ? prevQuantity + 1 : prevQuantity
+      prevQuantity < (product?.stock ?? 99) ? prevQuantity + 1 : prevQuantity
     );
   const decrementQuantity = () =>
     setQuantity((prevQuantity) =>
@@ -174,7 +174,7 @@ function ProductDetail() {
                 className="btn-add-cart"
                 onClick={() => {
                   addToCart(product, quantity);
-                  setQuantity(1);
+                  setQuantity(quantity);
                   notifySuccess("Item adicionado ao carrinho.");
                 }}
               >

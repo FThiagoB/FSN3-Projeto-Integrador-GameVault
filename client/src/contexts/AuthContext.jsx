@@ -9,8 +9,22 @@ export const AuthProvider = ({ children }) => {
     const [cookies, setCookie, removeCookie] = useCookies(['authToken']);
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
+    const [userAddress, setUserAddress] = useState({});
     const [loading, setLoading] = useState(true);
     const [refresh, setRefresh] = useState(true);
+
+    const updateAddressFromJSON = (response) => {
+        setUserAddress({
+            addressID: response?.id || undefined, 
+            street: response?.street || "",
+            number: response?.number || "",
+            complemento: response?.complemento || "",
+            neighborhood: response?.neighborhood || "",
+            city: response?.city || "",
+            state: response?.state || "",
+            zipCode: response?.zipCode || ""
+        });
+    };
 
     // Função para realizar o logout
     const logout = async () => {
@@ -59,19 +73,20 @@ export const AuthProvider = ({ children }) => {
     }
 
     const syncData = async () => {
-        console.log("chamou");
-        setRefresh( !refresh );
+        setRefresh(!refresh);
     }
 
     useEffect(() => {
-        // Função para buscar o usuário
+        // Função para buscar informações do usuário
         const fetchUser = async () => {
-            console.log("Sincronizando")
+            setLoading(true);
+
             if (!cookies.authToken) {
                 setLoading(false);
                 return;
             }
 
+            // Busca informações do usuário
             try {
                 const response = await fetch(`http://localhost:4500/user`, {
                     headers: {
@@ -91,6 +106,22 @@ export const AuthProvider = ({ children }) => {
             }
             finally {
                 setLoading(false);
+            }
+
+            // Busca informações sobre endereços
+            try {
+                const response = await fetch("http://localhost:4500/addresses", {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${cookies.authToken}`,
+                    }
+                });
+
+                const result = await response.json();
+                updateAddressFromJSON( result?result[0]:{} );
+                console.log({result})
+            } catch (error) {
+                console.error(error);
             }
         };
 
@@ -132,7 +163,7 @@ export const AuthProvider = ({ children }) => {
     }, [cookies.authToken]);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, loading, logout, deleteAcc, syncData }}>
+        <AuthContext.Provider value={{ user, setUser, userAddress, loading, logout, deleteAcc, syncData }}>
             {children}
         </AuthContext.Provider>
     );

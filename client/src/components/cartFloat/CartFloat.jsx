@@ -20,8 +20,8 @@ const CartFloat = () => {
     (sum, item) => sum + parseFloat(item.price) * item.quantity,
     0
   );
-  const shipping = 19.9;
-  const discount = 10.0;
+  const shipping = 0;
+  const discount = 0;
   const total = subtotal + shipping - discount;
 
   const location = useLocation();
@@ -318,24 +318,32 @@ const CartFloat = () => {
                     className="pt-3 mb-4"
                     style={{ borderTop: "1px solid rgba(139, 92, 246, 0.2)" }}
                   >
+                    {(shipping || discount)?(
                     <div className="d-flex justify-content-between mb-2">
                       <span style={{ color: "#d1d5db" }}>Subtotal</span>
                       <span className="fw-medium" style={{ color: "#a78bfa" }}>
                         R$ {subtotal.toFixed(2)}
                       </span>
                     </div>
+                    ): ""}
+                    {shipping ? (
                     <div className="d-flex justify-content-between mb-2">
                       <span style={{ color: "#d1d5db" }}>Frete</span>
                       <span className="fw-medium" style={{ color: "#a78bfa" }}>
                         R$ {shipping.toFixed(2)}
                       </span>
                     </div>
+                    ): ""}
+                    
+                    {discount? (
                     <div className="d-flex justify-content-between mb-2">
                       <span style={{ color: "#d1d5db" }}>Desconto</span>
                       <span className="fw-medium" style={{ color: "#34d399" }}>
                         - R$ {discount.toFixed(2)}
                       </span>
                     </div>
+                    ):""}
+                    
                     <div className="d-flex justify-content-between mt-3 fw-bold fs-5">
                       <span style={{ color: "#d1d5db" }}>Total</span>
                       <span style={{ color: "#34d399" }}>

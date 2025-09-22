@@ -8,6 +8,8 @@ export function useCart() {
 
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
+  const [shippingMethod, setShippingMethod] = useState([]);
+  const [discount, setDiscount] = useState(0);
 
   const addToCart = (product, quantity = 1) => {
     setCartItems((prevItems) => {
@@ -96,6 +98,8 @@ export function CartProvider({ children }) {
         return { valid: false, message: data.message || "Invalid coupon" };
       }
 
+      setDiscount( data.discount );
+
       return {
         valid: true,
         discountPercent: data.discount, // percentual de desconto
@@ -104,6 +108,30 @@ export function CartProvider({ children }) {
     } catch (error) {
       console.error("Error validating coupon:", error);
       return { valid: false, message: "Error validating coupon" };
+    }
+  };
+
+  // Valida cupom no backend
+  const getAllShippingMethods = async () => {
+    try {
+      const response = await fetch("http://localhost:4500/shipping/methods", {
+        method: "GET",
+      });
+
+      const data = await response.json();
+      console.log(data)
+
+      if (!response.ok) {
+        console.log("ERRO")
+        setShippingMethod([]);
+        return { error: true };
+      }
+
+      setShippingMethod( data );
+      return data
+    } catch (error) {
+      console.error(error);
+      return { error: true };
     }
   };
 
@@ -116,7 +144,10 @@ export function CartProvider({ children }) {
     clearCart,
     itemCount,
     validateCart,
-    validateCoupon
+    discount,
+    validateCoupon,
+    shippingMethod,
+    getAllShippingMethods
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

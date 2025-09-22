@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
 import {
@@ -22,10 +22,13 @@ const Cart = () => {
     removeItem: contextRemoveItem,
     updateQuantity: contextUpdateQuantity,
     clearCart: contextClearCart,
+    validateCoupon: contextValidateCoupon,
+    shippingMethod: shippingMethods,
+    getAllShippingMethods
   } = useCart();
 
   // ... (toda a lógica e os estados permanecem os mesmos) ...
-  const [shippingMethod, setShippingMethod] = useState("standard");
+  const [shippingMethodSelected, setshippingMethodSelected] = useState({});
   const [promoCode, setPromoCode] = useState("");
   const [promoMessage, setPromoMessage] = useState("");
   const [promoValid, setPromoValid] = useState(false);
@@ -45,6 +48,11 @@ const Cart = () => {
       progress: undefined,
       theme: "colored",
     });
+
+  useEffect( () => {
+    async function refreshMethodsShipping() {await getAllShippingMethods();}
+    refreshMethodsShipping();
+  }, []);
 
   const handleCheckout = () => {
     notifySuccess("Compra realizada com sucesso!");
@@ -81,39 +89,25 @@ const Cart = () => {
     contextUpdateQuantity(id, Math.max(1, newQuantity));
   };
 
-  const applyPromoCode = () => {
-    const promoCodes = {
-      SAVE10: { discount: 0.1, message: "10% discount applied!" },
-      FREESHIP: {
-        discount: 0,
-        message: "Free shipping applied!",
-        freeShipping: true,
-      },
-      WELCOME20: { discount: 0.2, message: "20% discount applied!" },
-    };
-
+  const applyPromoCode = async () => {
     if (promoCode.trim() === "") {
       setPromoMessage("Please enter a promo code");
       setPromoValid(false);
       return;
     }
 
-    const promo = promoCodes[promoCode.toUpperCase()];
-    if (promo) {
+    const promo = await contextValidateCoupon(promoCode.toUpperCase());
+    if (promo?.valid) {
       setPromoValid(true);
-      setPromoMessage(promo.message);
+      setPromoMessage(`Desconto aplicado com sucesso`);
       notifySuccess(promo.message);
 
-      if (promo.discount) {
-        setDiscount(subtotal * promo.discount);
-      }
-
-      if (promo.freeShipping) {
-        setShippingMethod("standard");
+      if (promo?.discountPercent) {
+        setDiscount(subtotal * promo.discountPercent);
       }
     } else {
       setPromoValid(false);
-      setPromoMessage("Invalid promo code");
+      setPromoMessage(`${promo?.message}`);
       setDiscount(0);
     }
   };

@@ -1,9 +1,12 @@
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+
 exports.getAllShippingMethods = async (req, res) => {
     try {
         const methods = await prisma.shippingMethod.findMany({
             where: { isActive: true }
         });
-        res.json(methods);
+        res.status(200).json(methods);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -16,7 +19,7 @@ exports.updateShippingMethod = async (req, res) => {
             where: { id: methodId },
             data: req.body
         });
-        res.json(method);
+        res.status(200).json(method);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

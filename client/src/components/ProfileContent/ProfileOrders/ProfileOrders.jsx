@@ -1,71 +1,93 @@
 import React from "react";
+import { useState } from "react";
+import { FaSearch } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+
+import { useAuth } from '../../../contexts/AuthContext';
+import { useCookies } from 'react-cookie';
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+
+import moment from 'moment';
+
+const notifySuccess = (Mensagem) => {
+  toast.success(Mensagem, {
+    position: "bottom-right",
+    autoClose: 1000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+  });
+}
+
+const notifyError = (message) => {
+  toast.error(message, {
+    position: "bottom-right",
+    autoClose: 1500,       // um pouco mais de tempo para ler o erro
+    hideProgressBar: false,
+    closeOnClick: true,    // permitir fechar ao clicar
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+  });
+}
 
 const ProfileOrders = () => {
-  const sampleOrders = [
-    {
-      id: "A7S8-D9F0-G1H2",
-      date: "2023-11-15",
-      status: "Delivered",
-      total: "99.80",
-      items: [
-        {
-          name: "The Legend of Zelda: Ocarina of Time",
-          image: "https://placehold.co/100x100/312e81/fff?text=Zelda",
-        },
-        {
-          name: "Super Mario 64",
-          image: "https://placehold.co/100x100/be185d/fff?text=Mario",
-        },
-      ],
-    },
-    {
-      id: "J3K4-L5M6-N7P8",
-      date: "2023-10-22",
-      status: "Shipped",
-      total: "44.90",
-      items: [
-        {
-          name: "Final Fantasy VII",
-          image: "https://placehold.co/100x100/6b21a8/fff?text=FF7",
-        },
-      ],
-    },
-    {
-      id: "Q9R0-S1T2-U3V4",
-      date: "2023-09-05",
-      status: "Processing",
-      total: "125.70",
-      items: [
-        {
-          name: "Chrono Trigger",
-          image: "https://placehold.co/100x100/10b981/fff?text=Chrono",
-        },
-        {
-          name: "Street Fighter II",
-          image: "https://placehold.co/100x100/3b82f6/fff?text=SFII",
-        },
-        {
-          name: "Donkey Kong Country",
-          image: "https://placehold.co/100x100/f59e0b/fff?text=DK",
-        },
-      ],
-    },
-  ];
+  const [orders, setOrders] = useState([]);
+  const { user, syncData } = useAuth();
+  const [cookies] = useCookies(['authToken']);
+
+  const navigate = useNavigate();
+
+  const fetchOrdesItems = async (zipCode) => {
+    try {
+      const response = await fetch(`http://localhost:4500/transactions/user/me`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${cookies.authToken}`,
+        }
+      });
+
+      if (!response.ok) {
+        console.error(`Problemas na requisição: ${response}`);
+        return;
+      }
+
+      const data = await response.json();
+      setOrders( data.orders );
+
+      console.log(data)
+    } catch (error) {
+      console.error(`Problemas na requisição: ${error}`);
+    }
+  };
+
+  // Bloqueia essa rota caso o usuário esteja deslogado
+  useEffect(() => {
+    if (!user) navigate('/login');
+
+    fetchOrdesItems();
+  }, [user, navigate]);
+
   return (
     <main className="profile-main-content">
       <h2 className="profile-orders-title">My Orders</h2>
 
       <div className="orders-list">
-        {sampleOrders.map((order) => (
+        {orders ? orders.map((order) => (
           <div key={order.id} className="order-card">
             <div className="order-card-header">
               <div className="order-info">
                 <span className="label">Order ID: </span>
-                <span>{order.id}</span>
+                <span>{order.externID}</span>
               </div>
               <div className="order-info">
                 <span className="label">Date: </span>
-                <span>{order.date}</span>
+                <span>{moment(order.createdAt).format("DD/MM/YYYY HH:mm:ss")}</span>
               </div>
               <div className={`status-badge status-${order.status}`}>
                 {order.status}
@@ -76,11 +98,11 @@ const ProfileOrders = () => {
                 {order.items.map((item, index) => (
                   <li key={index} className="order-item">
                     <img
-                      src={item.image}
-                      alt={item.name}
+                      src={item.game.imageUrl}
+                      alt={item.game.title}
                       className="order-item-image"
                     />
-                    <span className="order-item-name">{item.name}</span>
+                    <span className="order-item-name">{item.game.title}</span>
                   </li>
                 ))}
               </ul>
@@ -92,8 +114,9 @@ const ProfileOrders = () => {
               </button>
             </div>
           </div>
-        ))}
+        )) : ""}
       </div>
+      <ToastContainer />
     </main>
   );
 };

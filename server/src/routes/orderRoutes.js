@@ -5,9 +5,9 @@ const orderController = require("./../controllers/orderController");
 
 const router = Router();
 
-router.get("/transactions/", auth, adminOnly, orderController.getTransactions);
-router.get("/transactions/user/:id", auth, adminOnly, orderController.getTransactionsByUserID);
-router.get("/transactions/user/:id/:orderID", auth, adminOnly, orderController.getTransactionByUserID);
+// router.get("/transactions/", auth, adminOnly, orderController.getTransactions);
+// router.get("/transactions/user/:id", auth, adminOnly, orderController.getTransactionsByUserID);
+// router.get("/transactions/user/:id/:orderID", auth, adminOnly, orderController.getTransactionByUserID);
 router.get("/transactions/user/me", auth, clientOnly, orderController.getTransactionsByJWT);
 router.get("/transactions/user/me/:orderID", auth, clientOnly, orderController.getTransactionByJWT);
 

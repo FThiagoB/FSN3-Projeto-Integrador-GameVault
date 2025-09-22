@@ -329,6 +329,13 @@ exports.processCheckout = async (req, res) => {
 }
 
 exports.getTransactionsByJWT = async (req, res) => {
+    // Função para gerar externID
+    const generateExternID = (id) => {
+        let base36 = id.toString(36).toUpperCase();
+        base36 = base36.padStart(8, '0');
+        return base36.replace(/(\w{4})(\w{4})/, 'ORD$1-$2');
+    };
+
     try {
         const userID = parseInt(req.user.id);
         const { page = 1, limit = 10, status } = req.query;
@@ -361,6 +368,11 @@ exports.getTransactionsByJWT = async (req, res) => {
                         neighborhood: true, city: true, state: true,
                         zipCode: true
                     }
+                },
+                paymentMethod : {
+                    select: {
+                        type: true
+                    }
                 }
             }
         })
@@ -368,8 +380,21 @@ exports.getTransactionsByJWT = async (req, res) => {
         if (!orders || orders.length === 0)
             return res.status(404).json({ message: "Transactions not found" })
 
+        // Adiciona imageUrl aos games
+        const ordersWithImageUrl = orders.map(order => ({
+            ...order,
+            externID: generateExternID(order.id),
+            items: order.items.map(item => ({
+                ...item,
+                game: {
+                    ...item.game,
+                    imageUrl: `${req.protocol}://${req.get("host")}/uploads/games/${item.game.image}`
+                }
+            }))
+        }))
+
         res.status(200).json({
-            orders,
+            orders: ordersWithImageUrl,
             pagination: {
                 page: parseInt(page),
                 limit: parseInt(limit),

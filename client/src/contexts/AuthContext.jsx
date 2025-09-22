@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from "./CartContext";
 
 const AuthContext = createContext();
 
@@ -14,6 +15,8 @@ export const AuthProvider = ({ children }) => {
 
     const [loading, setLoading] = useState(true);
     const [refresh, setRefresh] = useState(true);
+
+    const { logoutClearInfo } = useCart();
 
     const updateAddressFromJSON = (response) => {
         setUserAddress({
@@ -57,6 +60,7 @@ export const AuthProvider = ({ children }) => {
             setUser(null);
             setUserAddress({});
             setUserPaymentMethod({});
+            logoutClearInfo();
         }
         catch (error) {
             console.error(error);

@@ -12,9 +12,20 @@ export function CartProvider({ children }) {
   const [shippingCost, setShippingCost] = useState(0)
   const [tax, setTax] = useState(0)
 
+  const [couponCode, setCouponCode] = useState("");
   const [shippingMethod, setShippingMethod] = useState({});
   const [shippingMethods, setShippingMethods] = useState([]);
 
+  const logoutClearInfo = () => {
+    setCartItems([])
+    setDiscount(0);
+    setShippingCost(0);
+    setTax(0);
+
+    setCouponCode("");
+    setShippingMethod({})
+    setShippingMethods([])
+  }
 
   // Função para calcular imposto com base na quantidade total de itens
   const calculateTax = () => {
@@ -121,6 +132,7 @@ export function CartProvider({ children }) {
         return { valid: false, message: data.message || "Invalid coupon" };
       }
 
+      setCouponCode( code );
       setDiscount(data.discount);
 
       return {
@@ -187,7 +199,9 @@ export function CartProvider({ children }) {
     getShippingMethods,
     selectShippingMethodById,
     shippingCost,
-    tax
+    tax,
+    couponCode,
+    logoutClearInfo
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

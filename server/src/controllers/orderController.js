@@ -156,17 +156,18 @@ exports.getCheckoutInfo = async (req, res) => {
 exports.processCheckout = async (req, res) => {
     try {
         if (!req.body) req.body = {};
-        const { shippingAddress, paymentMethod, shippingMethod, couponCode, items } = req.body;
+        const { shippingAddress, paymentMethod, shippingMethod, couponCode = "", items, tax = 0 } = req.body;
 
         const userID = parseInt(req.user.id);
         let addressID;
+        let subtotal = 0;
 
         // Validar dados de entrada
-        if (!shippingAddress || !paymentMethod || !shippingMethod)
+        if (!shippingAddress || !paymentMethod || !shippingMethod || !items)
             return res.status(400).json({ message: "Specify all required fields" });
 
-        if (shippingAddress && shippingAddress.newAddress) {
-            const { street, number, complemento, neighborhood, city, state, zipCode } = shippingAddress.newAddress;
+        if (shippingAddress) {
+            const { street, number, complemento, neighborhood, city, state, zipCode } = shippingAddress;
             if (!street || !number || !neighborhood || !city || !state || !zipCode)
                 return res.status(400).json({ message: "Invalid delivery address" });
         }
@@ -174,17 +175,16 @@ exports.processCheckout = async (req, res) => {
         if (!items || !Array.isArray(items) || items.length === 0)
             return res.status(400).json({ message: "Invalid product list" });
 
-
         // Criar transação para garantir atomicidade
         const result = await prisma.$transaction(async (prisma) => {
-            // Campos para um novo endereço foram passados
-            if (shippingAddress.newAddress) {
+            // Address - Usa os dados de endereço informados para procurar ou criar um novo endereço
+            if (shippingAddress) {
                 // Verifica se o endereço já está no banco
                 const existingAddress = await prisma.address.findFirst({
                     where: {
                         userID: userID,
-                        zipCode: shippingAddress.newAddress.zipCode,
-                        number: shippingAddress.newAddress.number
+                        zipCode: shippingAddress.zipCode,
+                        number: shippingAddress.number
                     }
                 });
 
@@ -196,13 +196,14 @@ exports.processCheckout = async (req, res) => {
                     const newAddress = await prisma.address.create({
                         data: {
                             userID: userID,
-                            ...shippingAddress.newAddress // Desconstroi o objeto
+                            ...shippingAddress // Desconstroi o objeto
                         }
                     });
 
                     addressID = newAddress.id;
                 }
             }
+            // Address: producra algum endereço válido do usuário
             else {
                 const existingAddress = await prisma.address.findFirst({
                     where: {
@@ -217,13 +218,20 @@ exports.processCheckout = async (req, res) => {
                 addressID = shippingAddress.id;
             }
 
+            // Address: producra se há o método de pagamento no banco
+            const registerPaymentMethod = await prisma.paymentMethod.create({ 
+                data: {
+                    userID: userID,
+                    ...paymentMethod
+                }
+            })
+
             // Calcular subtotal e validar itens
-            let subtotal = 0;
             const orderItems = [];
 
             for (const item of items) {
                 const game = await prisma.game.findUnique({
-                    where: { id: item.gameID },
+                    where: { id: item.id },
                     select: { id: true, title: true, price: true, stock: true }
                 });
 
@@ -246,12 +254,13 @@ exports.processCheckout = async (req, res) => {
 
             // --- Frete ---
             const selectedShipping = await prisma.shippingMethod.findUnique({
-                where: { id: shippingMethodID },
+                where: { id: shippingMethod.id },
             });
             if (!selectedShipping || !selectedShipping.isActive) {
                 throw new Error("Invalid shipping method");
             }
             const shippingCost = selectedShipping.price;
+            const shippingMethodID = selectedShipping.id;
 
             // --- Cupom ---
             let couponID = null;
@@ -277,7 +286,6 @@ exports.processCheckout = async (req, res) => {
             }
 
             // --- Imposto e total ---
-            const tax = subtotal * 0.1; // 10%
             const total = subtotal + shippingCost + tax - discount;
 
             // --- Pedido ---
@@ -285,7 +293,7 @@ exports.processCheckout = async (req, res) => {
                 data: {
                     userID,
                     shippingAddressID: addressID,
-                    paymentMethodID,
+                    paymentMethodID: registerPaymentMethod.id,
                     shippingMethodID,
                     couponID,
                     status: "pending",
@@ -301,10 +309,10 @@ exports.processCheckout = async (req, res) => {
                 },
             });
 
-            // Reduzir estoque dos jogos
+            // Reduz estoque dos jogos
             for (const item of items) {
                 await prisma.game.update({
-                    where: { id: item.gameID },
+                    where: { id: item.id },
                     data: { stock: { decrement: item.quantity } },
                 });
             }

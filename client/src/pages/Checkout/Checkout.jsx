@@ -22,13 +22,34 @@ import "./Checkout.css";
 import { useCookies } from 'react-cookie';
 import { useAuth } from '../../contexts/AuthContext';
 
+const formatCardNumber = (digits) => {
+  // Limita a 16 dígitos
+  const trimmed = digits.slice(0, 16);
+
+  // Agrupa em blocos de 4
+  return trimmed.replace(/(\d{4})(?=\d)/g, "$1 ");
+};
+
+const formatCardExpDate = (value) => {
+  // Remove tudo que não é número
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+
+  // Adiciona a barra após o mês
+  if (digits.length >= 3) {
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  } else if (digits.length >= 1) {
+    return digits;
+  }
+  return "";
+};
+
 const CheckoutPage = () => {
   const [cookies] = useCookies(['authToken']);
   const { user, userAddress, syncData, loading } = useAuth();
   const redirect = useNavigate();
   console.log(user)
   //contexto carrinho
-  const { clearCart: contextClearCart, discount } = useCart();
+  const { tax, shippingMethod, couponCode, clearCart: contextClearCart, discount, cartItems, removeItem, updateQuantity, tax: impostos, shippingCost: frete } = useCart();
 
   // Estados para pagamento
   const [cardNumber, setCardNumber] = useState("");
@@ -36,19 +57,37 @@ const CheckoutPage = () => {
   const [cvv, setCvv] = useState("");
   const [cardName, setCardName] = useState("");
   const [installments, setInstallments] = useState("1x sem juros");
-  const [useSavedPayment, setUseSavedPayment] = useState(user?.userPaymentMethod?.type);
 
   // Estados para endereço
   const [firstName, setFirstName] = useState("");
-  // const [lastName, setLastName] = useState(user?.name?.split(' ').slice(1).join(' ') || "");
   const [street, setStreet] = useState("");
   const [number, setNumber] = useState("");
-  const [neighborhood, setNeighborhood] = useState( "");
+  const [neighborhood, setNeighborhood] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zip, setZip] = useState("");
   const [complement, setComplement] = useState("");
   const [address, setAddress] = useState("");
+
+  // Estados para controlar inputs inválidos
+  const [invalidFields, setInvalidFields] = useState({
+    street: false,
+    number: false,
+    neighborhood: false,
+    city: false,
+    state: false,
+    zip: false,
+
+    cardNumber: false,
+    expDate: false,
+    cvv: false,
+    cardName: false,
+  });
+
+  // Se não tem item, redireciona
+  if (!cartItems.length) {
+    redirect("/");
+  }
 
   const refreshFields = () => {
     setFirstName(user?.name || "");
@@ -93,10 +132,6 @@ const CheckoutPage = () => {
     syncData();
   }, [])
 
-
-  // Acessar o carrinho do contexto
-  const { cartItems, removeItem, updateQuantity, tax: impostos, shippingCost: frete } = useCart();
-
   const subtotal = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
@@ -106,12 +141,37 @@ const CheckoutPage = () => {
   const total = subtotal + frete - desconto + impostos;
 
   const handleBuy = () => {
-    notifySuccess("Compra realizada com sucesso!");
-    contextClearCart();
-    setTimeout(() => {
-      redirect("/");
-    }, 2500);
+    // Verifica se há campos vazios
+    let newInvalidFields = {}
+    newInvalidFields.street = !street ? true : false;
+    newInvalidFields.number = !number ? true : false;
+    newInvalidFields.neighborhood = !neighborhood ? true : false;
+    newInvalidFields.city = !city ? true : false;
+    newInvalidFields.state = !state ? true : false;
+    newInvalidFields.zip = !zip ? true : false;
+
+    newInvalidFields.cardNumber = !cardNumber ? true : false;
+    newInvalidFields.expDate = !expDate ? true : false;
+    newInvalidFields.cvv = !cvv ? true : false;
+    newInvalidFields.cardName = !cardName ? true : false;
+
+    const hasInvalid = Object.values(newInvalidFields).some((value) => value === true);
+
+    if (hasInvalid) {
+      setInvalidFields(newInvalidFields)
+      notifyError("Preencha todos os campos.")
+      return;
+    };
+
+    // Verifica se há um método de envio selecionado
+    if (!shippingMethod) {
+      notifyError("Selecione um método de envio válido.")
+      return;
+    };
+
+    registerCheckout();
   };
+
   const notifySuccess = (Mensagem) =>
     toast.success(Mensagem, {
       position: "bottom-right",
@@ -123,6 +183,73 @@ const CheckoutPage = () => {
       progress: undefined,
       theme: "colored",
     });
+
+  const notifyError = (message) => {
+    toast.error(message, {
+      position: "bottom-right",
+      autoClose: 3000,       // um pouco mais de tempo para ler o erro
+      hideProgressBar: false,
+      closeOnClick: true,    // permitir fechar ao clicar
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  }
+
+  const registerCheckout = async () => {
+    const data = {
+      shippingAddress: {
+        street,
+        number,
+        neighborhood,
+        city,
+        state,
+        zipCode: zip,
+        complemento: complement
+      },
+      paymentMethod: {
+        type: "credit_card",
+        data: {
+          number: cardNumber,
+          expDate: expDate,
+          name: cardName,
+          cvv: cvv
+        }
+      },
+      items: cartItems,
+      shippingMethod,
+      couponCode,
+      tax,
+    };
+
+    try {
+      const response = await fetch(`http://localhost:4500/checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${cookies.authToken}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      // Verifica se houve algum problema
+      if (!response.ok) {
+        const { message } = await response.json();
+        throw new Error(message);
+      }
+
+      notifySuccess("Compra realizada com sucesso, acompanhe o seu pedido")
+      contextClearCart();
+      setTimeout(() => {
+        redirect("/");
+      }, 2500);
+    }
+    catch (error) {
+      console.error('Erro:', error);
+      alert(error);
+    }
+  };
 
   return (
     <div
@@ -291,7 +418,7 @@ const CheckoutPage = () => {
                       <Form.Label className="text-light">Rua</Form.Label>
                       <Form.Control
                         type="text"
-                        className="bg-gray-700 text-white border-secondary"
+                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.street ? "invalid" : "")}
                         placeholder="Rua são miguel"
                         value={street}
                         onChange={(e) => setStreet(e.target.value)}
@@ -308,7 +435,7 @@ const CheckoutPage = () => {
                       </Form.Label>
                       <Form.Control
                         type="text"
-                        className="bg-gray-700 text-white border-secondary"
+                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.number ? "invalid" : "")}
                         placeholder="10"
                         value={number}
                         onChange={(e) => setNumber(e.target.value.replace(/[^0-9.]/g, ''))}
@@ -321,7 +448,7 @@ const CheckoutPage = () => {
                       <Form.Label className="text-light">Bairro</Form.Label>
                       <Form.Control
                         type="text"
-                        className="bg-gray-700 text-white border-secondary"
+                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.neighborhood ? "invalid" : "")}
                         placeholder="Vila Lisboa"
                         value={neighborhood}
                         onChange={(e) => setNeighborhood(e.target.value)}
@@ -337,7 +464,7 @@ const CheckoutPage = () => {
                       <Form.Label className="text-light">Cidade</Form.Label>
                       <Form.Control
                         type="text"
-                        className="bg-gray-700 text-white border-secondary"
+                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.city ? "invalid" : "")}
                         placeholder="Sua cidade"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
@@ -349,7 +476,7 @@ const CheckoutPage = () => {
                     <Form.Group controlId="state">
                       <Form.Label className="text-light">Estado</Form.Label>
                       <Form.Select
-                        className="bg-gray-700 text-white border-secondary"
+                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.state ? "invalid" : "")}
                         value={state}
                         onChange={(e) => setState(e.target.value)}
                       >
@@ -373,7 +500,7 @@ const CheckoutPage = () => {
                       <Form.Label className="text-light">CEP</Form.Label>
                       <Form.Control
                         type="text"
-                        className="bg-gray-700 text-white border-secondary"
+                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.zip ? "invalid" : "")}
                         placeholder="00000-000"
                         value={zip}
                         onChange={(e) => setZip(e.target.value)}
@@ -412,10 +539,10 @@ const CheckoutPage = () => {
                   <div className="position-relative">
                     <Form.Control
                       type="text"
-                      className="bg-gray-700 text-white border-secondary"
+                      className={"bg-gray-700 text-white border-secondary " + (invalidFields.cardNumber ? "invalid" : "")}
                       placeholder="1234 5678 9012 3456"
-                      value={cardNumber}
-                      onChange={(e) => setCardNumber(e.target.value)}
+                      value={formatCardNumber(cardNumber)}
+                      onChange={(e) => { const digits = e.target.value.replace(/\D/g, ""); setCardNumber(digits) }}
                       required
                     />
                     <div className="position-absolute end-0 top-50 translate-middle-y me-3">
@@ -430,10 +557,10 @@ const CheckoutPage = () => {
                       <Form.Label className="text-light">Validade</Form.Label>
                       <Form.Control
                         type="text"
-                        className="bg-gray-700 text-white border-secondary"
+                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.expDate ? "invalid" : "")}
                         placeholder="01/33"
-                        value={expDate}
-                        onChange={(e) => setExpDate(e.target.value)}
+                        value={formatCardExpDate(expDate)}
+                        onChange={(e) => { const digits = e.target.value.replace(/\D/g, ""); setExpDate(digits) }}
                         required
                       />
                     </Form.Group>
@@ -444,10 +571,10 @@ const CheckoutPage = () => {
                       <div className="position-relative">
                         <Form.Control
                           type="text"
-                          className="bg-gray-700 text-white border-secondary"
+                          className={"bg-gray-700 text-white border-secondary " + (invalidFields.cvv ? "invalid" : "")}
                           placeholder="123"
                           value={cvv}
-                          onChange={(e) => setCvv(e.target.value)}
+                          onChange={(e) => { const digits = e.target.value.replace(/\D/g, "").slice(0, 4); setCvv(digits) }}
                           required
                         />
                         <div className="position-absolute end-0 top-50 translate-middle-y me-3">
@@ -469,7 +596,7 @@ const CheckoutPage = () => {
                       </Form.Label>
                       <Form.Control
                         type="text"
-                        className="bg-gray-700 text-white border-secondary"
+                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.cardName ? "invalid" : "")}
                         placeholder="John Doe"
                         value={cardName}
                         onChange={(e) => setCardName(e.target.value)}
@@ -506,14 +633,14 @@ const CheckoutPage = () => {
                   <span className="text-light">Frete:</span>
                   <span className="text-light">R$ {frete.toFixed(2)}</span>
                 </div>
-                {desconto?(
-                <div className="d-flex justify-content-between mb-2">
-                  <span className="text-light">Desconto:</span>
-                  <span className="text-success">
-                    - R$ {desconto.toFixed(2)}
-                  </span>
-                </div>
-                ):""}
+                {desconto ? (
+                  <div className="d-flex justify-content-between mb-2">
+                    <span className="text-light">Desconto:</span>
+                    <span className="text-success">
+                      - R$ {desconto.toFixed(2)}
+                    </span>
+                  </div>
+                ) : ""}
                 <div className="d-flex justify-content-between mb-4">
                   <span className="text-light">Impostos:</span>
                   <span className="text-light">R$ {impostos.toFixed(2)}</span>

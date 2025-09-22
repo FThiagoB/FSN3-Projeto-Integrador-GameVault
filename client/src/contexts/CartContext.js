@@ -48,6 +48,66 @@ export function CartProvider({ children }) {
     setCartItems([]);
   };
 
+  // Valida os itens do carrinho no backend
+  const validateCart = async () => {
+    try {
+      const payload = {
+        items: cartItems.map((item) => ({
+          gameID: item.id,
+          quantity: item.quantity,
+        })),
+      };
+
+      const response = await fetch("http://localhost:4500/cart/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          valid: false,
+          errors: data.errors || [{ message: data.message || "Validation failed" }],
+        };
+      }
+
+      // Exemplo de retorno esperado: { valid, items, errors, subtotal }
+      return data;
+    } catch (error) {
+      console.error("Error validating cart:", error);
+      return { valid: false, errors: [{ message: "Server error" }] };
+    }
+  };
+
+  // Valida cupom no backend
+  const validateCoupon = async (code) => {
+    try {
+      const response = await fetch("http://localhost:4500/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { valid: false, message: data.message || "Invalid coupon" };
+      }
+
+      return {
+        valid: true,
+        discountPercent: data.discount, // percentual de desconto
+        expiresAt: data.expiresAt,
+      };
+    } catch (error) {
+      console.error("Error validating coupon:", error);
+      return { valid: false, message: "Error validating coupon" };
+    }
+  };
+
+
   const value = {
     cartItems,
     addToCart,
@@ -55,6 +115,8 @@ export function CartProvider({ children }) {
     removeItem,
     clearCart,
     itemCount,
+    validateCart,
+    validateCoupon
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

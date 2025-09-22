@@ -35,22 +35,48 @@ const CheckoutPage = () => {
   const [cvv, setCvv] = useState("");
   const [cardName, setCardName] = useState("");
   const [installments, setInstallments] = useState("1x sem juros");
+  const [useSavedPayment, setUseSavedPayment] = useState(user?.userPaymentMethod?.type);
 
   // Estados para endereço
-  const [firstName, setFirstName] = useState(user?.name);
-  const [address, setAddress] = useState(`${userAddress.street}, ${userAddress.number}, ${userAddress.neighborhood} (${userAddress.state})`);
-  const [street, setStreet] = useState(userAddress.street);
-  const [number, setNumber] = useState(userAddress.number);
-  const [neighborhood, setNeighborhood] = useState(userAddress.neighborhood);
-  const [city, setCity] = useState(userAddress.city);
-  const [state, setState] = useState(userAddress.state);
-  const [zip, setZip] = useState(userAddress.zipCode);
-  const [complement, setComplement] = useState(userAddress.complemento);
+  const [firstName, setFirstName] = useState("");
+  // const [lastName, setLastName] = useState(user?.name?.split(' ').slice(1).join(' ') || "");
+  const [street, setStreet] = useState("");
+  const [number, setNumber] = useState("");
+  const [neighborhood, setNeighborhood] = useState( "");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zip, setZip] = useState("");
+  const [complement, setComplement] = useState("");
+  const [address, setAddress] = useState("");
 
-  const [lastName, setLastName] = useState("Doe");
+  const refreshFields = () => {
+    setFirstName(user?.name || "");
+    setStreet(userAddress.street || "");
+    setNumber(userAddress.number || "");
+    setNeighborhood(userAddress.neighborhood || "");
+    setCity(userAddress.city || "");
+    setState(userAddress.state || "");
+    setZip(userAddress.zipCode || "");
+    setComplement(userAddress.complemento || "");
+    setAddress(
+      userAddress.street ?
+        `${userAddress.street}, ${userAddress.number}, ${userAddress.neighborhood} (${userAddress.state})` :
+        ""
+    );
 
-  // Acessar o carrinho do contexto
-  const { cartItems, removeItem, updateQuantity } = useCart();
+    if (
+      user?.paymentMethod &&
+      user.paymentMethod.type === "credit_card" &&
+      user.paymentMethod.data
+    ) {
+      const { number, expDate, name } = user.paymentMethod.data;
+
+      setCardNumber(number || "");
+      setExpDate(expDate || "");
+      setCardName(name || "");
+      setCvv(""); // nunca armazenado, sempre vazio
+    }
+  }
 
   // Bloqueia essa rota caso o usuário esteja deslogado
   useEffect(() => {
@@ -58,22 +84,27 @@ const CheckoutPage = () => {
 
     // Se não for um perfil de usuário redireciona
     if (user?.role !== "user" && !loading) redirect("/profile");
-  }, [user, redirect]);
+    refreshFields();
+  }, [user, redirect, loading]);
 
   // Sincroniza as informações de endereço do usuário
   useEffect(() => {
     syncData();
   }, [])
 
-  // Calcular totais
+
+  // Acessar o carrinho do contexto
+  const { cartItems, removeItem, updateQuantity } = useCart();
+
   const subtotal = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
 
-  const frete = 19.9;
-  const desconto = 50.0;
-  const impostos = 35.82;
+  const frete = 0;
+  const desconto = 0;
+  const impostos = 0;
+
   const total = subtotal + frete - desconto + impostos;
 
   const handleBuy = () => {
@@ -491,12 +522,14 @@ const CheckoutPage = () => {
                   <span className="text-light">Frete:</span>
                   <span className="text-light">R$ {frete.toFixed(2)}</span>
                 </div>
+                {desconto?(
                 <div className="d-flex justify-content-between mb-2">
                   <span className="text-light">Desconto:</span>
                   <span className="text-success">
                     - R$ {desconto.toFixed(2)}
                   </span>
                 </div>
+                ):""}
                 <div className="d-flex justify-content-between mb-4">
                   <span className="text-light">Impostos:</span>
                   <span className="text-light">R$ {impostos.toFixed(2)}</span>

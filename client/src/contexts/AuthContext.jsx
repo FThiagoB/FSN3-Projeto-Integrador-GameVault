@@ -10,6 +10,8 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [userAddress, setUserAddress] = useState({});
+    const [userPaymentMethod, setUserPaymentMethod] = useState({});
+
     const [loading, setLoading] = useState(true);
     const [refresh, setRefresh] = useState(true);
 
@@ -22,7 +24,17 @@ export const AuthProvider = ({ children }) => {
             neighborhood: response?.neighborhood || "",
             city: response?.city || "",
             state: response?.state || "",
-            zipCode: response?.zipCode || ""
+            zipCode: response?.zipCode || "",
+            isDefaultShipping: response?.isDefaultShipping || false
+        });
+    };
+
+    const updatePaymentMethodFromJSON = (response) => {
+        setUserPaymentMethod({
+            paymentMethodID: response?.id || undefined,
+            type: response?.type || "",
+            name: response?.name || "",
+            data: response?.data || {}
         });
     };
 
@@ -43,6 +55,8 @@ export const AuthProvider = ({ children }) => {
 
             removeCookie('authToken', { path: '/' });
             setUser(null);
+            setUserAddress({});
+            setUserPaymentMethod({});
         }
         catch (error) {
             console.error(error);
@@ -66,6 +80,8 @@ export const AuthProvider = ({ children }) => {
 
             removeCookie('authToken', { path: '/' });
             setUser(null);
+            setUserAddress({});
+            setUserPaymentMethod({});
         }
         catch (error) {
             console.error(error);
@@ -76,94 +92,63 @@ export const AuthProvider = ({ children }) => {
         setRefresh(!refresh);
     }
 
+    // Função para buscar informações do usuário
+    const fetchUserData = async () => {
+        setLoading(true);
+
+        if (!cookies.authToken) {
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:4500/user`, {
+                headers: {
+                    Authorization: `Bearer ${cookies.authToken}`,
+                },
+            });
+
+            const userData = await response.json();
+
+            if (!response.ok) {
+                throw new Error(userData.message);
+            }
+
+            setUser(userData);
+            
+            // Atualiza endereço se disponível
+            if (userData.address) {
+                updateAddressFromJSON(userData.address);
+            }
+            
+            // Atualiza método de pagamento se disponível
+            if (userData.paymentMethod) {
+                updatePaymentMethodFromJSON(userData.paymentMethod);
+            }
+            
+            // Verifica flags para informar se o usuário tem endereço e método de pagamento
+            if (userData.hasAddress === false) {
+                setUserAddress({});
+            }
+            
+            if (userData.hasPaymentMethod === false) {
+                setUserPaymentMethod({});
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        // Função para buscar informações do usuário
-        const fetchUser = async () => {
-            setLoading(true);
-
-            if (!cookies.authToken) {
-                setLoading(false);
-                return;
-            }
-
-            // Busca informações do usuário
-            try {
-                const response = await fetch(`http://localhost:4500/user`, {
-                    headers: {
-                        Authorization: `Bearer ${cookies.authToken}`,
-                    },
-                });
-
-                const userData = await response.json();
-
-                if (!response.ok)
-                    throw new Error(userData.message);
-
-                setUser(userData);
-            }
-            catch (error) {
-                console.error(error);
-            }
-            finally {
-                setLoading(false);
-            }
-
-            // Busca informações sobre endereços
-            try {
-                const response = await fetch("http://localhost:4500/addresses", {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${cookies.authToken}`,
-                    }
-                });
-
-                const result = await response.json();
-                updateAddressFromJSON( result?result[0]:{} );
-                console.log({result})
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        fetchUser();
-    }, [refresh]);
-
-    // Busca dados do usuário nas mudanças de cookie
-    useEffect(() => {
-        // Função para buscar o usuário
-        const fetchUser = async () => {
-            if (!cookies.authToken) {
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const response = await fetch(`http://localhost:4500/user`, {
-                    headers: {
-                        Authorization: `Bearer ${cookies.authToken}`,
-                    },
-                });
-
-                const userData = await response.json();
-
-                if (!response.ok)
-                    throw new Error(userData.message);
-
-                setUser(userData);
-            }
-            catch (error) {
-                console.error(error);
-            }
-            finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUser();
-    }, [cookies.authToken]);
+        fetchUserData();
+    }, [refresh, cookies.authToken]);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, userAddress, loading, logout, deleteAcc, syncData }}>
+        <AuthContext.Provider value={{ user, setUser, userAddress, userPaymentMethod, loading, logout, deleteAcc, syncData }}>
             {children}
         </AuthContext.Provider>
     );

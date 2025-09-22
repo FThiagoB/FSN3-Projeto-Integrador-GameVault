@@ -155,7 +155,7 @@ const ProfileContent = () => {
     if (formData.cpf && formData.cpf !== user?.CPF) data.append("cpf", formData.cpf);
     if (formData.phone && formData.phone !== user?.phone) data.append("phone", formData.phone);
     if (file) data.append("file", file);
-
+    console.log(formData)
     try {
       const response = await fetch("http://localhost:4500/user", {
         method: "PUT",
@@ -222,7 +222,7 @@ const ProfileContent = () => {
 
           <div className="profile-form-group">
             <label htmlFor="email">Email Address</label>
-            <input type="email" id="email" defaultValue="" value={formData.email} onChange={handleChange} disabled />
+            <input type="email" id="email" defaultValue="" value={formData.email} disabled />
           </div>
         </div>
 

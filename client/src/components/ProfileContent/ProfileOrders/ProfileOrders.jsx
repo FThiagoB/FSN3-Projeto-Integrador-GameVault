@@ -7,8 +7,10 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import OrderDetailsModal from './OrderDetailsModal';
 
 import moment from 'moment';
+import "./OrderDetailsModal.css";
 
 const notifySuccess = (Mensagem) => {
   toast.success(Mensagem, {
@@ -41,7 +43,20 @@ const ProfileOrders = () => {
   const { user, syncData } = useAuth();
   const [cookies] = useCookies(['authToken']);
 
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
   const navigate = useNavigate();
+
+  const handleViewDetails = (order) => {
+    setSelectedOrder(order);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedOrder(null);
+  };
 
   const fetchOrdesItems = async (zipCode) => {
     try {
@@ -102,14 +117,14 @@ const ProfileOrders = () => {
                       alt={item.game.title}
                       className="order-item-image"
                     />
-                    <span className="order-item-name">{item.game.title}</span>
+                    <span className="order-item-name">{item.game.title} (x{item.quantity})</span>
                   </li>
                 ))}
               </ul>
             </div>
             <div className="order-card-footer">
               <span className="order-total">Total: R$ {order.total}</span>
-              <button className="profile-btn profile-btn-secondary">
+              <button className="profile-btn profile-btn-secondary" onClick={() => handleViewDetails(order)}>
                 View Details
               </button>
             </div>
@@ -117,6 +132,17 @@ const ProfileOrders = () => {
         )) : ""}
       </div>
       <ToastContainer />
+      {/* Modal */}
+      <OrderDetailsModal 
+        show={showModal}
+        onHide={handleCloseModal}
+        order={selectedOrder}
+        style={{ zIndex: 3080 }}
+        className="custom-order-modal"
+        backdropClassName="custom-order-modal-backdrop"
+        dialogClassName="custom-order-modal-dialog"
+        centered
+      />
     </main>
   );
 };

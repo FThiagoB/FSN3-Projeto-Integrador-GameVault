@@ -5,6 +5,33 @@ import { useCookies } from 'react-cookie';
 import { useNavigate } from "react-router-dom";
 
 import { FaSearch } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+
+const notifySuccess = (Mensagem) => {
+	toast.success(Mensagem, {
+		position: "bottom-right",
+		autoClose: 1000,
+		hideProgressBar: false,
+		closeOnClick: false,
+		pauseOnHover: true,
+		draggable: true,
+		progress: undefined,
+		theme: "colored",
+	});
+}
+
+const notifyError = (message) => {
+	toast.error(message, {
+		position: "bottom-right",
+		autoClose: 1500,       // um pouco mais de tempo para ler o erro
+		hideProgressBar: false,
+		closeOnClick: true,    // permitir fechar ao clicar
+		pauseOnHover: true,
+		draggable: true,
+		progress: undefined,
+		theme: "colored",
+	});
+}
 
 const ProfileAddress = () => {
   const { user, syncData } = useAuth();
@@ -109,12 +136,12 @@ const ProfileAddress = () => {
       const result = await response.json();
       
       if (response.ok) 
-        alert("Dados atualizados com sucesso!")
+        notifySuccess("Dados atualizados com sucesso!")
       else 
-        alert("Erro: " + result.message);
+        notifyError(`Problemas ao completar a operação`);
       
     } catch (error) {
-      console.error("Erro na requisição:", error);
+      notifyError(`${error}`);
     }
   }
 
@@ -132,12 +159,12 @@ const ProfileAddress = () => {
       const result = await response.json();
       
       if (response.ok) 
-        alert("Dados atualizados com sucesso!")
+        notifySuccess("Dados atualizados com sucesso!")
       else 
-        alert("Erro: " + result.message);
+        notifyError(`Erro: ${result.message}`);
       
     } catch (error) {
-      console.error("Erro na requisição:", error);
+      notifyError(`${error}`);
     }
   }
 
@@ -220,6 +247,7 @@ const ProfileAddress = () => {
           </button>
         </div>
       </form>
+      <ToastContainer/>
     </main>
   );
 };

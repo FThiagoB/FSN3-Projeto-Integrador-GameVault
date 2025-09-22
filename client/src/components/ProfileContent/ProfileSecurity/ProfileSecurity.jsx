@@ -3,6 +3,33 @@ import React, { useEffect, useState } from "react";
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { ToastContainer, toast } from "react-toastify";
+
+const notifySuccess = (Mensagem) => {
+	toast.success(Mensagem, {
+		position: "bottom-right",
+		autoClose: 1000,
+		hideProgressBar: false,
+		closeOnClick: false,
+		pauseOnHover: true,
+		draggable: true,
+		progress: undefined,
+		theme: "colored",
+	});
+}
+
+const notifyError = (message) => {
+	toast.error(message, {
+		position: "bottom-right",
+		autoClose: 1500,       // um pouco mais de tempo para ler o erro
+		hideProgressBar: false,
+		closeOnClick: true,    // permitir fechar ao clicar
+		pauseOnHover: true,
+		draggable: true,
+		progress: undefined,
+		theme: "colored",
+	});
+}
 
 const ProfileSecurity = () => {
   const { user, deleteAcc } = useAuth();
@@ -60,12 +87,12 @@ const ProfileSecurity = () => {
         throw new Error( message );
       }
 
-      alert("Email alterado com sucesso.");
+      notifySuccess("Email alterado com sucesso.");
       setEmailData({newEmail: "", confirmPassword: ""})
     }
     catch( error ){
       console.error('Erro:', error);
-      alert( error );
+      notifyError(`${error}`);
     }
   }
 
@@ -92,12 +119,12 @@ const ProfileSecurity = () => {
         throw new Error( message );
       }
 
-      alert("Senha alterada com sucesso.");
+      notifySuccess("Senha alterada com sucesso.");
       setPasswordData({currentPassword: "",newPassword: "",confirmPassword: ""})
     }
     catch( error ){
       console.error('Erro:', error);
-      alert( error );
+      notifyError(`${error}`);
     }
   }
 
@@ -109,7 +136,7 @@ const ProfileSecurity = () => {
       return;
 
     if(passwordData.newPassword !== passwordData.confirmPassword){
-      alert("The passwords are different");
+      notifyError("The passwords are different");
       return;
     }
 
@@ -226,10 +253,11 @@ const ProfileSecurity = () => {
             certain. All your data, orders, and personal information will be
             permanently removed.
           </p>
-          <button type="button" className="profile-btn profile-btn-danger" onClick={async () => {await deleteAcc(); alert("Usuário deletado com sucesso.");}}>
+          <button type="button" className="profile-btn profile-btn-danger" onClick={async () => {await deleteAcc(); notifyError("Usuário deletado com sucesso.");}}>
             Delete My Account
           </button>
         </div>
+        <ToastContainer/>
       </main>
     </>
   );

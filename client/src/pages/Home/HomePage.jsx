@@ -182,6 +182,7 @@ Ver Ofertas
       <ProductGrid />
       <ButtonRandomizer />
       <Newsletter />
+      <ToastContainer/>
     </section>
   );
 };

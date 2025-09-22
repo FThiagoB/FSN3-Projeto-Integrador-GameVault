@@ -240,14 +240,17 @@ const CheckoutPage = () => {
       }
 
       notifySuccess("Compra realizada com sucesso, acompanhe o seu pedido")
-      contextClearCart();
+      
       setTimeout(() => {
         redirect("/");
+        contextClearCart();
       }, 2500);
+
+      
     }
     catch (error) {
       console.error('Erro:', error);
-      alert(error);
+      notifyError(`${error}`);
     }
   };
 

@@ -66,10 +66,19 @@ const paymentMethods = [
     {
         type: 'credit_card',
         data: {
-            lastFour: '1234',
+            cvv: '1234',
             brand: 'Visa',
-            holderName: 'Juliana Mendes',
-            expirationDate: '12/25'
+            name: 'Juliana Mendes',
+            expDate: '12/25'
+        }
+    },
+    {
+        type: 'credit_card',
+        data: {
+            cvv: '1234',
+            brand: 'Visa',
+            name: 'Juliana Mendes',
+            expDate: '12/25'
         }
     },
 ];
@@ -85,6 +94,8 @@ async function createAdmin() {
                 role: "admin"
             }
         });
+
+        console.log("Admin created successfully");
     }
     catch (error) {
         console.error(`createAdmin() error : ${error.message}`)
@@ -98,16 +109,16 @@ async function createSellers() {
             data: [
                 {
                     id: 1,
-                    CPF: "12345678901",
+                    CPF: "86150879038",
                     name: "Carlos Silva",
                     phone: "11999990001",
                     password: await hashPassword("senha1234"),
-                    email: "vendedor@gmail.com",
+                    email: "carlos.silva2025@gmail.com",
                     role: "seller"
                 },
                 {
                     id: 2,
-                    CPF: "23456789012",
+                    CPF: "42507690038",
                     name: "Fernanda Souza",
                     phone: "11999990002",
                     password: await hashPassword("fernanda2025"),
@@ -116,7 +127,7 @@ async function createSellers() {
                 },
                 {
                     id: 3,
-                    CPF: "34567890123",
+                    CPF: "68907241007",
                     name: "João Oliveira",
                     phone: "11999990003",
                     password: await hashPassword("JoãoOliveira"),
@@ -125,7 +136,7 @@ async function createSellers() {
                 },
                 {
                     id: 4,
-                    CPF: "45678901234",
+                    CPF: "20574062025",
                     name: "Mariana Costa",
                     phone: "11999990004",
                     password: await hashPassword("Mariana2025"),
@@ -134,7 +145,7 @@ async function createSellers() {
                 },
                 {
                     id: 5,
-                    CPF: "56789012345",
+                    CPF: "73441420071",
                     name: "Rafael Lima",
                     phone: "11999990005",
                     password: await hashPassword("R@f@3l2025"),
@@ -143,7 +154,7 @@ async function createSellers() {
                 },
                 {
                     id: 6,
-                    CPF: "67890123456",
+                    CPF: "64851454007",
                     name: "Aline Martins",
                     phone: "11999990006",
                     password: await hashPassword("@lin3.2025"),
@@ -152,7 +163,7 @@ async function createSellers() {
                 },
                 {
                     id: 7,
-                    CPF: "78901234567",
+                    CPF: "63144994022",
                     name: "Bruno Rocha",
                     phone: "11999990007",
                     password: await hashPassword("sEnHa123"),
@@ -161,7 +172,7 @@ async function createSellers() {
                 },
                 {
                     id: 8,
-                    CPF: "89012345678",
+                    CPF: "16075408002",
                     name: "Patrícia Almeida",
                     phone: "11999990008",
                     password: await hashPassword("S1E2N3H4A"),
@@ -170,24 +181,26 @@ async function createSellers() {
                 },
                 {
                     id: 9,
-                    CPF: "90123456789",
+                    CPF: "62262810060",
                     name: "Lucas Ferreira",
-                    phone: "11999990009",
+                    phone: "987654321",
                     password: await hashPassword("LucasFerreiraVendedor"),
-                    email: "lucas.ferreira@example.com",
+                    email: "vendedor@example.com",
                     role: "seller"
                 },
                 {
                     id: 10,
-                    CPF: "01234567890",
+                    CPF: "63904086090",
                     name: "Juliana Mendes",
-                    phone: "11999990010",
+                    phone: "1121234567",
                     password: await hashPassword("senha1234"),
                     email: "usuario@gmail.com",
                     role: "user"
                 }
             ]
         });
+
+        console.log("Users created successfully");
     }
     catch (error) {
         console.error(`createSellers() error : ${error.message}`)
@@ -301,6 +314,8 @@ async function createAddresses() {
                 }
             ]
         });
+
+        console.log("Addresses created successfully");
     }
     catch (error) {
         console.error(`createAddress() error : ${error.message}`)
@@ -335,14 +350,21 @@ async function createCoupons() {
 
 async function createPaymentMethods() {
     try {
-        for (const method of paymentMethods) {
-            await prisma.paymentMethod.create({
-                data: {
-                    ...method,
-                    userID: 10 // Associando ao usuário Juliana Mendes
-                }
-            });
-        }
+        // Associado ao usuário Juliana Mendes
+        await prisma.paymentMethod.create({
+            data: {
+                ...paymentMethods[0],
+                userID: 10 
+            }
+        });
+
+        // Associado com Lucas Ferreira
+        await prisma.paymentMethod.create({
+            data: {
+                ...paymentMethods[1],
+                userID: 9
+            }
+        });
         
         console.log("Payment methods created successfully");
     } catch (error) {

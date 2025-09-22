@@ -35,6 +35,29 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+    // Função para apagar a conta
+    const deleteAcc = async () => {
+        try {
+            const response = await fetch(`http://localhost:4500/user`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${cookies.authToken}`,
+                },
+            });
+
+            if (!response.ok) {
+                const { message } = await response.json();
+                throw new Error(message);
+            };
+
+            removeCookie('authToken', { path: '/' });
+            setUser(null);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
     const syncData = async () => {
         console.log("chamou");
         setRefresh( !refresh );
@@ -109,7 +132,7 @@ export const AuthProvider = ({ children }) => {
     }, [cookies.authToken]);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, loading, logout, syncData }}>
+        <AuthContext.Provider value={{ user, setUser, loading, logout, deleteAcc, syncData }}>
             {children}
         </AuthContext.Provider>
     );

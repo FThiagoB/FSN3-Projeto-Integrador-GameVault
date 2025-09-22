@@ -54,12 +54,12 @@ const Sidebar = ({ isExpanded, onToggle }) => {
   ];
   
   // Páginas para os compradores ou usuários deslocados
-  if(!user || user.role === "client"){
+  if(!user || user.role === "user"){
     menuItems.splice(1, 0, {icon: <FaBoxOpen size={22} />, text: "Produtos", to: "/produtos"})
     menuItems.splice(4, 0, {icon: <FaShoppingCart size={22} />, text: "Carrinho", to: "/cart"})
   }
 
-  if(user && !user.role !== "client"){
+  if(user && !user.role !== "user"){
     // Páginas comuns ao admin e o seller
     
     // Páginas do admin

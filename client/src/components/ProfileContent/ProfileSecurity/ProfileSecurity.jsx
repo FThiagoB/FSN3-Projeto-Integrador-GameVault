@@ -1,6 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+import { useCookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const ProfileSecurity = () => {
+  const { user, deleteAcc } = useAuth();
+  const [cookies] = useCookies(['authToken']);
+  const navigate = useNavigate();
+
+  // Bloqueia essa rota caso o usuário esteja deslogado
+  useEffect(() => {
+    if (!user) navigate('/login');
+  }, [user, navigate]);
+
   // Estados para gerenciar os formulários de forma independente
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -24,6 +37,103 @@ const ProfileSecurity = () => {
     setEmailData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const callUpdateEmail = async () => {
+    const data = {
+      current_password: emailData.confirmPassword,
+      new_email: emailData.newEmail
+    };  
+
+    try{
+      // Realiza a requisição pro backend passando email e senha
+      const response = await fetch(`http://localhost:4500/user/update/email`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${cookies.authToken}`,
+        },
+        body: JSON.stringify( data ),
+      });
+
+      // Verifica se houve algum problema
+      if (!response.ok) {
+        const {message} = await response.json();
+        throw new Error( message );
+      }
+
+      alert("Email alterado com sucesso.");
+      setEmailData({newEmail: "", confirmPassword: ""})
+    }
+    catch( error ){
+      console.error('Erro:', error);
+      alert( error );
+    }
+  }
+
+  const callUpdatePassword = async () => {
+    const data = {
+      current_password: passwordData.currentPassword,
+      new_password: passwordData.newPassword
+    };  
+
+    try{
+      // Realiza a requisição pro backend passando email e senha
+      const response = await fetch(`http://localhost:4500/user/update/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${cookies.authToken}`,
+        },
+        body: JSON.stringify( data ),
+      });
+
+      // Verifica se houve algum problema
+      if (!response.ok) {
+        const {message} = await response.json();
+        throw new Error( message );
+      }
+
+      alert("Senha alterada com sucesso.");
+      setPasswordData({currentPassword: "",newPassword: "",confirmPassword: ""})
+    }
+    catch( error ){
+      console.error('Erro:', error);
+      alert( error );
+    }
+  }
+
+  const onClickChangePassword = async () => {
+    if(!passwordData.newPassword || !passwordData.confirmPassword || !passwordData.currentPassword )
+      return;
+
+    if( (passwordData.currentPassword !== passwordData.newPassword) ||  (passwordData.currentPassword !== passwordData.confirmPassword) )
+      return;
+
+    if(passwordData.newPassword !== passwordData.confirmPassword){
+      alert("The passwords are different");
+      return;
+    }
+
+    await callUpdatePassword();
+  };
+
+  const onClickChangeEmail = async () => {
+    const validaEmail = (email) => {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return regex.test(email);
+    }
+
+    // Existem campos faltantes
+    if(!emailData.confirmPassword || !emailData.newEmail)
+      return;
+
+    // Email inválido
+    if( !validaEmail(emailData.newEmail) ){
+      return;
+    }
+
+    await callUpdateEmail();
+  };
+
   return (
     <>
       <main className="profile-main-content">
@@ -40,6 +150,7 @@ const ProfileSecurity = () => {
               name="currentPassword"
               value={passwordData.currentPassword}
               onChange={handlePasswordChange}
+              autoComplete="off"
             />
           </div>
           <div className="profile-form-group">
@@ -50,6 +161,8 @@ const ProfileSecurity = () => {
               name="newPassword"
               value={passwordData.newPassword}
               onChange={handlePasswordChange}
+              minLength={4}
+              autoComplete="off"
             />
           </div>
           <div className="profile-form-group">
@@ -60,10 +173,12 @@ const ProfileSecurity = () => {
               name="confirmPassword"
               value={passwordData.confirmPassword}
               onChange={handlePasswordChange}
+              minLength={4}
+              autoComplete="off"
             />
           </div>
           <div className="profile-form-actions">
-            <button type="button" className="profile-btn profile-btn-primary">
+            <button type="button" className="profile-btn profile-btn-primary" onClick={onClickChangePassword}>
               Update Password
             </button>
           </div>
@@ -80,6 +195,7 @@ const ProfileSecurity = () => {
               name="newEmail"
               value={emailData.newEmail}
               onChange={handleEmailChange}
+              autoComplete="off"
             />
           </div>
           <div className="profile-form-group">
@@ -92,10 +208,11 @@ const ProfileSecurity = () => {
               name="confirmPassword"
               value={emailData.confirmPassword}
               onChange={handleEmailChange}
+              autoComplete="off"
             />
           </div>
           <div className="profile-form-actions">
-            <button type="button" className="profile-btn profile-btn-primary">
+            <button type="button" className="profile-btn profile-btn-primary" onClick={onClickChangeEmail}>
               Update Email
             </button>
           </div>
@@ -109,7 +226,7 @@ const ProfileSecurity = () => {
             certain. All your data, orders, and personal information will be
             permanently removed.
           </p>
-          <button type="button" className="profile-btn profile-btn-danger">
+          <button type="button" className="profile-btn profile-btn-danger" onClick={async () => {await deleteAcc(); alert("Usuário deletado com sucesso.");}}>
             Delete My Account
           </button>
         </div>

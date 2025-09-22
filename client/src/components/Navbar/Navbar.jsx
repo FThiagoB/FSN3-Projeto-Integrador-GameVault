@@ -60,7 +60,7 @@ const Navbar = () => {
       </Link>
       <div className="admin-navbar-controls">
 
-        {(!user || (user && (user.role === "client")))  && (
+        {(!user || (user && (user.role === "user")))  && (
           <>
             <div className="search-container">
               <input
@@ -70,6 +70,8 @@ const Navbar = () => {
                 id="search-field"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                autoComplete="off"
+                name="no-autofill"
               />
               {(isLoading ||
                 searchResults.length > 0 ||

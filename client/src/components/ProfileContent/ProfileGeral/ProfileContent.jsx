@@ -154,7 +154,6 @@ const ProfileContent = () => {
     if (formData.name && formData.name !== user?.name) data.append("name", formData.name);
     if (formData.cpf && formData.cpf !== user?.CPF) data.append("cpf", formData.cpf);
     if (formData.phone && formData.phone !== user?.phone) data.append("phone", formData.phone);
-    if (formData.email && formData.email !== user?.email) data.append("email", formData.email);
     if (file) data.append("file", file);
 
     try {
@@ -223,7 +222,7 @@ const ProfileContent = () => {
 
           <div className="profile-form-group">
             <label htmlFor="email">Email Address</label>
-            <input type="email" id="email" defaultValue="" value={formData.email} onChange={handleChange} required />
+            <input type="email" id="email" defaultValue="" value={formData.email} onChange={handleChange} disabled />
           </div>
         </div>
 

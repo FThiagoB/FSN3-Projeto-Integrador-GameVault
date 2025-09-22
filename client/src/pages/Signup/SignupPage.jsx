@@ -1,20 +1,68 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Signup.css";
 import { Link } from "react-router-dom";
+
+import { useCookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+
 const SignupPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const [role, setRole] = useState('');
+
+  const [cookies] = useCookies(['authToken']);
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  // Bloqueia essa rota caso o usuário esteja logado
+  useEffect(() => {
+    if (user) navigate("/profile");
+    setRole("user");
+  }, [user, navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (password !== confirmPassword) {
       alert("As senhas não coincidem!");
       return;
     }
-    // Aqui você pode adicionar lógica para registro
-    alert(`Registro realizado para: ${name} (${email})`);
+
+    const data = {
+      name: name,
+      email: email,
+      password: password,
+      role: role,
+    };
+
+    try {
+      // Realiza a requisição pro backend passando email e senha
+      const response = await fetch(`http://localhost:4500/signin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${cookies.authToken}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      // Verifica se houve algum problema
+      if (!response.ok) {
+        const { message } = await response.json();
+        throw new Error(message);
+      }
+
+      alert("Usuário cadastrado com sucesso.");
+      navigate("/login");
+    }
+    catch (error) {
+      console.error('Erro:', error);
+      alert(error);
+    }
   };
 
   return (
@@ -74,11 +122,33 @@ const SignupPage = () => {
             required
           />
 
+          <div style={{"display": "flex", "flex-direction": "row", "justifyContent": "space-around", "gap": "5"}}>
+            <label>
+              <input
+                type="radio"
+                value="user"
+                checked={role === 'user'}
+                onChange={() => setRole('user')}
+              />
+              <span style={{padding: "0px 10px"}}>User</span>
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                value="seller"
+                checked={role === 'seller'}
+                onChange={() => setRole('seller')}
+              />
+              <span style={{padding: "0px 10px"}}>Seller</span>
+            </label>
+          </div>
+
           <button type="submit" className="signup-retro__btn">
             Registrar
           </button>
         </form>
-        <p>
+        <p style={{"margin-top": "10px", "text-align": "center"}}>
           Já tem uma conta? <Link to="/login">Entrar</Link>
         </p>
       </div>

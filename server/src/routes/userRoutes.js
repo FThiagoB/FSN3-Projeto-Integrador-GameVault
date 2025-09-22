@@ -15,6 +15,9 @@ router.get("/user", auth, userController.getUserByJWT);          // Obtém as pr
 router.put("/user", auth, upload.single("file"), userController.updateUser);            // Atualiza as informações do usuário via token JWT
 router.delete("/user", auth, userController.deleteUserByJWT);    // Deleta a própria conta de usuário via token JWT
 
+router.put("/user/update/email", auth, userController.updateUserEmail); // Atualiza as informações de email requerindo o email atual
+router.put("/user/update/password", auth, userController.updateUserPassword); // Atualiza a senha requerindo a senha atual
+
 // Rotas para o admin ====================================================================
 router.get("/users", auth, adminOnly, userController.getUsers);                 // Lista de todos os usuários cadastrados no sistema
 router.get("/users/:id", auth, adminOnly, userController.getUserByID);          // Informações sobre um usuário específico

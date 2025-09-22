@@ -3,3 +3,9 @@ migrations
 
 # Keep environment variables out of version control
 .env
+
+# Ignora tudo dentro de uploads/users
+src/uploads/users/**
+
+# Excetua apenas o default.png
+!src/uploads/users/default.png

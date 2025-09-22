@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./LoginPage.css";
 import { Link } from "react-router-dom";
 import { useCookies } from 'react-cookie';
@@ -18,10 +18,12 @@ const LoginPage = () => {
   const [cookies, setCookie] = useCookies(['authToken']);
 
   // Bloqueia essa rota caso o usuário esteja logado
-  if( user){
-    if( user.role === "admin" ) navigate("/admin");
-    else navigate("/profile");
-  }
+  useEffect(() => {
+    if (user){
+      if( user.role === "admin" ) navigate("/admin");
+      else navigate("/profile");
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

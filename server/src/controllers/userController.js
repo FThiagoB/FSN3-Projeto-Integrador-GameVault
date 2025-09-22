@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const {hashPassword} = require("./../utils/miscellaneous");
+const {hashPassword, comparePassword} = require("./../utils/miscellaneous");
 const {blacklist} = require("./authController");
 const { handleImageUpload } = require("../utils/imageHandler");
 
@@ -336,6 +336,95 @@ exports.updateUser = async (req, res) => {
                 data: { image: filename }
             });
         }
+
+        res.status(200).json(user);
+    }
+    catch( error ){
+        console.error( error );
+        
+        switch (error.code) {
+            // Restrição : Email escolhido já está em uso
+            case "P2002":
+                res.status(400).json({
+                    message: `the desired email is already in use.`,
+                });
+                break;
+
+            default:
+                res.status(500).json({ message: error.message });
+        }
+    }
+};
+
+exports.updateUserEmail = async (req, res) => {
+    try{
+        const userID = parseInt(req.user.id);
+
+        if( !req.body ) req.body = {};
+        const {current_password, new_email} = req.body;
+
+        // Verifica se os campos foram passados
+        if( !current_password ||  !new_email )
+            return res.status(400).json({message: "Provide the necessary information."});
+
+        // Obtém as informações atuais de usuários
+        const current_user = await prisma.user.findUnique({ where: { id: userID } });
+
+        // Verifica se a senha bate
+        const match = await comparePassword( current_password, current_user.password );
+        if( !match )
+            return res.status(400).json({message: "The password is incorrect."});
+
+        // Monta a query do prisma por meio de uma variável
+        const user = await prisma.user.update({
+            where: { id: userID },
+            data: {email: new_email}
+        });
+
+        res.status(200).json(user);
+    }
+    catch( error ){
+        console.error( error );
+        
+        switch (error.code) {
+            // Restrição : Email escolhido já está em uso
+            case "P2002":
+                res.status(400).json({
+                    message: `the desired email is already in use.`,
+                });
+                break;
+
+            default:
+                res.status(500).json({ message: error.message });
+        }
+    }
+};
+
+exports.updateUserPassword = async (req, res) => {
+    try{
+        const userID = parseInt(req.user.id);
+
+        if( !req.body ) req.body = {};
+        const {current_password, new_password} = req.body;
+
+        // Verifica se os campos foram passados
+        if( !current_password ||  !new_password )
+            return res.status(400).json({message: "Provide the necessary information."});
+
+        // Obtém as informações atuais de usuários
+        const current_user = await prisma.user.findUnique({ where: { id: userID } });
+
+        // Verifica se a senha bate
+        const match = await comparePassword( current_password, current_user.password );
+        if( !match )
+            return res.status(400).json({message: "The password is incorrect."});
+
+        // Monta a query do prisma por meio de uma variável
+        let hashedPassword = await hashPassword( new_password );
+        const user = await prisma.user.update({
+            where: { id: userID },
+            data: {password: hashedPassword}
+        });
 
         res.status(200).json(user);
     }

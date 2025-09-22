@@ -16,47 +16,66 @@ const paymentMethods = [
     { id: 'credit_card', name: 'Cartão de Crédito' },
 ];
 
-// Por enquanto isso é fixo
-const discountCoupons = [
-    { "code": "VERAO10", "discount": 0.1 },
-    { "code": "PRIMEIRACOMPRA", "discount": 0.15 },
-    { "code": "GAMER20", "discount": 0.2 },
-    { "code": "FREEGAME5", "discount": 0.05 },
-    { "code": "BLACKFRIDAY30", "discount": 0.3 }
-];
+exports.validateCart = async (req, res) => {
+  try {
+    const { items } = req.body;
 
-exports.validateCoupon = async (req, res) => {
-    try {
-        if (!req.body) req.body = {};
-        const { code } = req.body;
-
-        if (!code)
-            return res.status(400).json({ message: "Coupon code is missing" });
-
-        const coupon = discountCoupons.find((c) => c.code === code);
-        if (!coupon)
-            return res.status(404).json({ message: "Invalid coupon code" });
-
-        res.status(200).json(coupon);
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: "Cart is empty or invalid" });
     }
-    catch (error) {
-        console.error(error);
-        res.status(500).json({ message: error.message })
-    }
-}
 
-exports.getCoupons = async (req, res) => {
-    try {
-        if (!discountCoupons)
-            return res.status(404).json({ message: "There are no valid coupons available." });
+    let subtotal = 0;
+    const validatedItems = [];
+    const errors = [];
 
-        res.status(200).json(discountCoupons);
+    for (const item of items) {
+      const game = await prisma.game.findUnique({
+        where: { id: item.gameID },
+        select: { id: true, title: true, price: true, stock: true },
+      });
+
+      if (!game) {
+        errors.push({ gameID: item.gameID, message: "Game not found" });
+        continue;
+      }
+
+      if (game.stock <= 0) {
+        errors.push({ gameID: game.id, title: game.title, message: "Out of stock" });
+        continue;
+      }
+
+      if (item.quantity > game.stock) {
+        errors.push({
+          gameID: game.id,
+          title: game.title,
+          message: `Insufficient stock, available: ${game.stock}`,
+        });
+        continue;
+      }
+
+      const itemTotal = game.price * item.quantity;
+      subtotal += itemTotal;
+
+      validatedItems.push({
+        gameID: game.id,
+        title: game.title,
+        unitPrice: game.price,
+        quantity: item.quantity,
+        itemTotal,
+      });
     }
-    catch (error) {
-        console.error(error);
-        res.status(500).json({ message: error.message })
-    }
-}
+
+    res.status(200).json({
+      valid: errors.length === 0,
+      subtotal,
+      items: validatedItems,
+      errors,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 exports.getCheckoutInfo = async (req, res) => {
     /*
@@ -66,29 +85,66 @@ exports.getCheckoutInfo = async (req, res) => {
     try {
         const userID = parseInt(req.user.id);
 
-        // Verifica se o usuário tem algum email cadastrado
-        const addresses = await prisma.address.findMany({
-            where: {
-                userID: userID,
+        // Busca informações do usuário com seus endereços e métodos de pagamento
+        const user = await prisma.user.findUnique({
+            where: { id: userID },
+            include: {
+                addresses: {
+                    orderBy: { isDefaultShipping: 'desc' } // Endereços padrão primeiro
+                },
+                paymentMethods: {
+                    where: { isActive: true }
+                },
+                defaultAddress: true,
+                defaultPaymentMethod: true
             }
         });
 
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        // Busca todos os métodos de envio ativos
+        const shippingMethods = await prisma.shippingMethod.findMany({
+            where: { isActive: true }
+        });
+
+        // Formata os métodos de envio para manter compatibilidade com o frontend
+        const formattedShippingMethods = shippingMethods.map(method => ({
+            id: method.id.toString(), // Mantém como string para compatibilidade
+            name: method.name,
+            cost: method.price,
+            description: method.description
+        }));
+
+        // Formata os métodos de pagamento do usuário
+        const formattedPaymentMethods = user.paymentMethods.map(method => ({
+            id: method.id.toString(), // Mantém como string para compatibilidade
+            type: method.type,
+            // Adiciona name baseado no type para compatibilidade
+            name: method.type === 'credit_card' ? 'Cartão de Crédito' :
+                method.type === 'debit_card' ? 'Cartão de Débito' :
+                    method.type === 'pix' ? 'PIX' :
+                        method.type === 'bank_transfer' ? 'Transferência Bancária' : method.type,
+            details: method.details
+        }));
+
+        // Determina o endereço padrão (o marcado como default ou o primeiro da lista)
+        const defaultAddress = user.addresses.find(addr => addr.isDefaultShipping) ||
+            (user.addresses.length > 0 ? user.addresses[0] : null);
+
         res.status(200).json({
             user: {
-                hasAddress: addresses.length > 0,
-                addresses,
+                hasAddress: user.addresses.length > 0,
+                hasPaymentMethod: user.paymentMethods.length > 0,
+                addresses: user.addresses,
+                address: defaultAddress // Mantém compatibilidade com campo address
             },
-
-            // Métodos de envio
-            shippingMethods: [
-                { id: 'standard', name: 'Padrão', cost: 10.00 },
-                { id: 'express', name: 'Expresso', cost: 25.00 },
-            ],
-
-            // Métodos de pagamento
-            paymentMethods: [
-                { id: 'credit_card', name: 'Cartão de Crédito' },
-            ],
+            shippingMethods: formattedShippingMethods,
+            paymentMethods: formattedPaymentMethods.length > 0 ?
+                formattedPaymentMethods :
+                // Fallback para manter compatibilidade se não houver métodos cadastrados
+                [{ id: 'credit_card', name: 'Cartão de Crédito' }]
         });
     }
     catch (error) {
@@ -186,31 +242,52 @@ exports.processCheckout = async (req, res) => {
                     quantity: item.quantity,
                     unitPrice: game.price
                 });
-
-                // Atualizar estoque ( podemos esperar até que o status de pagamento mude para confirmado )
-                // await prisma.game.update({
-                //     where: { id: game.id },
-                //     data: { stock: { decrement: item.quantity } }
-                // });
             }
 
-            // Calcular custos adicionais
-            const selectedShipping = shippingMethods.find(m => m.id === shippingMethod);
-            const couponApplied = discountCoupons.find(c => c.code === couponCode);
-            const shippingCost = selectedShipping ? selectedShipping.cost : 0;
-            const discountApplied = couponApplied ? couponApplied.discount : 0;
+            // --- Frete ---
+            const selectedShipping = await prisma.shippingMethod.findUnique({
+                where: { id: shippingMethodID },
+            });
+            if (!selectedShipping || !selectedShipping.isActive) {
+                throw new Error("Invalid shipping method");
+            }
+            const shippingCost = selectedShipping.price;
 
-            const discount = subtotal * discountApplied;
-            const tax = subtotal * 0.1; // 10% de imposto
-            const total = subtotal + shippingCost + tax;
+            // --- Cupom ---
+            let couponID = null;
+            let discount = 0;
+            if (couponCode) {
+                const coupon = await prisma.coupon.findFirst({
+                    where: {
+                        code: couponCode,
+                        isActive: true,
+                        OR: [
+                            { expiresAt: null },
+                            { expiresAt: { gt: new Date() } },
+                        ],
+                    },
+                });
 
-            // Criar pedido
+                if (!coupon) throw new Error("Invalid or expired coupon");
+
+                if (subtotal >= coupon.minValue) {
+                    discount = coupon.discount; // percentual ou valor fixo? (ajuste conforme sua regra)
+                    couponID = coupon.id;
+                }
+            }
+
+            // --- Imposto e total ---
+            const tax = subtotal * 0.1; // 10%
+            const total = subtotal + shippingCost + tax - discount;
+
+            // --- Pedido ---
             const order = await prisma.order.create({
                 data: {
-                    userID: userID,
+                    userID,
                     shippingAddressID: addressID,
-                    paymentMethod,
-                    shippingMethod,
+                    paymentMethodID,
+                    shippingMethodID,
+                    couponID,
                     status: "pending",
                     paymentStatus: "pending",
                     subtotal,
@@ -219,10 +296,18 @@ exports.processCheckout = async (req, res) => {
                     total,
                     discount,
                     items: {
-                        create: orderItems
-                    }
-                }
+                        create: orderItems,
+                    },
+                },
             });
+
+            // Reduzir estoque dos jogos
+            for (const item of items) {
+                await prisma.game.update({
+                    where: { id: item.gameID },
+                    data: { stock: { decrement: item.quantity } },
+                });
+            }
 
             return order;
         });
@@ -1160,9 +1245,9 @@ exports.getSummaryBySellerID = async (req, res) => {
         };
 
         // Verifica se o usuário especificado existe
-        const seller = await prisma.user.findUnique({where: {id: sellerID, role: "seller"}});
-        if( !seller )
-            res.status(404).json({message: "Seller not found"})
+        const seller = await prisma.user.findUnique({ where: { id: sellerID, role: "seller" } });
+        if (!seller)
+            res.status(404).json({ message: "Seller not found" })
 
         // Executar agregações em paralelo
         const [salesStats, pendingSalesStats, ordersByStatus] = await Promise.all([
@@ -1324,163 +1409,163 @@ exports.getSummaryBySellerID = async (req, res) => {
 }
 
 exports.cancelOrderByClient = async (req, res) => {
-  try {
-    const { orderID } = req.params;
-    const userID = parseInt(req.user.id);
+    try {
+        const { orderID } = req.params;
+        const userID = parseInt(req.user.id);
 
-    // Procura o pedido no banco
-    const order = await prisma.order.findUnique({
-      where: { id: orderID, userID },
-    });
+        // Procura o pedido no banco
+        const order = await prisma.order.findUnique({
+            where: { id: orderID, userID },
+        });
 
-    // Existe?
-    if (!order)
-      return res.status(404).json({ message: "Order not found" });
+        // Existe?
+        if (!order)
+            return res.status(404).json({ message: "Order not found" });
 
-    // Ainda pode modificar?
-    if(!['pending', 'paid'].includes(order.status))
-      return res.status(400).json({ message: "The order cannot be canceled in the current status." });
+        // Ainda pode modificar?
+        if (!['pending', 'paid'].includes(order.status))
+            return res.status(400).json({ message: "The order cannot be canceled in the current status." });
 
-    // Atualiza o pedido
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderID },
-      data: { status: 'cancelled' },
-    });
+        // Atualiza o pedido
+        const updatedOrder = await prisma.order.update({
+            where: { id: orderID },
+            data: { status: 'cancelled' },
+        });
 
-    res.status(200).json(updatedOrder);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message })
-  }
+        res.status(200).json(updatedOrder);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message })
+    }
 };
 
 exports.receivedOrderByClient = async (req, res) => {
-  try {
-    const { orderID } = req.params;
-    const userID = parseInt(req.user.id);
+    try {
+        const { orderID } = req.params;
+        const userID = parseInt(req.user.id);
 
-    const order = await prisma.order.findUnique({
-      where: { id: orderID, userID },
-    });
+        const order = await prisma.order.findUnique({
+            where: { id: orderID, userID },
+        });
 
-    if (!order)
-      return res.status(404).json({ message: "Order not found" });
+        if (!order)
+            return res.status(404).json({ message: "Order not found" });
 
-    if (order.status !== 'shipped')
-      return res.status(400).json({ message: "The order has not yet been shipped" });
+        if (order.status !== 'shipped')
+            return res.status(400).json({ message: "The order has not yet been shipped" });
 
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderID },
-      data: { status: 'delivered' },
-    });
+        const updatedOrder = await prisma.order.update({
+            where: { id: orderID },
+            data: { status: 'delivered' },
+        });
 
-    res.status(200).json(updatedOrder);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message })
-  }
+        res.status(200).json(updatedOrder);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message })
+    }
 };
 
 exports.cancelOrderBySeller = async (req, res) => {
-  try {
-    const { orderID } = req.params;
-    const sellerID = req.user.id;
+    try {
+        const { orderID } = req.params;
+        const sellerID = req.user.id;
 
-    // Verificar se o pedido existe e todos os itens são do vendedor
-    const order = await prisma.order.findFirst({
-      where: {
-        id: orderID,
-        items: {
-          every: {
-            game: {
-              sellerID: sellerID
+        // Verificar se o pedido existe e todos os itens são do vendedor
+        const order = await prisma.order.findFirst({
+            where: {
+                id: orderID,
+                items: {
+                    every: {
+                        game: {
+                            sellerID: sellerID
+                        }
+                    }
+                }
             }
-          }
-        }
-      }
-    });
+        });
 
-    if (!order)
-      return res.status(404).json({ message: "Order not found or you do not have permission" });
+        if (!order)
+            return res.status(404).json({ message: "Order not found or you do not have permission" });
 
-    if (!['pending', 'paid'].includes(order.status))
-      return res.status(400).json({ message: "The order cannot be canceled in the current status." });
+        if (!['pending', 'paid'].includes(order.status))
+            return res.status(400).json({ message: "The order cannot be canceled in the current status." });
 
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderID },
-      data: { status: 'cancelled' },
-    });
+        const updatedOrder = await prisma.order.update({
+            where: { id: orderID },
+            data: { status: 'cancelled' },
+        });
 
-    res.status(200).json(updatedOrder);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message })
-  }
+        res.status(200).json(updatedOrder);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message })
+    }
 };
 
 exports.shipOrderBySeller = async (req, res) => {
-  try {
-    const { orderID } = req.params;
-    const sellerID = req.user.id;
+    try {
+        const { orderID } = req.params;
+        const sellerID = req.user.id;
 
-    const order = await prisma.order.findFirst({
-      where: {
-        id: orderID,
-        items: {
-          every: {
-            game: {
-              sellerID: sellerID
+        const order = await prisma.order.findFirst({
+            where: {
+                id: orderID,
+                items: {
+                    every: {
+                        game: {
+                            sellerID: sellerID
+                        }
+                    }
+                }
             }
-          }
-        }
-      }
-    });
+        });
 
-    if (!order)
-      return res.status(404).json({ message: "Request not found or you do not have permission" });
+        if (!order)
+            return res.status(404).json({ message: "Request not found or you do not have permission" });
 
-    if (order.status !== 'paid')
-      return res.status(400).json({ message: "The order is not paid" });
+        if (order.status !== 'paid')
+            return res.status(400).json({ message: "The order is not paid" });
 
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderID },
-      data: { status: 'shipped' },
-    });
+        const updatedOrder = await prisma.order.update({
+            where: { id: orderID },
+            data: { status: 'shipped' },
+        });
 
-    res.status(200).json(updatedOrder);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message })
-  }
+        res.status(200).json(updatedOrder);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message })
+    }
 };
 
 exports.updateOrderStatusByAdmin = async (req, res) => {
-  try {
-    const { orderID } = req.params;
-    const { status, paymentStatus } = req.body;
+    try {
+        const { orderID } = req.params;
+        const { status, paymentStatus } = req.body;
 
-    // Valida se os status são permitidos
-    if (!allowedStatus.includes(status))
-      return res.status(400).json({ message: "Invalid order status" });
+        // Valida se os status são permitidos
+        if (!allowedStatus.includes(status))
+            return res.status(400).json({ message: "Invalid order status" });
 
-    if (!allowedPaymentStatus.includes(paymentStatus))
-        return res.status(400).json({ error: 'Invalid payment status.' });
+        if (!allowedPaymentStatus.includes(paymentStatus))
+            return res.status(400).json({ error: 'Invalid payment status.' });
 
-    const order = await prisma.order.findUnique({
-      where: { id: orderID },
-    });
+        const order = await prisma.order.findUnique({
+            where: { id: orderID },
+        });
 
-    if (!order)
-      return res.status(404).json({ message: "Order not found" });
+        if (!order)
+            return res.status(404).json({ message: "Order not found" });
 
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderID },
-      data: { status, paymentStatus },
-    });
+        const updatedOrder = await prisma.order.update({
+            where: { id: orderID },
+            data: { status, paymentStatus },
+        });
 
-    res.status(200).json(updatedOrder);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message })
-  }
+        res.status(200).json(updatedOrder);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message })
+    }
 };

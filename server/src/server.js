@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const addressRoutes = require("./routes/addressRoutes");
+const couponRoutes = require("./routes/couponRoutes");
 
 app = express();
 const porta = 4500;
@@ -29,6 +30,7 @@ app.use(gamesRoutes);
 app.use(userRoutes);
 app.use(orderRoutes);
 app.use(addressRoutes);
+app.use(couponRoutes);
 
 app.listen(porta, () => {
   console.log(`Servidor iniciado na porta http://localhost:${porta}`);

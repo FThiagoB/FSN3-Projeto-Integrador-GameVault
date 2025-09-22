@@ -29,4 +29,16 @@ router.get("/seller/:id/games", auth, adminOnly, userController.getGamesBySeller
 // Rotas de vendedor ==============================================
 router.get("/seller/games", auth, sellerOnly, userController.getGamesBySeller); // informações sobre seus jogos cadastrados via token JWT
 
+// Definir endereço padrão
+router.put("/user/default-address/:addressId", auth, userController.setDefaultAddress);
+
+// Definir método de pagamento padrão
+router.put("/user/default-payment-method/:methodId", auth, userController.setDefaultPaymentMethod);
+
+// Remover endereço padrão
+router.delete("/user/default-address", auth, userController.removeDefaultAddress);
+
+// Remover método de pagamento padrão
+router.delete("/user/default-payment-method", auth, userController.removeDefaultPaymentMethod);
+
 module.exports = router;

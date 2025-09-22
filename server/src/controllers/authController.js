@@ -102,7 +102,7 @@ exports.auth = async (req, res, next) => {
         }
 
         // Checa se o ID existe no token
-        if (!decoded?.id) return res.status(403).json({ message: "Invalid token payload" });
+        if (!decoded) return res.status(403).json({ message: "Invalid token payload" });
 
         // Busca o usuário no banco
         const user = await prisma.user.findUnique({ where: { id: decoded.id } });

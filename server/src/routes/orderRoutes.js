@@ -20,9 +20,7 @@ router.get("/transactions/seller/me/:orderID", auth, sellerOnly, orderController
 // Rotas que irão para outro lugar depois
 router.get("/checkout", auth, clientOnly, orderController.getCheckoutInfo);
 router.post("/checkout", auth, clientOnly, orderController.processCheckout);
-
-router.get("/coupons", auth, adminOnly, orderController.getCoupons);
-router.post("/coupons/validate", orderController.validateCoupon); 
+router.post("/cart/valide", auth, orderController.validateCart)
 
 router.get("/seller/me/summary", auth, sellerOnly, orderController.getSummaryBySellerJWT);
 router.get("/seller/:id/summary", auth, adminOnly, orderController.getSummaryBySellerID);

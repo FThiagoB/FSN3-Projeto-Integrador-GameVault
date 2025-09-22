@@ -44,6 +44,7 @@ model User{
   
   gamesSold Game[]
   orders Order[]
+  paymentMethods PaymentMethod[]
 }
 
 model Address{
@@ -77,12 +78,16 @@ model Order{
   tax Float
   shippingCost Float
   shippingAddressID Int
-  shippingMethod String
-  paymentMethod String
+  shippingMethodID Int 
+  paymentMethodID Int 
+  couponID Int?
   paymentStatus String
   
   user User @relation(fields: [userID], references: [id])
   address Address @relation(fields: [shippingAddressID], references: [id])
+  shippingMethod ShippingMethod @relation(fields: [shippingMethodID], references: [id])
+  paymentMethod PaymentMethod @relation(fields: [paymentMethodID], references: [id])
+  coupon Coupon? @relation(fields: [couponID], references: [id])
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -101,4 +106,44 @@ model OrderItem{
 	order Order @relation(fields: [orderID], references: [id])
 	game Game @relation(fields: [gameID], references: [id])
   @@unique([orderID, gameID])
+}
+
+model PaymentMethod {
+  id          Int      @id @default(autoincrement())
+  userID Int
+  type        String   // ex: "credit_card", "debit_card", "paypal"
+  data        Json     // Dados desestruturados (ex: para cartão: número, titular, etc)
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User @relation(fields: [userID], references: [id])
+
+  orders      Order[]
+}
+
+model Coupon {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  discount    Float    
+  minValue    Float    @default(0)
+  expiresAt   DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orders      Order[]
+}
+
+model ShippingMethod {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float    // Custo do frete
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orders      Order[]
 }

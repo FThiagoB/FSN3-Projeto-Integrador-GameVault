@@ -1,4 +1,4 @@
-const {hashPassword} = require("./src/utils/miscellaneous");
+const { hashPassword } = require("./src/utils/miscellaneous");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
@@ -10,8 +10,72 @@ const getRandomSeller = () => {
     return parseInt(Math.floor(Math.random() * 9) + 1)
 };
 
+// Cupons a serem criados
+const discountCoupons = [
+    { 
+        code: "VERAO10", 
+        discount: 0.1, 
+        isActive: false,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 dias a partir de agora
+        minValue: 50.00
+    },
+    { 
+        code: "PRIMEIRACOMPRA", 
+        discount: 0.15, 
+        isActive: false,
+        expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 dias
+        minValue: 30.00
+    },
+    { 
+        code: "GAMER20", 
+        discount: 0.2, 
+        isActive: true,
+        expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 dias
+        minValue: 100.00
+    },
+    { 
+        code: "FREEGAME5", 
+        discount: 0.05, 
+        isActive: true,
+        expiresAt: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), // 45 dias
+        minValue: 20.00
+    },
+    { 
+        code: "BLACKFRIDAY30", 
+        discount: 0.3, 
+        isActive: true,
+        expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 dias
+        minValue: 150.00
+    }
+];
+
+const shippingMethods = [
+    {
+        name: 'Padrão',
+        price: 10.00,
+        description: 'Entrega padrão em até 5 dias úteis'
+    },
+    {
+        name: 'Expresso',
+        price: 25.00,
+        description: 'Entrega expressa em até 2 dias úteis'
+    }
+];
+
+const paymentMethods = [
+    {
+        type: 'credit_card',
+        data: {
+            lastFour: '1234',
+            brand: 'Visa',
+            holderName: 'Juliana Mendes',
+            expirationDate: '12/25'
+        }
+    },
+];
+
 async function createAdmin() {
-    try{
+    try {
         // Cadastra o usuário Admin
         await prisma.user.create({
             data: {
@@ -22,13 +86,13 @@ async function createAdmin() {
             }
         });
     }
-    catch( error ){
+    catch (error) {
         console.error(`createAdmin() error : ${error.message}`)
     }
 }
 
 async function createSellers() {
-    try{
+    try {
         // Cadastra alguns vendedores
         await prisma.user.createMany({
             data: [
@@ -125,13 +189,13 @@ async function createSellers() {
             ]
         });
     }
-    catch( error ){
+    catch (error) {
         console.error(`createSellers() error : ${error.message}`)
     }
 }
 
 async function createAddresses() {
-    try{
+    try {
         // Cria os endereços para os vendedores
         await prisma.address.createMany({
             data: [
@@ -238,16 +302,59 @@ async function createAddresses() {
             ]
         });
     }
-    catch( error ){
+    catch (error) {
         console.error(`createAddress() error : ${error.message}`)
     }
 }
 
+async function createShippingMethods() {
+    try {
+        for (const method of shippingMethods) {
+            await prisma.shippingMethod.create({
+                data: method
+            });
+        }
+        console.log("Shipping methods created successfully");
+    } catch (error) {
+        console.error(`createShippingMethods() error: ${error.message}`);
+    }
+}
+
+async function createCoupons() {
+    try {
+        for (const coupon of discountCoupons) {
+            await prisma.coupon.create({
+                data: coupon
+            });
+        }
+        console.log("Coupons created successfully");
+    } catch (error) {
+        console.error(`createCoupons() error: ${error.message}`);
+    }
+}
+
+async function createPaymentMethods() {
+    try {
+        for (const method of paymentMethods) {
+            await prisma.paymentMethod.create({
+                data: {
+                    ...method,
+                    userID: 10 // Associando ao usuário Juliana Mendes
+                }
+            });
+        }
+        
+        console.log("Payment methods created successfully");
+    } catch (error) {
+        console.error(`createPaymentMethods() error: ${error.message}`);
+    }
+}
+
 async function createGames() {
-    try{
-        for( const game of games ){
+    try {
+        for (const game of games) {
             await prisma.game.create({
-                data:{
+                data: {
                     id: parseInt(game.id),
                     title: game.name,
                     description: game.description,
@@ -260,7 +367,7 @@ async function createGames() {
             });
         }
     }
-    catch( error ){
+    catch (error) {
         console.error(`createGames() error : ${error.message}`)
     }
 }
@@ -271,12 +378,27 @@ async function seed() {
     await createSellers();
     await createAddresses();
     await createGames();
+    await createShippingMethods();
+    await createCoupons();
+    await createPaymentMethods();
 
     // Como o id é informado de forma explicita devemos atualizar o contador do autoincrement da tabela de jogos
     await prisma.$executeRaw`SELECT setval('"Game_id_seq"', (SELECT MAX(id) FROM "Game"))`;
 
     // Como o id é informado de forma explicita devemos atualizar o contador do autoincrement da tabela de usuários
     await prisma.$executeRaw`SELECT setval('"User_id_seq"', (SELECT MAX(id) FROM "User"))`;
+
+     // Atualizar sequências para as novas tabelas
+    await prisma.$executeRaw`SELECT setval('"ShippingMethod_id_seq"', (SELECT MAX(id) FROM "ShippingMethod"))`;
+    await prisma.$executeRaw`SELECT setval('"Coupon_id_seq"', (SELECT MAX(id) FROM "Coupon"))`;
+    await prisma.$executeRaw`SELECT setval('"PaymentMethod_id_seq"', (SELECT MAX(id) FROM "PaymentMethod"))`;
 }
 
-seed()
+seed().then(async () => {
+        await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+        console.error(e);
+        await prisma.$disconnect();
+        process.exit(1);
+    });

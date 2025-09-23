@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { FaUpload, FaSave } from "react-icons/fa";
+import { FaEye } from "react-icons/fa";
+
 import "./CreateGame.css";
 
 import { useNavigate } from "react-router-dom";
@@ -7,31 +8,34 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useCookies } from 'react-cookie';
 
 import { ToastContainer, toast } from "react-toastify";
+import { Modal, Button } from "react-bootstrap";
+import ProductCard from "../ProductCard/ProductCard";
+import ModalPreview from "./ModalPreview";
 
 const notifySuccess = (Mensagem) =>
-    toast.success(Mensagem, {
-      position: "bottom-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
+  toast.success(Mensagem, {
+    position: "bottom-right",
+    autoClose: 2000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+  });
 
-  const notifyError = (message) => {
-    toast.error(message, {
-      position: "bottom-right",
-      autoClose: 3000,       // um pouco mais de tempo para ler o erro
-      hideProgressBar: false,
-      closeOnClick: true,    // permitir fechar ao clicar
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
-  }
+const notifyError = (message) => {
+  toast.error(message, {
+    position: "bottom-right",
+    autoClose: 3000,       // um pouco mais de tempo para ler o erro
+    hideProgressBar: false,
+    closeOnClick: true,    // permitir fechar ao clicar
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+  });
+}
 
 const CreateGame = () => {
   const { user } = useAuth();
@@ -43,6 +47,9 @@ const CreateGame = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imageURLPreview, setImageURLPreview] = useState(null);
 
+  const [showPreview, setShowPreview] = useState(false);
+  const [isGameDataIncomplete, setIsGameDataIncomplete] = useState(false);
+
   // Estado inicial do formulário, agora incluindo sellerID
   const [gameData, setGameData] = useState({
     title: "",
@@ -51,6 +58,9 @@ const CreateGame = () => {
     stock: "",
     genre: "",
   });
+
+  const dataComplete = (!gameData.title || !gameData.genre || !gameData.stock || !imageURLPreview);
+  if (dataComplete != isGameDataIncomplete) setIsGameDataIncomplete(dataComplete)
 
   // Estados para controlar inputs inválidos
   const [invalidFields, setInvalidFields] = useState({
@@ -109,23 +119,30 @@ const CreateGame = () => {
       setImageFile(dataFile);
       setImageURLPreview(URL.createObjectURL(dataFile));
     }
+    console.log("Setou")
   };
 
   const clearFiels = () => {
     setGameData({
-    title: "",
-    description: "",
-    price: "",
-    stock: "",
-    genre: "-1",
-  });
-    setImageFile(null)
+      title: "",
+      description: "",
+      price: "",
+      stock: "",
+      genre: "-1",
+    });
+    setImageFile("")
     setImageURLPreview("")
+
+    // Limpa o campo de arquivo manualmente
+    const fileInput = document.getElementById("file");
+    if (fileInput) {
+      fileInput.value = "";
+    }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Verifica se há campos vazios
     let newInvalidFields = {}
     newInvalidFields.title = !gameData.title ? true : false;
@@ -148,12 +165,13 @@ const CreateGame = () => {
     requestData.append("price", gameData.price);
     requestData.append("stock", gameData.stock);
     requestData.append("genre", gameData.genre);
-    if( imageFile )
+
+    if (imageFile)
       requestData.append("file", imageFile);
 
     console.log(requestData)
     requestData.forEach((value, key) => {
-  console.log(`${key}: ${value}`);
+      console.log(`${key}: ${value}`);
     })
 
     try {
@@ -166,10 +184,10 @@ const CreateGame = () => {
       });
 
       const result = await response.json();
-      
+
       if (response.ok) {
         notifySuccess("Jogo criado com sucesso!");
-        
+
         clearFiels()
       } else {
         notifyError(`Erro: ${result.message}`);
@@ -292,7 +310,7 @@ const CreateGame = () => {
                       height="24"
                       fill="currentColor"
                     >
-                      <path d="M296 384h-80c-13.3 0-24-10.7-24-24V192h-87.7c-17.8 0-26.7-21.5-14.1-34.1L242.3 5.7c7.5-7.5 19.8-7.5 27.3 0l152.2 152.2c12.6 12.6 3.7 34.1-14.1 34.1H320v168c0 13.3-10.7 24-24 24zm216-8v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h136v8c0 30.9 25.1 56 56 56h80c30.9 0 56-25.1 56-56v-8h136c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"/>
+                      <path d="M296 384h-80c-13.3 0-24-10.7-24-24V192h-87.7c-17.8 0-26.7-21.5-14.1-34.1L242.3 5.7c7.5-7.5 19.8-7.5 27.3 0l152.2 152.2c12.6 12.6 3.7 34.1-14.1 34.1H320v168c0 13.3-10.7 24-24 24zm216-8v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h136v8c0 30.9 25.1 56 56 56h80c30.9 0 56-25.1 56-56v-8h136c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z" />
                     </svg>
                     <p>
                       {imageFile
@@ -303,18 +321,14 @@ const CreateGame = () => {
                 </div>
 
                 <div className="text-center d-flex justify-content-center m-auto" style={{ width: "100%" }}>
-                  {imageURLPreview && (
-                    <img
-                      src={imageURLPreview}
-                      alt="Pré-visualização do Jogo"
-                      className="image-preview"
-                    />
-                  )}
                 </div>
               </div>
             </div>
 
             <div className="game-form-actions d-flex gap-4">
+              <button type="button" className={`profile-btn profile-btn-primary ${isGameDataIncomplete ? 'disabled' : ''}`} onClick={() => setShowPreview(true)} disabled={isGameDataIncomplete}>
+                <FaEye style={{ marginRight: '4px' }} /> Visualizar
+              </button>
 
               <button type="submit" className="profile-btn profile-btn-primary">
                 {/* Ícone SVG embutido */}
@@ -329,9 +343,40 @@ const CreateGame = () => {
                 Salvar Jogo
               </button>
             </div>
+
+            {
+              console.log({ showPreview })
+            }
           </form>
         </div>
-        <ToastContainer/>
+        <ToastContainer />
+
+
+        <Modal show={showPreview} onHide={() => setShowPreview(false)} size="xl">
+          <Modal.Header closeButton>
+            <Modal.Title>Pré-visualização</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            <ModalPreview
+              product={{
+                category: gameData.genre,
+                imageUrl: imageURLPreview,
+                title: gameData.title,
+                stock: gameData.stock,
+                price: gameData.price,
+                description: gameData.description,
+                genre: gameData.genre
+              }}
+            />
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowPreview(false)} >
+              Fechar
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </main>
     </>
   );

@@ -6,8 +6,15 @@ import ProfileOrders from "../../components/ProfileContent/ProfileOrders/Profile
 import ProfileSecurity from "../../components/ProfileContent/ProfileSecurity/ProfileSecurity";
 import CreateGamePage from "../../components/CreateGame/CreateGame";
 
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
 const ProfileSettings = () => {
   const [activePage, setActivePage] = useState("profile");
+  // user.role : user / seller / admin
+  const { user, deleteAcc } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <div className="profile-container">
       <aside className="profile-sidebar">
@@ -26,10 +33,14 @@ const ProfileSettings = () => {
                 Addresses
               </button>
             </li>
+
+            { user?.role === "user" && (
             <li className={activePage === "orders" ? "profile-nav-active" : ""}>
               <button onClick={() => setActivePage("orders")}>Orders</button>
             </li>
-            <li
+            )}
+            
+            { user?.role === "seller" && ( <li
               className={
                 activePage === "createGame" ? "profile-nav-active" : ""
               }
@@ -38,6 +49,8 @@ const ProfileSettings = () => {
                 Create Game
               </button>
             </li>
+            )}
+
             <li
               className={activePage === "security" ? "profile-nav-active" : ""}
             >
@@ -53,7 +66,7 @@ const ProfileSettings = () => {
       {activePage === "profile" && <ProfileContent />}
       {activePage === "addresses" && <ProfileAddress />}
       {activePage === "orders" && <ProfileOrders />}
-      {activePage === "createGame" && <CreateGamePage />}
+      {activePage === "createGame" && user?.role === "seller" && <CreateGamePage />}
       {activePage === "security" && <ProfileSecurity />}
     </div>
   );

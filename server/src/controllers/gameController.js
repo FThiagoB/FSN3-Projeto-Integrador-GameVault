@@ -200,6 +200,7 @@ exports.createGame = async (req, res) => {
     const genre = req.body.genre;
 
     let game;
+    console.log({title, description, price, stock, sellerID, genre})
 
     // Verifica se todos os campos foram especificados
     if (
@@ -258,10 +259,11 @@ exports.createGame = async (req, res) => {
 
     switch (error.code) {
       // Problemas de restrição (id já existe ou problemas com o ID do vendedor)
-      case "P2003":
-        res.status(400).json({
-          message: `Violation of restriction ${e.meta.constraint} in ${e.meta.modelName}`,
-        });
+      case "P2002":
+        if( error?.meta?.modelName == "Game")
+          res.status(400).json({
+            message: `Seller already has this title`,
+          });
         break;
 
       default:

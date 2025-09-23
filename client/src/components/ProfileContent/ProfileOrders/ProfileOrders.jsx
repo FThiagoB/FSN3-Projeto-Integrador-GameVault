@@ -12,6 +12,22 @@ import OrderDetailsModal from './OrderDetailsModal';
 import moment from 'moment';
 import "./OrderDetailsModal.css";
 
+import Badge from 'react-bootstrap/Badge';
+
+// Status badges com cores
+const getStatusBadge = (status) => {
+  const statusConfig = {
+    pending: { variant: 'warning', text: 'Pendente' },
+    completed: { variant: 'success', text: 'Concluído' },
+    cancelled: { variant: 'danger', text: 'Cancelado' },
+    shipped: { variant: 'info', text: 'Enviado' },
+    processing: { variant: 'primary', text: 'Processando' }
+  };
+  
+  const config = statusConfig[status] || { variant: 'secondary', text: status };
+  return <Badge bg={config.variant}>{config.text}</Badge>;
+};
+
 const notifySuccess = (Mensagem) => {
   toast.success(Mensagem, {
     position: "bottom-right",
@@ -60,7 +76,7 @@ const ProfileOrders = () => {
 
   const fetchOrdesItems = async (zipCode) => {
     try {
-      const response = await fetch(`http://localhost:4500/transactions/user/me`, {
+      const response = await fetch(`http://localhost:4500/orders/me`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${cookies.authToken}`,
@@ -104,9 +120,9 @@ const ProfileOrders = () => {
                 <span className="label">Date: </span>
                 <span>{moment(order.createdAt).format("DD/MM/YYYY HH:mm:ss")}</span>
               </div>
-              <div className={`status-badge status-${order.status}`}>
-                {order.status}
-              </div>
+              <span>
+                {getStatusBadge(order.status)}
+              </span>
             </div>
             <div className="order-card-body">
               <ul className="order-item-list">
@@ -124,9 +140,12 @@ const ProfileOrders = () => {
             </div>
             <div className="order-card-footer">
               <span className="order-total">Total: R$ {order.total}</span>
-              <button className="profile-btn profile-btn-secondary" onClick={() => handleViewDetails(order)}>
-                View Details
-              </button>
+
+              <div className="d-flex gap-4">
+                <button className="profile-btn profile-btn-secondary" onClick={() => handleViewDetails(order)}>
+                  View Details
+                </button>
+              </div>
             </div>
           </div>
         )) : ""}

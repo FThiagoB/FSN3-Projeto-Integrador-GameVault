@@ -336,6 +336,17 @@ exports.getTransactionsByJWT = async (req, res) => {
         return base36.replace(/(\w{4})(\w{4})/, 'ORD$1-$2');
     };
 
+    // Função para pegar uma descrição do pagamento
+    const getPaymentDescription = (type, data) => {
+        if(type === "credit_card"){
+            let cardNumber = data.number;
+            let hidden_cardNumber = cardNumber.replace(/(^\w{4}).*.(\w{2})$/, `$1${"*".repeat((cardNumber.length - 11))}$2`)
+            return hidden_cardNumber;
+        }
+
+        return "";
+    };
+
     try {
         const userID = parseInt(req.user.id);
         const { page = 1, limit = 10, status } = req.query;
@@ -371,7 +382,8 @@ exports.getTransactionsByJWT = async (req, res) => {
                 },
                 paymentMethod : {
                     select: {
-                        type: true
+                        type: true,
+                        data: true
                     }
                 }
             }
@@ -384,12 +396,16 @@ exports.getTransactionsByJWT = async (req, res) => {
         const ordersWithImageUrl = orders.map(order => ({
             ...order,
             externID: generateExternID(order.id),
+            paymentMethod: {
+                type: order.paymentMethod.type,
+                description: getPaymentDescription(order.paymentMethod.type, order.paymentMethod.data)
+            },
             items: order.items.map(item => ({
                 ...item,
                 game: {
                     ...item.game,
                     imageUrl: `${req.protocol}://${req.get("host")}/uploads/games/${item.game.image}`
-                }
+                },
             }))
         }))
 
@@ -1472,10 +1488,15 @@ exports.cancelOrderByClient = async (req, res) => {
     }
 };
 
-exports.receivedOrderByClient = async (req, res) => {
+exports.setStateOrderByClient = async (req, res) => {
     try {
-        const { orderID } = req.params;
+        const { orderID, orderStatus } = req.params;
         const userID = parseInt(req.user.id);
+
+        const valideOrderStatus = ["delivered", "cancelled"]
+
+        if (!orderID || !orderStatus)
+            return res.status(400).json({ message: "Problems with the request" });
 
         const order = await prisma.order.findUnique({
             where: { id: orderID, userID },
@@ -1484,12 +1505,18 @@ exports.receivedOrderByClient = async (req, res) => {
         if (!order)
             return res.status(404).json({ message: "Order not found" });
 
+        if (!valideOrderStatus.includes(orderStatus))
+            return res.status(400).json({ message: "Unrecognized Order Status" });
+
+        if (order.status !== 'delivered' || order.status !== 'cancelled')
+            return res.status(400).json({ message: "The order has already been finalized" });
+
         if (order.status !== 'shipped')
             return res.status(400).json({ message: "The order has not yet been shipped" });
 
         const updatedOrder = await prisma.order.update({
             where: { id: orderID },
-            data: { status: 'delivered' },
+            data: { status: orderStatus },
         });
 
         res.status(200).json(updatedOrder);

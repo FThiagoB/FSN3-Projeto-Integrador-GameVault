@@ -6,8 +6,63 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
 import Badge from 'react-bootstrap/Badge';
+import Alert from 'react-bootstrap/Alert';
+import { useState } from "react";
+import { useRef } from "react";
+import { useEffect } from "react";
+
+import { useAuth } from '../../../contexts/AuthContext';
+import { useCookies } from 'react-cookie';
+import { useNavigate } from "react-router-dom";
+
 
 const OrderDetailsModal = ({ show, onHide, order }) => {
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showDeliveryConfirm, setShowDeliveryConfirm] = useState(false);
+
+  const [cancelling, setCancelling] = useState(false);
+  const [confirmingDelivery, setConfirmingDelivery] = useState(false);
+
+  const alertRef = useRef(null);
+  const modalBodyRef = useRef(null);
+
+  const { user, syncData } = useAuth();
+  const [cookies] = useCookies(['authToken']);
+
+  async function onCancelOrder() {
+  try {
+    const response = await fetch(`http://localhost:4500/transactions/user/me`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${cookies.authToken}`,
+      }
+    });
+
+    if (!response.ok) {
+      console.error(`Problemas na requisição: ${response}`);
+      return;
+    }
+
+    const data = await response.json();
+
+    console.log(data)
+  } catch (error) {
+    console.error(`Problemas na requisição: ${error}`);
+  }
+}
+
+  // Scroll para o alerta quando ele for exibido
+  useEffect(() => {
+    if ((showCancelConfirm || showDeliveryConfirm) && alertRef.current && modalBodyRef.current) {
+      setTimeout(() => {
+        alertRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 100);
+    }
+  }, [showCancelConfirm, showDeliveryConfirm]);
+
   if (!order) return null;
 
   // Função para formatar data
@@ -33,30 +88,151 @@ const OrderDetailsModal = ({ show, onHide, order }) => {
   const getStatusBadge = (status) => {
     const statusConfig = {
       pending: { variant: 'warning', text: 'Pendente' },
-      completed: { variant: 'success', text: 'Concluído' },
+      delivered: { variant: 'success', text: 'Concluído' },
       cancelled: { variant: 'danger', text: 'Cancelado' },
       shipped: { variant: 'info', text: 'Enviado' },
-      processing: { variant: 'primary', text: 'Processando' }
+      processing: { variant: 'primary', text: 'Processando' },
+
+      approved: { variant: 'success', text: 'Aprovado' },
+      rejected: { variant: 'danger', text: 'Rejeitado' },
+      refunded: { variant: 'info', text: 'Reembolsado' },
     };
-    
+
     const config = statusConfig[status] || { variant: 'secondary', text: status };
     return <Badge bg={config.variant}>{config.text}</Badge>;
   };
 
+  // Verifica se o pedido pode ser cancelado
+  const canCancelOrder = () => {
+    return order.status === 'pending' || order.status === 'processing';
+  };
+
+  // Verifica se o pedido pode ter entrega confirmada
+  const canConfirmDelivery = () => {
+    return order.status === 'shipped' || order.status === 'delivered';
+  };
+
+  // Inicia o processo de cancelamento
+  const handleCancelClick = () => {
+    setShowCancelConfirm(true);
+  };
+
+  // Inicia o processo de confirmação de entrega
+  const handleDeliveryClick = () => {
+    setShowDeliveryConfirm(true);
+    setShowCancelConfirm(false);
+  };
+
+  // Confirma o cancelamento
+  const confirmCancel = async () => {
+    setCancelling(true);
+    try {
+      // await onCancelOrder(order.id);
+      setShowCancelConfirm(false);
+      onHide(); // Fecha o modal após o cancelamento
+    } catch (error) {
+      console.error('Erro ao cancelar pedido:', error);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  // Confirma a entrega
+  const confirmDelivery = async () => {
+    setConfirmingDelivery(true);
+    try {
+      // await onConfirmDelivery(order.id);
+      setShowDeliveryConfirm(false);
+      onHide();
+    } catch (error) {
+      console.error('Erro ao confirmar entrega:', error);
+    } finally {
+      setConfirmingDelivery(false);
+    }
+  };
+
+  // Cancela a confirmação de cancelamento
+  const cancelCancel = () => {
+    setShowCancelConfirm(false);
+  };
+
+  // Cancela a confirmação de entrega
+  const cancelDelivery = () => {
+    setShowDeliveryConfirm(false);
+  };
+
   // Use Portal para renderizar no body
   return ReactDOM.createPortal(
-    <Modal 
-      show={show} 
-      onHide={onHide} 
-      size="xl" 
+    <Modal
+      show={show}
+      onHide={onHide}
+      size="xl"
       centered
       dialogClassName="custom-order-modal"
       style={{ zIndex: 1060 }}
     >
-      <Modal.Header closeButton>
-        <Modal.Title>Detalhes do Pedido - {order.externID}</Modal.Title>
+      <Modal.Header closeButton closeVariant="white">
+        <Modal.Title ref={alertRef}>📦 Detalhes do Pedido - {order.externID}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body ref={modalBodyRef}>
+        {/* Alerta de confirmação de cancelamento */}
+        {showCancelConfirm && (
+          <div >
+            <Alert variant="warning" className="mb-4">
+              <Alert.Heading>Tem certeza que deseja cancelar este pedido?</Alert.Heading>
+              <p>
+                Esta ação não pode ser desfeita. O pedido será cancelado e qualquer valor pago será reembolsado.
+              </p>
+              <hr />
+              <div className="d-flex justify-content-end gap-2">
+                <Button
+                  variant="outline-secondary"
+                  onClick={cancelCancel}
+                  disabled={cancelling}
+                >
+                  Manter Pedido
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={confirmCancel}
+                  disabled={cancelling}
+                >
+                  {cancelling ? 'Cancelando...' : 'Sim, Cancelar Pedido'}
+                </Button>
+              </div>
+            </Alert>
+          </div>
+        )}
+
+        {/* Alerta de confirmação de entrega */}
+        {showDeliveryConfirm && (
+          <div>
+            <Alert variant="info" className="mb-4">
+              <Alert.Heading>Confirmar recebimento do pedido?</Alert.Heading>
+              <p>
+                Ao confirmar, você estará indicando que recebeu todos os itens do pedido em perfeito estado.
+                Esta ação finalizará o processo de compra.
+              </p>
+              <hr />
+              <div className="d-flex justify-content-end gap-2">
+                <Button
+                  variant="outline-secondary"
+                  onClick={cancelDelivery}
+                  disabled={confirmingDelivery}
+                >
+                  Aguardar Entrega
+                </Button>
+                <Button
+                  variant="success"
+                  onClick={confirmDelivery}
+                  disabled={confirmingDelivery}
+                >
+                  {confirmingDelivery ? 'Confirmando...' : 'Sim, Recebi o Pedido'}
+                </Button>
+              </div>
+            </Alert>
+          </div>
+        )}
 
         {/* Informações Gerais do Pedido */}
         <div className="mb-4">
@@ -65,6 +241,7 @@ const OrderDetailsModal = ({ show, onHide, order }) => {
             <div className="col-md-6">
               <p><strong>Status:</strong> {getStatusBadge(order.status)}</p>
               <p><strong>Data do Pedido:</strong> {formatDate(order.createdAt)}</p>
+              <p><strong>Última atualização:</strong> {formatDate(order.updatedAt)}</p>
               <p><strong>Status do Pagamento:</strong> {getStatusBadge(order.paymentStatus)}</p>
             </div>
             <div className="col-md-6">
@@ -94,8 +271,8 @@ const OrderDetailsModal = ({ show, onHide, order }) => {
                 <tr key={item.id}>
                   <td>
                     <div className="d-flex align-items-center">
-                      <img 
-                        src={item.game.imageUrl} 
+                      <img
+                        src={item.game.imageUrl}
                         alt={item.game.title}
                         style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                         className="me-3"
@@ -137,21 +314,40 @@ const OrderDetailsModal = ({ show, onHide, order }) => {
           <h5 className="mb-3">Método de Pagamento</h5>
           <div className="border rounded p-3">
             <p>
-              <strong>Tipo:</strong> {order.paymentMethod?.type === 'credit_card' 
-                ? 'Cartão de Crédito' 
+              <strong>Tipo:</strong> {order.paymentMethod?.type === 'credit_card'
+                ? 'Cartão de Crédito'
                 : order.paymentMethod?.type === 'debit_card'
-                ? 'Cartão de Débito'
+                  ? 'Cartão de Débito'
+                  : order.paymentMethod?.type === 'pix'
+                    ? 'PIX'
+                    : order.paymentMethod?.type || 'Não especificado'}
+            </p>
+            <p>
+              <strong> {order.paymentMethod?.type === 'credit_card' || 'debit_card'
+                ? 'Número do Cartão: '
                 : order.paymentMethod?.type === 'pix'
-                ? 'PIX'
-                : order.paymentMethod?.type || 'Não especificado'}
+                  ? 'Chave: '
+                  : order.paymentMethod?.type || 'Descrição: '}
+              </strong>
+              {order.paymentMethod?.description}
             </p>
           </div>
         </div>
       </Modal.Body>
-      
- <Modal.Footer>
-        <Button variant="outline-secondary" onClick={onHide}>Fechar</Button>
-        <Button variant="primary" onClick={() => window.print()}>Imprimir Detalhes</Button>
+
+      <Modal.Footer className="d-flex justify-content-center align-items-center">
+        <div className="d-flex flex-column gap-4 justify-content-around align-items-center w-100">
+          {/* Botão de cancelamento (apenas para pedidos canceláveis) */}
+          {canCancelOrder() && (
+            <Button variant="outline-danger" style={{ "min-width": "200px" }} disabled={cancelling} onClick={() => { return !showCancelConfirm ? handleCancelClick() : "" }}>Cancelar Pedido</Button>
+          )}
+
+          {/* Botão de confirmar entrega (apenas para pedidos enviados) */}
+          {canConfirmDelivery() && (
+            <Button variant="outline-success" style={{ "min-width": "200px" }} onClick={() => { return (!showCancelConfirm && !showDeliveryConfirm) ? handleDeliveryClick() : "" }} disabled={confirmingDelivery}>Confirmar Entrega</Button>
+          )}
+
+        </div>
       </Modal.Footer>
     </Modal>,
     document.body

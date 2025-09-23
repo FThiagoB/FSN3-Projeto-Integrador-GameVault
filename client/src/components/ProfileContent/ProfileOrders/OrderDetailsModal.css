@@ -23,7 +23,7 @@
     border-radius: 1rem;
     box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
     padding: 1.5rem;
-    color: white;
+    color: white !important;
     width: 50vw !important;
     max-width: none;
 }

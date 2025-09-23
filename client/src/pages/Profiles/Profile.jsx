@@ -7,13 +7,29 @@ import ProfileSecurity from "../../components/ProfileContent/ProfileSecurity/Pro
 import CreateGamePage from "../../components/CreateGame/CreateGame";
 
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect } from "react";
+import ProfileGamesSold from "../../components/ProfileContent/ProfileSeller/ProfileGamesSold/ProfileGamesSold";
 
-const ProfileSettings = () => {
+const ProfileSettings = ( redirectPage = undefined ) => {
   const [activePage, setActivePage] = useState("profile");
+  const { section } = useParams();
+  const valideSections = ["profile", "addresses", "orders", "createGame", "security", "mygames"]
+
   // user.role : user / seller / admin
   const { user, deleteAcc } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (valideSections.includes(section)) {
+      setActivePage(section);
+      navigate(`/profile`)
+    }
+  }, [section]);
+
+   useEffect(() => {
+      if (!user) navigate('/login');
+    }, [user, navigate]);
 
   return (
     <div className="profile-container">
@@ -51,6 +67,17 @@ const ProfileSettings = () => {
             </li>
             )}
 
+            { user?.role === "seller" && ( <li
+              className={
+                activePage === "mygames" ? "profile-nav-active" : ""
+              }
+            >
+              <button onClick={() => setActivePage("mygames")}>
+                My games
+              </button>
+            </li>
+            )}
+
             <li
               className={activePage === "security" ? "profile-nav-active" : ""}
             >
@@ -67,6 +94,7 @@ const ProfileSettings = () => {
       {activePage === "addresses" && <ProfileAddress />}
       {activePage === "orders" && <ProfileOrders />}
       {activePage === "createGame" && user?.role === "seller" && <CreateGamePage />}
+      {activePage === "mygames" && user?.role === "seller" && <ProfileGamesSold />}
       {activePage === "security" && <ProfileSecurity />}
     </div>
   );

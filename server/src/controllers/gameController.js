@@ -15,12 +15,14 @@ exports.getGames = async (req, res) => {
       genre,
       page = 1,
       limit = 10,
+      includeDeleted = "false"
     } = req.query;
 
     // 2. Converte página e limite para números, calculando o 'skip'
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const skip = (pageNum - 1) * limitNum;
+    const includeDeletedBool = includeDeleted === "true";
 
     // 3. Monta a cláusula 'where' dinamicamente para o filtro
     const where = {
@@ -34,38 +36,70 @@ exports.getGames = async (req, res) => {
         isDeleted: false,
       },
 
+      // Filtro padrão: exclui jogos deletados e sem estoque
+      // A menos que includeDeleted seja true
+      ...(!includeDeletedBool && {
+        OR: [
+          { deleted: false },
+          { 
+            AND: [
+              { deleted: true },
+              { stock: { gt: 0 } } // Inclui deletados apenas se tiverem estoque > 0
+            ]
+          }
+        ]
+      }),
+
+      // (tratado acima) ou que includeDeleted seja true
+      ...(!includeDeletedBool && { stock: { gt: 0 } }),
+
       // Adiciona o filtro de gênero apenas se ele for fornecido na URL
       ...(genre && { genre: { equals: genre, mode: "insensitive" } }),
     };
 
-    // 4. Executa a busca e a contagem em uma única transação para melhor performance
+    // 4. Se includeDeleted for true, remove todas as restrições de deleted/stock
+    if (includeDeletedBool) {
+      delete where.OR;
+      delete where.stock;
+    }
+
+    // 5. Executa a busca e a contagem em uma única transação para melhor performance
     const [games, total] = await prisma.$transaction([
       prisma.game.findMany({
         where,
         orderBy: { id: orderby },
         skip,
         take: limitNum,
+        include: {
+          seller: {
+            select: {
+              id: true,
+              name: true,
+              // outros campos que você queira incluir do vendedor
+            }
+          }
+        }
       }),
       prisma.game.count({ where }),
     ]);
 
-    // 5. Mapeia os resultados para adicionar a URL completa da imagem
+    // 6. Mapeia os resultados para adicionar a URL completa da imagem
     const gamesWithImageUrl = games.map((game) => ({
       ...game,
       imageUrl: `${req.protocol}://${req.get("host")}/uploads/games/${
         game.image
       }`,
     }));
-    
-    // 6. Verifica se existem jogos com esses filtros
+    // 7. Verifica se existem jogos com esses filtros
     if( !(gamesWithImageUrl.length) )
       return res.status(404).json({message: "No games found."});
 
-    // 7. Retorna a resposta formatada para o frontend
+    // 8. Retorna a resposta formatada para o frontend
     res.status(200).json({
       games: gamesWithImageUrl,
       totalPages: Math.ceil(total / limitNum),
       currentPage: pageNum,
+      includeDeleted: includeDeletedBool
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -352,28 +386,70 @@ exports.updateGame = async (req, res) => {
 };
 
 exports.deleteGame = async (req, res) => {
+  let transaction;
+
   try {
     const id_procurado = parseInt(req.params.id);
 
-    const jogo_deletado = await prisma.game.delete({
-      where: {
-        id: id_procurado,
-      },
+    transaction = await prisma.$transaction(async (prisma) => {
+      // Verificar se o jogo existe
+      const game = await prisma.game.findUnique({
+        where: { id: id_procurado },
+        include: {
+          itemsSold: {
+            include: {
+              order: {
+                select: { status: true }
+              }
+            }
+          }
+        }
+      });
+
+      if (!game)
+        throw { code: "P2025" }; // Jogo não encontrado
+
+      // Verificar se o jogo está em algum pedido
+      if (game.itemsSold.length > 0) {
+
+        // Verificar se existe algum pedido que não esteja concluído ou cancelado
+        const hasActiveOrder = game.itemsSold.some(item => 
+          item.order.status !== 'delivered' && item.order.status !== 'cancelled'
+        );
+
+        if (hasActiveOrder)
+          throw new Error("Cannot delete game because it is associated with active orders.");
+
+        // Se não há pedidos ativos, então atualizamos o jogo para deleted e stock = 0
+        const updatedGame = await prisma.game.update({
+          where: { id: id_procurado },
+          data: {
+            deleted: true,
+            stock: 0
+          }
+        });
+      } else  {
+
+        // Se não está em nenhum pedido, deletamos o jogo
+        const deletedGame = await prisma.game.delete({
+          where: { id: id_procurado }
+        });
+      } 
+
+      return { message: "Game deleted successfully."};
     });
 
-    res.status(200).json(jogo_deletado);
+    res.status(200).json(transaction);
   } catch (error) {
     console.error(error);
-    switch (error.code) {
-      // Jogo não encontrado
-      case "P2025":
-        res.status(404).json({
-          message: `No record was found for a delete.`,
-        });
-        break;
-
-      default:
-        res.status(500).json({ message: error.message });
+    if (error.code === "P2025") {
+      res.status(404).json({
+        message: `Game not found.`
+      });
+    } else if (error.message === "Cannot delete game because it is associated with active orders.") {
+      res.status(400).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: error.message });
     }
   } finally {
     await prisma.$disconnect();

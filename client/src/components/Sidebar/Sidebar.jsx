@@ -12,6 +12,7 @@ import {
   FaEnvelope,
   FaChevronLeft,
   FaTachometerAlt,
+  FaPlus 
 } from "react-icons/fa";
 import "./Sidebar.css";
 
@@ -96,6 +97,14 @@ const Sidebar = ({ isExpanded, onToggle }) => {
       icon: <FaTachometerAlt size={22} />,
       text: "Dashboard",
       to: "/admin",
+    });
+  }
+
+  if (user && user.role === "seller") {
+    mainLinks.splice(3, 0,{
+      icon: <FaPlus size={22} />,
+      text: "Add Jogo",
+      to: "/profile/createGame",
     });
   }
 

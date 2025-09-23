@@ -129,14 +129,18 @@ const ProfileSecurity = () => {
   }
 
   const onClickChangePassword = async () => {
-    if(!passwordData.newPassword || !passwordData.confirmPassword || !passwordData.currentPassword )
-      return;
-
-    if( (passwordData.currentPassword !== passwordData.newPassword) ||  (passwordData.currentPassword !== passwordData.confirmPassword) )
-      return;
+    
+    if(!passwordData.newPassword || !passwordData.confirmPassword || !passwordData.currentPassword ){
+      notifyError("Preencha todos os campos")
+      return;}
 
     if(passwordData.newPassword !== passwordData.confirmPassword){
       notifyError("The passwords are different");
+      return;
+    }
+
+    if( (passwordData.currentPassword === passwordData.newPassword) ){
+      notifyError("As senhas não podem ser as mesmas");
       return;
     }
 
@@ -257,6 +261,7 @@ const ProfileSecurity = () => {
             Delete My Account
           </button>
         </div>
+
         <ToastContainer/>
       </main>
     </>

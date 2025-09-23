@@ -188,7 +188,7 @@ const CreateGame = () => {
       if (response.ok) {
         notifySuccess("Jogo criado com sucesso!");
 
-        // clearFiels()
+        clearFiels()
       } else {
         notifyError(`Erro: ${result.message}`);
       }

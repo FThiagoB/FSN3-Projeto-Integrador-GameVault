@@ -16,6 +16,7 @@ model Game{
   stock Int
   sellerID Int
   genre String
+  deleted Boolean @default(false)
   
   seller User @relation(fields: [sellerID], references: [id])
   

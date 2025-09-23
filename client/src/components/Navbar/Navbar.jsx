@@ -98,7 +98,6 @@ const Navbar = () => {
 
         { user && (
           <>
-            <span className="profile-span">{user.role}</span>
 
             <img
               src={user.imageUrl}

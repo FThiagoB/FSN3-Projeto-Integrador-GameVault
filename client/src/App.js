@@ -40,6 +40,7 @@ function App() {
             {/* Rotas acessíveis apenas depois do login */}
             <Route path="/admin" element={<Admin />} />
             <Route path="/profile" element={<ProfileSettings />} />
+            <Route path="/profile/:section" element={<ProfileSettings />} />
           </Routes>
         </Layout>
         <Footer />

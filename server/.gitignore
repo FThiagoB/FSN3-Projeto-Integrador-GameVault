@@ -6,6 +6,8 @@ migrations
 
 # Ignora tudo dentro de uploads/users
 src/uploads/users/**
+src/uploads/games/**
 
 # Excetua apenas o default.png
 !src/uploads/users/default.png
+!src/uploads/games/default.png

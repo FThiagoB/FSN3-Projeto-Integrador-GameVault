@@ -180,3 +180,9 @@
 .admin-profile-options-list li:not(:last-child) {
   border-bottom: 1px solid rgba(139, 92, 246, 0.2);
 }
+
+@media (max-width: 766px) {
+  .admin-navbar {
+    display: none;
+  }
+}

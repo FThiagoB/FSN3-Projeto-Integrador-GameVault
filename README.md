@@ -1,12 +1,14 @@
 ## ⚙️ Instalação
 
 1. Realize o clone do repositório:
+
 ```
 git clone https://github.com/FThiagoB/FSN3-Projeto-Integrador-GameVault.git
 cd FSN3-Projeto-Integrador-GameVault
 ```
 
 2. Instale os módulos:
+
 ```
 cd client
 npm install
@@ -40,8 +42,8 @@ npm run seed
 
 6. Rode o servidor
 
-Dentro da pasta `src/` do servidor, executar:
+Dentro da pasta `server` executar:
 
 ```
-node server.js
+npm run dev
 ```

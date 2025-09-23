@@ -1,11 +1,9 @@
-/* Estilos Globais da Sidebar */
 .sidebar {
   height: 100vh;
   position: sticky;
   top: 0;
   z-index: 3000;
   background-image: linear-gradient(to bottom right, #312e81, #be185d);
-  font-family: "Press Start 2P", system-ui, sans-serif;
   color: white;
   border-right: 4px solid #a78bfa;
 }
@@ -13,7 +11,7 @@
 .sidebar__nav {
   height: 100%;
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Essencial para a separação topo/meio/rodapé */
 }
 
 /* Cabeçalho da Sidebar */
@@ -22,6 +20,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0; /* Impede que o header encolha */
 }
 
 .sidebar__logo-container {
@@ -40,17 +39,6 @@
   flex-shrink: 0;
 }
 
-.sidebar__logo-text {
-  overflow: hidden;
-  transition: all 0.3s ease-in-out;
-  color: #a78bfa;
-  text-shadow: 1px 1px 4px #000;
-}
-
-.sidebar__logo-text--visible {
-  width: 8rem; /* 128px */
-}
-
 /* Botão de Toggle (Desktop) */
 .sidebar__toggle-desktop {
   padding: 0.5rem;
@@ -59,7 +47,7 @@
   border: none;
   color: white;
   cursor: pointer;
-  display: none; /* Escondido por padrão, visível em telas maiores */
+  display: none;
 }
 
 .sidebar__toggle-desktop:hover {
@@ -74,23 +62,45 @@
   transform: rotate(180deg);
 }
 
+/* --- NOVO: Contêiner do Menu Principal --- */
+.sidebar__menu-container {
+  flex-grow: 1; /* Faz esta seção ocupar todo o espaço disponível */
+  overflow-y: auto; /* Adiciona scroll se os itens não couberem */
+  overflow-x: hidden;
+}
+
 /* Menu e Itens */
 .sidebar__menu {
-  flex-grow: 1;
   padding: 0 1rem;
   list-style: none;
   margin: 0;
 }
 
+/* --- NOVO: Rodapé da Sidebar --- */
+.sidebar__footer {
+  padding: 1rem;
+  flex-shrink: 0; /* Impede que o rodapé encolha */
+  border-top: 1px solid rgba(167, 139, 250, 0.3);
+}
+
+/* Itens da Sidebar (Links e Botões) */
 .sidebar__item {
   display: flex;
   align-items: center;
+  width: 100%;
   padding: 0.75rem;
   margin: 0.5rem 0;
   border-radius: 0.5rem;
   color: #f0e9ff;
   text-decoration: none;
   transition: background-color 0.2s, color 0.2s;
+  /* Reset para botões */
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.75rem;
+  text-align: left;
 }
 
 .sidebar__item:hover {
@@ -106,6 +116,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .sidebar__item-text {
@@ -117,7 +128,7 @@
 }
 
 .sidebar__item-text--visible {
-  width: 10rem; /* 160px */
+  width: 10rem;
   margin-left: 1rem;
 }
 

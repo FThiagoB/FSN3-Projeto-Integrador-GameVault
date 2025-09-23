@@ -4,6 +4,7 @@ import ProfileContent from "../../components/ProfileContent/ProfileGeral/Profile
 import ProfileAddress from "../../components/ProfileContent/ProfileAddress/ProfileAddress";
 import ProfileOrders from "../../components/ProfileContent/ProfileOrders/ProfileOrders";
 import ProfileSecurity from "../../components/ProfileContent/ProfileSecurity/ProfileSecurity";
+import CreateGamePage from "../../components/CreateGame/CreateGame";
 
 const ProfileSettings = () => {
   const [activePage, setActivePage] = useState("profile");
@@ -29,6 +30,15 @@ const ProfileSettings = () => {
               <button onClick={() => setActivePage("orders")}>Orders</button>
             </li>
             <li
+              className={
+                activePage === "createGame" ? "profile-nav-active" : ""
+              }
+            >
+              <button onClick={() => setActivePage("createGame")}>
+                Create Game
+              </button>
+            </li>
+            <li
               className={activePage === "security" ? "profile-nav-active" : ""}
             >
               <button onClick={() => setActivePage("security")}>
@@ -43,6 +53,7 @@ const ProfileSettings = () => {
       {activePage === "profile" && <ProfileContent />}
       {activePage === "addresses" && <ProfileAddress />}
       {activePage === "orders" && <ProfileOrders />}
+      {activePage === "createGame" && <CreateGamePage />}
       {activePage === "security" && <ProfileSecurity />}
     </div>
   );

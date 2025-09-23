@@ -16,7 +16,7 @@ import Admin from "./pages/Adm/Admin.jsx";
 import Navbar from "./components/Navbar/Navbar.jsx";
 import ProfileSettings from "./pages/Profiles/Profile.jsx";
 import { AuthProvider } from "./contexts/AuthContext";
-import ProtectedRoutes from "./contexts/RequireAuth.jsx";
+import ProtectedRoutes from "./contexts/RequireAuth.js";
 
 function App() {
   return (
@@ -41,7 +41,6 @@ function App() {
             {/* Rotas acessíveis apenas depois do login */}
             <Route path="/admin" element={<Admin />} />
             <Route path="/profile" element={<ProfileSettings />} />
-
           </Routes>
         </Layout>
         <Footer />

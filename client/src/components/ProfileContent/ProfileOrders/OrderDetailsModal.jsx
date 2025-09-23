@@ -17,6 +17,16 @@ import { useNavigate } from "react-router-dom";
 
 import { ToastContainer, toast } from "react-toastify";
 
+const getStatusBadge = (status) => {
+  const statusConfig = {
+    pending: { variant: 'warning', text: 'Pendente' },
+    completed: { variant: 'success', text: 'Concluído' },
+    cancelled: { variant: 'danger', text: 'Cancelado' },
+    shipped: { variant: 'info', text: 'Enviado' },
+    processing: { variant: 'primary', text: 'Processando' }
+  };
+}
+
 const notifySuccess = (Mensagem) => {
   toast.success(Mensagem, {
     position: "bottom-right",
@@ -131,6 +141,10 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
       cancelled: { variant: 'danger', text: 'Cancelado' },
       shipped: { variant: 'info', text: 'Enviado' },
       processing: { variant: 'primary', text: 'Processando' },
+
+      partially_shipped: { variant: 'warning', text: 'Parcialmente enviado' },
+      partially_cancelled: { variant: 'danger', text: 'Parcialmente cancelado' },
+      partially_completed: { variant: 'success', text: 'Parcialmente recebido' },
 
       approved: { variant: 'success', text: 'Aprovado' },
       rejected: { variant: 'danger', text: 'Rejeitado' },
@@ -283,7 +297,7 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
             </div>
             <div className="col-md-6">
               <p><strong>Subtotal:</strong> {formatCurrency(order.subtotal)}</p>
-              <p><strong>Desconto:</strong> {formatCurrency(order.discount)}</p>
+              <p><strong>Desconto:</strong> {formatCurrency(order.discount * order.subtotal)}</p>
               <p><strong>Taxas:</strong> {formatCurrency(order.tax)}</p>
               <p><strong>Frete:</strong> {formatCurrency(order.shippingCost)}</p>
               <p><strong className="h6">Total: {formatCurrency(order.total)}</strong></p>
@@ -301,11 +315,12 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
                 <th>Quantidade</th>
                 <th>Preço Unitário</th>
                 <th>Subtotal</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {order.items.map((item) => (
-                <tr key={item.id}>
+                <tr key={item.game.id}>
                   <td>
                     <div className="d-flex align-items-center">
                       <img
@@ -326,6 +341,7 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
                   <td className="align-middle">
                     {formatCurrency(item.unitPrice * item.quantity)}
                   </td>
+                  <td className="align-middle">{getStatusBadge(item.status)}</td>
                 </tr>
               ))}
             </tbody>

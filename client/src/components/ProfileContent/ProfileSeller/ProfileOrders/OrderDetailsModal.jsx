@@ -63,8 +63,8 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
       orderStatus: status
     };
 
-    const response = await fetch(`http://localhost:4500/orders/me/${order.id}`, {
-      method: "PUT",
+    const response = await fetch(`http://localhost:4500/seller/orders/me/${order.id}`, {
+      method: "DELETE",
       headers: {
           'Content-Type': 'application/json',
           "Authorization": `Bearer ${cookies.authToken}`,
@@ -131,6 +131,10 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
       cancelled: { variant: 'danger', text: 'Cancelado' },
       shipped: { variant: 'info', text: 'Enviado' },
       processing: { variant: 'primary', text: 'Processando' },
+
+      partially_shipped: { variant: 'warning', text: 'Parcialmente enviado' },
+      partially_cancelled: { variant: 'warning', text: 'Parcialmente enviado' },
+      partially_completed: { variant: 'success', text: 'Parcialmente recebido' },
 
       approved: { variant: 'success', text: 'Aprovado' },
       rejected: { variant: 'danger', text: 'Rejeitado' },
@@ -299,6 +303,7 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
                 <th>Quantidade</th>
                 <th>Preço Unitário</th>
                 <th>Subtotal</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -324,6 +329,7 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
                   <td className="align-middle">
                     {formatCurrency(item.unitPrice * item.quantity)}
                   </td>
+                  <td className="align-middle">{getStatusBadge(item.status)}</td>
                 </tr>
               ))}
             </tbody>

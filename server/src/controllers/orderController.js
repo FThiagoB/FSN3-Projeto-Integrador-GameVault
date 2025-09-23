@@ -17,22 +17,40 @@ const paymentMethods = [
 ];
 
 // Função para gerar externID
-    const generateExternID = (id) => {
-        let base36 = id.toString(36).toUpperCase();
-        base36 = base36.padStart(8, '0');
-        return base36.replace(/(\w{4})(\w{4})/, 'ORD$1-$2');
-    };
+const generateExternID = (id) => {
+    let base36 = id.toString(36).toUpperCase();
+    base36 = base36.padStart(8, '0');
+    return base36.replace(/(\w{4})(\w{4})/, 'ORD$1-$2');
+};
 
-    // Função para pegar uma descrição do pagamento
-    const getPaymentDescription = (type, data) => {
-        if (type === "credit_card") {
-            let cardNumber = data.number;
-            let hidden_cardNumber = cardNumber.replace(/(^\w{4}).*.(\w{2})$/, `$1${"*".repeat((cardNumber.length - 11))}$2`)
-            return hidden_cardNumber;
-        }
+// Função para pegar uma descrição do pagamento
+const getPaymentDescription = (type, data) => {
+    if (type === "credit_card") {
+        let cardNumber = data.number;
+        let hidden_cardNumber = cardNumber.replace(/(^\w{4}).*.(\w{2})$/, `$1${"*".repeat((cardNumber.length - 11))}$2`)
+        return hidden_cardNumber;
+    }
 
-        return "";
-    };
+    return "";
+};
+
+function getOrderStatusFromItems(items) {
+    const statuses = items.map(item => item.status);
+
+    const all = (status) => statuses.every(s => s === status);
+    const some = (status) => statuses.some(s => s === status);
+
+    if (all('cancelled')) return 'cancelled';
+    if (all('pending')) return 'pending';
+    if (all('shipped')) return 'shipped';
+    if (all('delivered')) return 'completed';
+
+    if (some('shipped') && some('pending')) return 'partially_shipped';
+    if (some('cancelled') && some(s => s !== 'cancelled')) return 'partially_cancelled';
+    if (some('delivered') && !all('delivered')) return 'partially_completed';
+
+    return 'processing'; // fallback genérico
+}
 
 exports.validateCart = async (req, res) => {
     try {
@@ -266,7 +284,8 @@ exports.processCheckout = async (req, res) => {
                 orderItems.push({
                     gameID: game.id,
                     quantity: item.quantity,
-                    unitPrice: game.price
+                    unitPrice: game.price,
+                    status: "pending",
                 });
             }
 
@@ -347,8 +366,6 @@ exports.processCheckout = async (req, res) => {
 }
 
 exports.getTransactionsByJWT = async (req, res) => {
-    
-
     try {
         const userID = parseInt(req.user.id);
         const { page = 1, limit = 10, status } = req.query;
@@ -369,11 +386,15 @@ exports.getTransactionsByJWT = async (req, res) => {
             orderBy: { createdAt: 'desc' },
             include: {
                 items: {
-                    include: {
+                    select: {
                         game: {
                             select: { id: true, title: true, image: true }
-                        }
-                    }
+                        },
+                        status: true,
+                        unitPrice: true,
+                        quantity: true,
+                    },
+                    
                 },
                 address: {
                     select: {
@@ -635,7 +656,7 @@ exports.getTransactions = async (req, res) => {
 exports.getTransactionsBySellerJWT = async (req, res) => {
     try {
         const sellerId = parseInt(req.user.id);
-        const { page = 1, limit = 10, status, startDate, endDate } = req.query;
+        const { page = 1, limit = 10, startDate, endDate } = req.query;
         const skip = (page - 1) * limit;
 
         // Monta os filtros
@@ -648,8 +669,6 @@ exports.getTransactionsBySellerJWT = async (req, res) => {
                 }
             }
         };
-
-        if (status) where.status = status;
 
         if (startDate || endDate) {
             where.createdAt = {};
@@ -688,7 +707,7 @@ exports.getTransactionsBySellerJWT = async (req, res) => {
                             sellerID: sellerId
                         }
                     },
-                    include: {
+                    select: {
                         game: {
                             select: {
                                 id: true,
@@ -698,7 +717,10 @@ exports.getTransactionsBySellerJWT = async (req, res) => {
                                 sellerID: true,
                                 deleted: true
                             }
-                        }
+                        },
+                        status: true,
+                        unitPrice: true,
+                        quantity: true,
                     }
                 },
                 paymentMethod: {
@@ -715,8 +737,8 @@ exports.getTransactionsBySellerJWT = async (req, res) => {
 
         // Contar total de pedidos para paginação
         const totalOrders = await prisma.order.count({ where });
-        
-         // Adiciona imageUrl aos games
+
+        // Adiciona imageUrl aos games
         const formattedOrders = orders.map(order => {
             // Calcula o valor total recebido pelo vendedor daquele pedido
             const totalSeller = order.items.reduce((sum, item) => {
@@ -724,15 +746,17 @@ exports.getTransactionsBySellerJWT = async (req, res) => {
             }, 0)
 
             // Remove alguns campos que o vendedor não deve ter acesso
-            const {subtotal, discount, tax, couponID, ... filteredOrder} =  order;
+            const { subtotal, discount, tax, couponID, ...filteredOrder } = order;
 
             return ({
                 ...filteredOrder,
                 total: totalSeller,
                 externID: generateExternID(order.id),
+                status: getOrderStatusFromItems(order.items),
+                paymentStatus: getOrderStatusFromItems(order.items) === "cancelled"? "cancelled":order.paymentStatus,
                 paymentMethod: {
                     type: order.paymentMethod.type,
-                    description: getPaymentDescription(order.paymentMethod.type, order.paymentMethod.data)
+                    description: getPaymentDescription(order.paymentMethod.type, order.paymentMethod.data),
                 },
                 items: order.items.map(item => ({
                     ...item,
@@ -1509,8 +1533,15 @@ exports.setStateOrderByClient = async (req, res) => {
         if (!orderID || !orderStatus)
             return res.status(400).json({ message: "Problems with the request" });
 
+        // Verificar se o orderID é um número
+        if (Number.isNaN(parseInt(orderID)))
+            return res.status(400).json({ message: "The ID number must be an integer" });
+
         const order = await prisma.order.findUnique({
             where: { id: parseInt(orderID), userID },
+            include: {
+                items: true, // Inclui os itens para verificar seus status
+            }
         });
 
         if (!order)
@@ -1519,22 +1550,70 @@ exports.setStateOrderByClient = async (req, res) => {
         if (!valideOrderStatus.includes(orderStatus))
             return res.status(400).json({ message: "Unrecognized Order Status" });
 
-        if ((order.status === 'delivered') || (order.status === 'cancelled'))
+        // Verificar se o pedido já está finalizado (globalmente)
+        if (order.status === 'delivered' || order.status === 'cancelled')
             return res.status(400).json({ message: "The order has already been finalized" });
 
-        if (order.status === 'shipped')
-            return res.status(400).json({ message: "The order has not yet been shipped" });
+        // Agora, baseado nos itens, vamos verificar a possibilidade de mudança de status
+        if (orderStatus === "delivered") {
+             // Verificar os status dos itens
+            const items = order.items;
 
-        if (Number.isNaN( parseInt(orderID) ))
-            return res.status(400).json({ message: "The ID number must be an integer" });
+            // Verificar se há pelo menos um item shipped (para ser marcado como delivered)
+            const hasShippedItem = items.some(item => item.status === 'shipped');
+            const hasPendingOrProcessing = items.some(item => item.status === 'pending' || item.status === 'processing');
 
-        // Atualiza o status
-        const updatedOrder = await prisma.order.update({
-            where: { id: parseInt(orderID) },
-            data: { status: orderStatus }
-        });
+            if (!hasShippedItem) {
+                return res.status(400).json({ message: "Cannot mark as delivered: no items have been shipped." });
+            }
+
+            if (hasPendingOrProcessing) {
+                return res.status(400).json({ message: "Cannot mark as delivered: there are items pending or processing." });
+            }
+
+            // Atualizar o status do pedido para delivered
+            const updatedOrder = await prisma.order.update({
+                where: { id: parseInt(orderID) },
+                data: { status: 'delivered' }
+            });
+
+            // Atualizar todos os itens que estão shipped para delivered
+            await prisma.orderItem.updateMany({
+                where: {
+                    orderID: parseInt(orderID),
+                    status: 'shipped'
+                },
+                data: { status: 'delivered' }
+            });
+
+            return res.status(200).json(updatedOrder);
+        }
 
         if (orderStatus === "cancelled") {
+            const items = order.items;
+            // Verificar se há itens shipped ou delivered
+            const hasShippedOrDelivered = items.some(item => item.status === 'shipped' || item.status === 'delivered');
+
+            if (hasShippedOrDelivered) {
+                return res.status(400).json({ message: "Cannot cancel order: there are items already shipped or delivered." });
+            }
+
+            // Atualizar o status do pedido para cancelled
+            const updatedOrder = await prisma.order.update({
+                where: { id: parseInt(orderID) },
+                data: { status: 'cancelled' }
+            });
+
+            // Atualizar todos os itens que não estão cancelled para cancelled
+            await prisma.orderItem.updateMany({
+                where: {
+                    orderID: parseInt(orderID),
+                    status: { not: 'cancelled' }
+                },
+                data: { status: 'cancelled' }
+            });
+
+            // Ajustar o paymentStatus conforme a lógica anterior
             let newPaymentStatus;
 
             if (updatedOrder.paymentStatus === "pending")
@@ -1543,15 +1622,15 @@ exports.setStateOrderByClient = async (req, res) => {
             else if (updatedOrder.paymentStatus === "approved")
                 newPaymentStatus = "refunded"
 
-            if( newPaymentStatus ){
-                // Atualiza o status
-                const updatedOrder = await prisma.order.update({
+            if (newPaymentStatus) {
+                await prisma.order.update({
                     where: { id: parseInt(orderID) },
                     data: { paymentStatus: newPaymentStatus }
                 });
             }
+
+            return res.status(200).json(updatedOrder);
         }
-        res.status(200).json(updatedOrder);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message })
@@ -1563,14 +1642,25 @@ exports.cancelOrderBySeller = async (req, res) => {
         const { orderID } = req.params;
         const sellerID = req.user.id;
 
-        // Verificar se o pedido existe e todos os itens são do vendedor
-        const order = await prisma.order.findFirst({
-            where: {
-                id: orderID,
+        if (!orderID)
+            return res.status(400).json({ message: "Order ID is required" });
+
+        // Verificar se orderID é um número válido
+        if (Number.isNaN(parseInt(orderID)))
+            return res.status(400).json({ message: "The ID number must be an integer" });
+
+        // Buscar o pedido com todos os itens e seus jogos
+        const order = await prisma.order.findUnique({
+            where: { id: parseInt(orderID) },
+            include: {
                 items: {
-                    every: {
+                    include: {
                         game: {
-                            sellerID: sellerID
+                            select: {
+                                id: true,
+                                sellerID: true,
+                                title: true
+                            }
                         }
                     }
                 }
@@ -1578,20 +1668,116 @@ exports.cancelOrderBySeller = async (req, res) => {
         });
 
         if (!order)
-            return res.status(404).json({ message: "Order not found or you do not have permission" });
+            return res.status(404).json({ message: "Order not found" });
 
-        if (!['pending', 'paid'].includes(order.status))
-            return res.status(400).json({ message: "The order cannot be canceled in the current status." });
+        // Verificar se o pedido já está finalizado
+        if (order.status === 'delivered' || order.status === 'cancelled')
+            return res.status(400).json({ message: "The order has already been finalized" });
 
-        const updatedOrder = await prisma.order.update({
-            where: { id: orderID },
-            data: { status: 'cancelled' },
+        // Separar itens do vendedor e de outros vendedores
+        const sellerItems = order.items.filter(item => item.game.sellerID === sellerID);
+        const otherItems = order.items.filter(item => item.game.sellerID !== sellerID);
+
+        if (sellerItems.length === 0)
+            return res.status(404).json({ message: "No items found from this seller in the order" });
+
+        // Verificar se há itens do vendedor que já foram enviados ou entregues
+        const hasShippedOrDeliveredItems = sellerItems.some(item => 
+            item.status === 'shipped' || item.status === 'delivered'
+        );
+
+        if (hasShippedOrDeliveredItems) {
+            return res.status(400).json({ 
+                message: "Cannot cancel items: some items have already been shipped or delivered" 
+            });
+        }
+
+        // Verificar status dos itens de outros vendedores
+        const otherItemsStatus = getOrderStatusFromItems(otherItems);
+        const hasOtherActiveItems = otherItems.length > 0 && 
+            otherItemsStatus !== 'cancelled' && 
+            otherItemsStatus !== 'delivered';
+
+        // Determinar o novo status global do pedido
+        let newOrderStatus = order.status;
+        let newPaymentStatus = order.paymentStatus;
+
+        if (otherItems.length === 0) {
+            // Se não há outros itens, cancelar todo o pedido
+            newOrderStatus = 'cancelled';
+            if (order.paymentStatus === 'approved') {
+                newPaymentStatus = 'refunded';
+            } else if (order.paymentStatus === 'pending') {
+                newPaymentStatus = 'cancelled';
+            }
+        } else if (hasOtherActiveItems) {
+            // Se há outros itens ativos, marcar como parcialmente cancelado
+            newOrderStatus = 'partially_cancelled';
+            if (order.paymentStatus === 'approved') {
+                newPaymentStatus = 'partially_refunded';
+            }
+        } else {
+            // Se todos os outros itens já estão cancelados ou entregues
+            newOrderStatus = 'cancelled';
+            if (order.paymentStatus === 'approved') {
+                newPaymentStatus = 'refunded';
+            }
+        }
+
+        // Atualizar em transação
+        const transaction = await prisma.$transaction([
+             // Atualizar status do pedido e pagamento
+            prisma.order.update({
+                where: { id: parseInt(orderID) },
+                data: { 
+                    status: newOrderStatus,
+                    paymentStatus: newPaymentStatus
+                }
+            }),
+
+            // Atualizar itens do vendedor para cancelados
+            prisma.orderItem.updateMany({
+                where: { 
+                    orderID: parseInt(orderID),
+                    game: {
+                        sellerID: sellerID
+                    },
+                    status: { 
+                        notIn: ['shipped', 'delivered'] // Só cancela itens que não foram enviados
+                    }
+                },
+                data: { status: 'cancelled' }
+            })
+        ]);
+
+        const updatedOrder = transaction[0];
+
+        // Buscar o pedido atualizado com itens para retornar
+        const finalOrder = await prisma.order.findUnique({
+            where: { id: parseInt(orderID) },
+            include: {
+                items: {
+                    include: {
+                        game: {
+                            select: {
+                                id: true,
+                                title: true,
+                                sellerID: true
+                            }
+                        }
+                    }
+                }
+            }
         });
 
-        res.status(200).json(updatedOrder);
-    } catch (error) {
+        res.status(200).json({
+            order: finalOrder,
+            message: `Items cancelled successfully. Order status updated to: ${newOrderStatus}`
+        });
+
+        } catch (error) {
         console.error(error);
-        res.status(500).json({ message: error.message })
+        res.status(500).json({ message: error.message });
     }
 };
 

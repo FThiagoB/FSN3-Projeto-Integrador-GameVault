@@ -103,6 +103,7 @@ model OrderItem{
 	gameID Int
 	quantity Int
 	unitPrice Float
+  status  String
 	
 	order Order @relation(fields: [orderID], references: [id])
 	game Game @relation(fields: [gameID], references: [id])

@@ -16,17 +16,25 @@ import Badge from 'react-bootstrap/Badge';
 
 // Status badges com cores
 const getStatusBadge = (status) => {
-  const statusConfig = {
-    pending: { variant: 'warning', text: 'Pendente' },
-    completed: { variant: 'success', text: 'Concluído' },
-    cancelled: { variant: 'danger', text: 'Cancelado' },
-    shipped: { variant: 'info', text: 'Enviado' },
-    processing: { variant: 'primary', text: 'Processando' }
+    const statusConfig = {
+      pending: { variant: 'warning', text: 'Pendente' },
+      delivered: { variant: 'success', text: 'Concluído' },
+      cancelled: { variant: 'danger', text: 'Cancelado' },
+      shipped: { variant: 'info', text: 'Enviado' },
+      processing: { variant: 'primary', text: 'Processando' },
+
+      partially_shipped: { variant: 'warning', text: 'Parcialmente enviado' },
+      partially_cancelled: { variant: 'danger', text: 'Parcialmente cancelado' },
+      partially_completed: { variant: 'success', text: 'Parcialmente recebido' },
+
+      approved: { variant: 'success', text: 'Aprovado' },
+      rejected: { variant: 'danger', text: 'Rejeitado' },
+      refunded: { variant: 'info', text: 'Reembolsado' },
+    };
+
+    const config = statusConfig[status] || { variant: 'secondary', text: status };
+    return <Badge bg={config.variant}>{config.text}</Badge>;
   };
-  
-  const config = statusConfig[status] || { variant: 'secondary', text: status };
-  return <Badge bg={config.variant}>{config.text}</Badge>;
-};
 
 const notifySuccess = (Mensagem) => {
   toast.success(Mensagem, {

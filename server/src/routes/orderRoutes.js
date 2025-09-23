@@ -8,11 +8,13 @@ const router = Router();
 // router.get("/transactions/", auth, adminOnly, orderController.getTransactions);
 // router.get("/transactions/user/:id", auth, adminOnly, orderController.getTransactionsByUserID);
 // router.get("/transactions/user/:id/:orderID", auth, adminOnly, orderController.getTransactionByUserID);
+// router.get("/orders/me/:orderID", auth, clientOnly, orderController.getTransactionByJWT);
+
 router.get("/orders/me", auth, clientOnly, orderController.getTransactionsByJWT);
-router.get("/orders/me/:orderID", auth, clientOnly, orderController.getTransactionByJWT);
 router.put("/orders/me/:orderID", auth, clientOnly, orderController.setStateOrderByClient);
 
 router.get("/seller/orders/me", auth, sellerOnly, orderController.getTransactionsBySellerJWT);
+router.delete("/seller/orders/me/:orderID", auth, sellerOnly, orderController.cancelOrderBySeller);
 
 router.get("/transactions/seller/:id", auth, adminOnly, orderController.getTransactionsBySellerID);
 router.get("/transactions/seller/:id/:orderID", auth, adminOnly, orderController.getTransactionBySellerID);
@@ -31,9 +33,9 @@ router.get("/seller/:id/summary", auth, adminOnly, orderController.getSummaryByS
 // Rotas para gerenciar os estados dos pedidos
 
 
-router.put("/seller/orders/me/:orderID/cancel", auth, sellerOnly, orderController.cancelOrderBySeller);
-router.put("/seller/orders/me/:orderID/ship", auth, sellerOnly, orderController.shipOrderBySeller);
 
-router.put("/orders/:orderID/status", auth, adminOnly, orderController.updateOrderStatusByAdmin);
+// router.put("/seller/orders/me/:orderID/ship", auth, sellerOnly, orderController.shipOrderBySeller);
+
+// router.put("/orders/:orderID/status", auth, adminOnly, orderController.updateOrderStatusByAdmin);
 
 module.exports = router;

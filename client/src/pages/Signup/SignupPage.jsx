@@ -64,7 +64,7 @@ const notifyError = (message) => {
       name: name,
       email: email,
       password: password,
-      role: role,
+      role: "user",
     };
 
     try {
@@ -92,7 +92,7 @@ const notifyError = (message) => {
     }
     catch (error) {
       console.error('Erro:', error);
-      notifyError(error);
+      notifyError(`${error}`);
     }
   };
 
@@ -152,28 +152,6 @@ const notifyError = (message) => {
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
-
-          <div style={{ "display": "flex", "flex-direction": "row", "justifyContent": "space-around", "gap": "5" }}>
-            <label>
-              <input
-                type="radio"
-                value="user"
-                checked={role === 'user'}
-                onChange={() => setRole('user')}
-              />
-              <span style={{ padding: "0px 10px" }}>User</span>
-            </label>
-
-            <label>
-              <input
-                type="radio"
-                value="seller"
-                checked={role === 'seller'}
-                onChange={() => setRole('seller')}
-              />
-              <span style={{ padding: "0px 10px" }}>Seller</span>
-            </label>
-          </div>
 
           <button type="submit" className="signup-retro__btn">
             Registrar

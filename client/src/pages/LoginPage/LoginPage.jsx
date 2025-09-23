@@ -112,7 +112,7 @@ const notifyError = (message) => {
             Entrar
           </button>
         </form>
-        <p>
+        <p style={{ "margin-top": "10px", "text-align": "center" }}>
           Ainda sem conta? <Link to="/signup">Cadastre-se</Link>
         </p>
 

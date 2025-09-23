@@ -17,64 +17,64 @@ const paymentMethods = [
 ];
 
 exports.validateCart = async (req, res) => {
-  try {
-    const { items } = req.body;
+    try {
+        const { items } = req.body;
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ message: "Cart is empty or invalid" });
-    }
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ message: "Cart is empty or invalid" });
+        }
 
-    let subtotal = 0;
-    const validatedItems = [];
-    const errors = [];
+        let subtotal = 0;
+        const validatedItems = [];
+        const errors = [];
 
-    for (const item of items) {
-      const game = await prisma.game.findUnique({
-        where: { id: item.gameID },
-        select: { id: true, title: true, price: true, stock: true },
-      });
+        for (const item of items) {
+            const game = await prisma.game.findUnique({
+                where: { id: item.gameID },
+                select: { id: true, title: true, price: true, stock: true },
+            });
 
-      if (!game) {
-        errors.push({ gameID: item.gameID, message: "Game not found" });
-        continue;
-      }
+            if (!game) {
+                errors.push({ gameID: item.gameID, message: "Game not found" });
+                continue;
+            }
 
-      if (game.stock <= 0) {
-        errors.push({ gameID: game.id, title: game.title, message: "Out of stock" });
-        continue;
-      }
+            if (game.stock <= 0) {
+                errors.push({ gameID: game.id, title: game.title, message: "Out of stock" });
+                continue;
+            }
 
-      if (item.quantity > game.stock) {
-        errors.push({
-          gameID: game.id,
-          title: game.title,
-          message: `Insufficient stock, available: ${game.stock}`,
+            if (item.quantity > game.stock) {
+                errors.push({
+                    gameID: game.id,
+                    title: game.title,
+                    message: `Insufficient stock, available: ${game.stock}`,
+                });
+                continue;
+            }
+
+            const itemTotal = game.price * item.quantity;
+            subtotal += itemTotal;
+
+            validatedItems.push({
+                gameID: game.id,
+                title: game.title,
+                unitPrice: game.price,
+                quantity: item.quantity,
+                itemTotal,
+            });
+        }
+
+        res.status(200).json({
+            valid: errors.length === 0,
+            subtotal,
+            items: validatedItems,
+            errors,
         });
-        continue;
-      }
-
-      const itemTotal = game.price * item.quantity;
-      subtotal += itemTotal;
-
-      validatedItems.push({
-        gameID: game.id,
-        title: game.title,
-        unitPrice: game.price,
-        quantity: item.quantity,
-        itemTotal,
-      });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
     }
-
-    res.status(200).json({
-      valid: errors.length === 0,
-      subtotal,
-      items: validatedItems,
-      errors,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
-  }
 };
 
 exports.getCheckoutInfo = async (req, res) => {
@@ -219,7 +219,7 @@ exports.processCheckout = async (req, res) => {
             }
 
             // Address: producra se há o método de pagamento no banco
-            const registerPaymentMethod = await prisma.paymentMethod.create({ 
+            const registerPaymentMethod = await prisma.paymentMethod.create({
                 data: {
                     userID: userID,
                     ...paymentMethod
@@ -338,7 +338,7 @@ exports.getTransactionsByJWT = async (req, res) => {
 
     // Função para pegar uma descrição do pagamento
     const getPaymentDescription = (type, data) => {
-        if(type === "credit_card"){
+        if (type === "credit_card") {
             let cardNumber = data.number;
             let hidden_cardNumber = cardNumber.replace(/(^\w{4}).*.(\w{2})$/, `$1${"*".repeat((cardNumber.length - 11))}$2`)
             return hidden_cardNumber;
@@ -380,7 +380,7 @@ exports.getTransactionsByJWT = async (req, res) => {
                         zipCode: true
                     }
                 },
-                paymentMethod : {
+                paymentMethod: {
                     select: {
                         type: true,
                         data: true
@@ -1490,8 +1490,11 @@ exports.cancelOrderByClient = async (req, res) => {
 
 exports.setStateOrderByClient = async (req, res) => {
     try {
-        const { orderID, orderStatus } = req.params;
+        const { orderID } = req.params;
         const userID = parseInt(req.user.id);
+
+        if (!req.body) req.body = {}
+        const { orderStatus } = req.body;
 
         const valideOrderStatus = ["delivered", "cancelled"]
 
@@ -1499,7 +1502,7 @@ exports.setStateOrderByClient = async (req, res) => {
             return res.status(400).json({ message: "Problems with the request" });
 
         const order = await prisma.order.findUnique({
-            where: { id: orderID, userID },
+            where: { id: parseInt(orderID), userID },
         });
 
         if (!order)
@@ -1508,17 +1511,38 @@ exports.setStateOrderByClient = async (req, res) => {
         if (!valideOrderStatus.includes(orderStatus))
             return res.status(400).json({ message: "Unrecognized Order Status" });
 
-        if (order.status !== 'delivered' || order.status !== 'cancelled')
+        if ((order.status === 'delivered') || (order.status === 'cancelled'))
             return res.status(400).json({ message: "The order has already been finalized" });
 
-        if (order.status !== 'shipped')
+        if (order.status === 'shipped')
             return res.status(400).json({ message: "The order has not yet been shipped" });
 
+        if (Number.isNaN( parseInt(orderID) ))
+            return res.status(400).json({ message: "The ID number must be an integer" });
+
+        // Atualiza o status
         const updatedOrder = await prisma.order.update({
-            where: { id: orderID },
-            data: { status: orderStatus },
+            where: { id: parseInt(orderID) },
+            data: { status: orderStatus }
         });
 
+        if (orderStatus === "cancelled") {
+            let newPaymentStatus;
+
+            if (updatedOrder.paymentStatus === "pending")
+                newPaymentStatus = "cancelled"
+
+            else if (updatedOrder.paymentStatus === "approved")
+                newPaymentStatus = "refunded"
+
+            if( newPaymentStatus ){
+                // Atualiza o status
+                const updatedOrder = await prisma.order.update({
+                    where: { id: parseInt(orderID) },
+                    data: { paymentStatus: newPaymentStatus }
+                });
+            }
+        }
         res.status(200).json(updatedOrder);
     } catch (error) {
         console.error(error);

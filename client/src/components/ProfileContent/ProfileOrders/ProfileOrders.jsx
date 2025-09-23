@@ -10,7 +10,7 @@ import { useEffect } from "react";
 import OrderDetailsModal from './OrderDetailsModal';
 
 import moment from 'moment';
-import "./OrderDetailsModal.css";
+import "./ProfileOrders.css";
 
 import Badge from 'react-bootstrap/Badge';
 
@@ -161,6 +161,7 @@ const ProfileOrders = () => {
         backdropClassName="custom-order-modal-backdrop"
         dialogClassName="custom-order-modal-dialog"
         centered
+        refreshFetch={fetchOrdesItems}
       />
     </main>
   );

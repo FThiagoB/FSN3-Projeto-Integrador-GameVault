@@ -15,8 +15,36 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from "react-router-dom";
 
+import { ToastContainer, toast } from "react-toastify";
 
-const OrderDetailsModal = ({ show, onHide, order }) => {
+const notifySuccess = (Mensagem) => {
+  toast.success(Mensagem, {
+    position: "bottom-right",
+    autoClose: 1000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+  });
+}
+
+const notifyError = (message) => {
+  toast.error(message, {
+    position: "bottom-right",
+    autoClose: 1500,       // um pouco mais de tempo para ler o erro
+    hideProgressBar: false,
+    closeOnClick: true,    // permitir fechar ao clicar
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+  });
+}
+
+
+const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showDeliveryConfirm, setShowDeliveryConfirm] = useState(false);
 
@@ -29,25 +57,36 @@ const OrderDetailsModal = ({ show, onHide, order }) => {
   const { user, syncData } = useAuth();
   const [cookies] = useCookies(['authToken']);
 
-  async function onCancelOrder() {
+  async function changeStatus( status ) {
   try {
-    const response = await fetch(`http://localhost:4500/transactions/user/me`, {
-      method: "GET",
+    const payload = {
+      orderStatus: status
+    };
+
+    const response = await fetch(`http://localhost:4500/orders/me/${order.id}`, {
+      method: "PUT",
       headers: {
-        "Authorization": `Bearer ${cookies.authToken}`,
-      }
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${cookies.authToken}`,
+      },
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-      console.error(`Problemas na requisição: ${response}`);
+      notifyError(`Problemas na requisição: ${response}`);
+      console.error('Erro ao confirmar entrega:', response);
       return;
     }
 
-    const data = await response.json();
+    notifySuccess("Status alterado com sucesso");
+    refreshFetch();
+    setTimeout(() => {
+      onHide();
+    }, 1500);
 
-    console.log(data)
   } catch (error) {
-    console.error(`Problemas na requisição: ${error}`);
+    notifyError(`${error}`);
+    console.error('Erro ao confirmar entrega:', error);
   }
 }
 
@@ -127,9 +166,8 @@ const OrderDetailsModal = ({ show, onHide, order }) => {
   const confirmCancel = async () => {
     setCancelling(true);
     try {
-      // await onCancelOrder(order.id);
+      await changeStatus("cancelled")
       setShowCancelConfirm(false);
-      onHide(); // Fecha o modal após o cancelamento
     } catch (error) {
       console.error('Erro ao cancelar pedido:', error);
     } finally {
@@ -141,9 +179,8 @@ const OrderDetailsModal = ({ show, onHide, order }) => {
   const confirmDelivery = async () => {
     setConfirmingDelivery(true);
     try {
-      // await onConfirmDelivery(order.id);
+      await changeStatus("delivered");
       setShowDeliveryConfirm(false);
-      onHide();
     } catch (error) {
       console.error('Erro ao confirmar entrega:', error);
     } finally {
@@ -349,6 +386,7 @@ const OrderDetailsModal = ({ show, onHide, order }) => {
 
         </div>
       </Modal.Footer>
+      <ToastContainer/>
     </Modal>,
     document.body
   );

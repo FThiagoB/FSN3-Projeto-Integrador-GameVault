@@ -11,6 +11,7 @@ import {
   FaCcAmex,
   FaCcPaypal,
   FaTrash,
+  FaBox
 } from "react-icons/fa";
 
 import { useCart } from "../../contexts/CartContext";
@@ -47,9 +48,9 @@ const CheckoutPage = () => {
   const [cookies] = useCookies(['authToken']);
   const { user, userAddress, syncData, loading } = useAuth();
   const redirect = useNavigate();
-  console.log(user)
+  
   //contexto carrinho
-  const { tax, shippingMethod, couponCode, clearCart: contextClearCart, discount, cartItems, removeItem, updateQuantity, tax: impostos, shippingCost: frete } = useCart();
+  const { tax, shippingMethod, shippingMethods, getShippingMethods, selectShippingMethodById, couponCode, clearCart: contextClearCart, discount, cartItems, removeItem, updateQuantity, tax: impostos, shippingCost: frete } = useCart();
 
   // Estados para pagamento
   const [cardNumber, setCardNumber] = useState("");
@@ -88,6 +89,11 @@ const CheckoutPage = () => {
   if (!cartItems.length) {
     redirect("/");
   }
+
+  useEffect(() => {
+      async function refreshMethodsShipping() { await getShippingMethods(); }
+      refreshMethodsShipping();
+    }, []);
 
   const refreshFields = () => {
     setFirstName(user?.name || "");
@@ -240,13 +246,13 @@ const CheckoutPage = () => {
       }
 
       notifySuccess("Compra realizada com sucesso, acompanhe o seu pedido")
-      
+
       setTimeout(() => {
-        redirect("/");
+        redirect("/profile/orders");
         contextClearCart();
       }, 2500);
 
-      
+
     }
     catch (error) {
       console.error('Erro:', error);
@@ -622,6 +628,28 @@ const CheckoutPage = () => {
                     </Form.Group>
                   </Col>
                 </Row>
+              </div>
+
+              {/* Informações de Entrega */}
+              <div style={{"margin-top": "20px"}}>
+                <h2 className="text-white mb-3 d-flex align-items-center fw-bold">
+                  <FaBox className="me-2 text-blue" /> Informações de
+                  Entrega
+                </h2>
+
+                {shippingMethods.map((method) => (
+                  <div key={method.id} className={`shipping-option ${shippingMethod?.id === method.id ? "shipping-option--selected" : ""}`} onClick={() => selectShippingMethodById(method.id)}>
+                    <input type="radio" name="shippingMethod" id={`shippingMethod${method.id}`} value={method.id} checked={shippingMethod?.id === method.id} onChange={() => selectShippingMethodById(method.id)} />
+                    <label htmlFor={`shippingMethod${method.id}`}>
+                      <div>
+                        <div className="shipping-option__name">{method.name}</div>
+                        <div className="shipping-option__desc">{method.description}</div>
+                      </div>
+                      <div className="shipping-option__price">R${method.price.toFixed(2)}</div>
+                    </label>
+                  </div>
+                ))}
+
               </div>
 
               {/* Resumo do Pedido */}

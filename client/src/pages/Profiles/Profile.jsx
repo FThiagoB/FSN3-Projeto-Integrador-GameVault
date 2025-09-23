@@ -9,12 +9,14 @@ import CreateGamePage from "../../components/CreateGame/CreateGame";
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect } from "react";
+
 import ProfileGamesSold from "../../components/ProfileContent/ProfileSeller/ProfileGamesSold/ProfileGamesSold";
+import {default as ProfileSellerOrders} from "../../components/ProfileContent/ProfileSeller/ProfileOrders/ProfileOrders";
 
 const ProfileSettings = ( redirectPage = undefined ) => {
   const [activePage, setActivePage] = useState("profile");
   const { section } = useParams();
-  const valideSections = ["profile", "addresses", "orders", "createGame", "security", "mygames"]
+  const valideSections = ["profile", "addresses", "orders", "createGame", "security", "mygames", "seller-orders"]
 
   // user.role : user / seller / admin
   const { user, deleteAcc } = useAuth();
@@ -78,6 +80,17 @@ const ProfileSettings = ( redirectPage = undefined ) => {
             </li>
             )}
 
+             { user?.role === "seller" && ( <li
+              className={
+                activePage === "seller-orders" ? "profile-nav-active" : ""
+              }
+            >
+              <button onClick={() => setActivePage("seller-orders")}>
+                My Orders
+              </button>
+            </li>
+            )}
+
             <li
               className={activePage === "security" ? "profile-nav-active" : ""}
             >
@@ -96,6 +109,8 @@ const ProfileSettings = ( redirectPage = undefined ) => {
       {activePage === "createGame" && user?.role === "seller" && <CreateGamePage />}
       {activePage === "mygames" && user?.role === "seller" && <ProfileGamesSold />}
       {activePage === "security" && <ProfileSecurity />}
+      {activePage === "seller-orders" && <ProfileSellerOrders />}
+      
     </div>
   );
 };

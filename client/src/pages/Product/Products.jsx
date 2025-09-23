@@ -5,6 +5,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Pagination } from "react-bootstrap";
 import { ToastContainer } from "react-toastify";
 
+import { useAuth } from '../../contexts/AuthContext';
+
 const Products = () => {
   // 2. Novos estados para gerenciar os dados da API
   const [products, setProducts] = useState([]);
@@ -19,6 +21,12 @@ const Products = () => {
 
   const { category: currentCategory } = useParams();
   const navigate = useNavigate();
+
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if((user?.role === "seller") || (user?.role === "admin")) navigate('/profile');
+  }, [user, navigate]);
 
   // 3. O useEffect principal para buscar os produtos
   useEffect(() => {

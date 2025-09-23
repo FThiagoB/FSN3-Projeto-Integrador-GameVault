@@ -16,6 +16,10 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "./Cart.css"; // Importe o novo arquivo CSS
 
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate, useParams } from 'react-router-dom';
+
+
 const Cart = () => {
   const {
     cartItems,
@@ -32,6 +36,9 @@ const Cart = () => {
     discount
   } = useCart();
 
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   // ... (toda a lógica e os estados permanecem os mesmos) ...
   const [shippingMethodSelected, setShippingMethodSelected] = useState({});
   const [promoCode, setPromoCode] = useState("");
@@ -42,7 +49,10 @@ const Cart = () => {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [itemToRemove, setItemToRemove] = useState(null);
 
-  console.log( shippingMethodSelected )
+  useEffect(() => {
+    if((user?.role === "seller") || (user?.role === "admin")) navigate('/profile');
+  }, [user, navigate]);
+
   const notifySuccess = (Mensagem) =>
     toast.success(Mensagem, {
       position: "bottom-right",

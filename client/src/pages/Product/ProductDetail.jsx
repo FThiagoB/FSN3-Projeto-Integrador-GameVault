@@ -1,8 +1,10 @@
 import "./Products.css";
 
 import { useState, useEffect } from "react";
-import { useParams, Navigate, Link } from "react-router-dom";
+import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
+
+import { useAuth } from '../../contexts/AuthContext';
 
 import {
   ButtonGroup,
@@ -36,6 +38,12 @@ function ProductDetail() {
   const [total, setTotal] = useState(0); // Estado para o preço total
 
   const { addToCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if((user?.role === "seller") || (user?.role === "admin")) navigate('/profile');
+  }, [user, navigate]);
 
   // useEffect para buscar os dados do produto na API
   useEffect(() => {

@@ -10,6 +10,8 @@ import { ToastContainer, toast } from "react-toastify";
 
 import moment from 'moment';
 
+import "./ModalPages.css";
+
 const EditGameModal = ({ show, onHide, game, refreshFetch = () => { } }) => {
     const [formData, setFormData] = useState({
         title: '',
@@ -197,7 +199,7 @@ const EditGameModal = ({ show, onHide, game, refreshFetch = () => { } }) => {
             onHide={onHide}
             size="lg"
             centered
-            dialogClassName="custom-game-modal"
+            dialogClassName="edit-game-modal"
             style={{ zIndex: 1060 }}
         >
             <Modal.Header closeButton closeVariant="white">
@@ -205,7 +207,7 @@ const EditGameModal = ({ show, onHide, game, refreshFetch = () => { } }) => {
             </Modal.Header>
 
             <Form onSubmit={handleSubmit}>
-                <Modal.Body ref={modalBodyRef}>
+                <Modal.Body ref={modalBodyRef} style={{"color": "white"}}>
                     {/* Alerta de confirmação de exclusão */}
                     {showDeleteConfirm && (
                         <div ref={alertRef}>
@@ -237,7 +239,6 @@ const EditGameModal = ({ show, onHide, game, refreshFetch = () => { } }) => {
 
                     {/* Upload de Imagem */}
                     <div className="mb-4">
-                        <Form.Label>Imagem do Jogo</Form.Label>
                         <div className="d-flex align-items-center gap-3">
                             {previewImage && (
                                 <img
@@ -256,13 +257,13 @@ const EditGameModal = ({ show, onHide, game, refreshFetch = () => { } }) => {
                                     ref={fileInputRef}
                                     disabled={(game?.deleted)}
                                 />
-                                <Form.Text className="text-muted">
+                                <Form.Text style={{"color": "white"}}>
                                     Formatos suportados: JPG, PNG, GIF. Tamanho máximo: 5MB
                                 </Form.Text>
                             </div>
                             {previewImage && !(game?.deleted) && (
-                                <Button variant="outline-danger" size="sm" onClick={handleRemoveImage}>
-                                    Remover
+                                <Button variant="outline-secondary" size="sm" onClick={handleRemoveImage}>
+                                    Limpar
                                 </Button>
                             )}
                         </div>

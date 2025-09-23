@@ -12,7 +12,7 @@ import {
   FaEnvelope,
   FaChevronLeft,
   FaTachometerAlt,
-  FaPlus 
+  FaMoneyBillWave  
 } from "react-icons/fa";
 import "./Sidebar.css";
 
@@ -102,9 +102,9 @@ const Sidebar = ({ isExpanded, onToggle }) => {
 
   if (user && user.role === "seller") {
     mainLinks.splice(3, 0,{
-      icon: <FaPlus size={22} />,
-      text: "Add Jogo",
-      to: "/profile/createGame",
+      icon: <FaMoneyBillWave size={22} />,
+      text: "My Sales",
+      to: "/profile/seller-orders",
     });
   }
 

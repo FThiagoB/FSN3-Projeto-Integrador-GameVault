@@ -81,7 +81,7 @@ const ProfileOrders = () => {
 
   return (
     <main className="profile-main-content">
-      <h2 className="profile-orders-title">My Orders</h2>
+      <h2 className="profile-orders-title">My Salles</h2>
 
       <div className="orders-list">
         {orders ? orders.map((order) => (
@@ -114,7 +114,7 @@ const ProfileOrders = () => {
               </ul>
             </div>
             <div className="order-card-footer">
-              <span className="order-total">Total: R$ {order.total}</span>
+              <span className="order-total">Total: R$ {Number(order.total).toFixed(2)}</span>
 
               <div className="d-flex gap-4">
                 <button className="profile-btn profile-btn-secondary" onClick={() => handleViewDetails(order)}>

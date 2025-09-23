@@ -717,21 +717,32 @@ exports.getTransactionsBySellerJWT = async (req, res) => {
         const totalOrders = await prisma.order.count({ where });
         
          // Adiciona imageUrl aos games
-        const formattedOrders = orders.map(order => ({
-            ...order,
-            externID: generateExternID(order.id),
-            paymentMethod: {
-                type: order.paymentMethod.type,
-                description: getPaymentDescription(order.paymentMethod.type, order.paymentMethod.data)
-            },
-            items: order.items.map(item => ({
-                ...item,
-                game: {
-                    ...item.game,
-                    imageUrl: `${req.protocol}://${req.get("host")}/uploads/games/${item.game.image}`
+        const formattedOrders = orders.map(order => {
+            // Calcula o valor total recebido pelo vendedor daquele pedido
+            const totalSeller = order.items.reduce((sum, item) => {
+                return sum + (item.unitPrice * item.quantity);
+            }, 0)
+
+            // Remove alguns campos que o vendedor não deve ter acesso
+            const {subtotal, discount, tax, couponID, ... filteredOrder} =  order;
+
+            return ({
+                ...filteredOrder,
+                total: totalSeller,
+                externID: generateExternID(order.id),
+                paymentMethod: {
+                    type: order.paymentMethod.type,
+                    description: getPaymentDescription(order.paymentMethod.type, order.paymentMethod.data)
                 },
-            }))
-        }))
+                items: order.items.map(item => ({
+                    ...item,
+                    game: {
+                        ...item.game,
+                        imageUrl: `${req.protocol}://${req.get("host")}/uploads/games/${item.game.image}`
+                    },
+                }))
+            })
+        })
 
         res.status(200).json({
             orders: formattedOrders,

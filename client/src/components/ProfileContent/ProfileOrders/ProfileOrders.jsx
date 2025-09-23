@@ -139,7 +139,7 @@ const ProfileOrders = () => {
               </ul>
             </div>
             <div className="order-card-footer">
-              <span className="order-total">Total: R$ {order.total}</span>
+              <span className="order-total">Total: R$ {Number(order.total).toFixed(2)}</span>
 
               <div className="d-flex gap-4">
                 <button className="profile-btn profile-btn-secondary" onClick={() => handleViewDetails(order)}>

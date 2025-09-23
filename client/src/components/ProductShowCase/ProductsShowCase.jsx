@@ -16,7 +16,7 @@ const ProductGrid = () => {
     const fetchFeaturedGames = async () => {
       try {
         // Vamos buscar 8 jogos para usar como destaque
-        const response = await fetch("http://localhost:4500/games?limit=9");
+        const response = await fetch("http://localhost:4500/games?limit=9&orderby=asc");
         if (!response.ok) {
           throw new Error("Não foi possível carregar os jogos em destaque.");
         }

@@ -26,7 +26,7 @@ const Hero = () => {
     const fetchFeaturedProduct = async () => {
       try {
         // Vamos buscar um jogo específico (ex: ID 1) para ser o destaque
-        const response = await fetch("http://localhost:4500/games/3");
+        const response = await fetch("http://localhost:4500/games/24");
         if (!response.ok) {
           throw new Error("Produto em destaque não encontrado.");
         }

@@ -67,7 +67,7 @@ exports.getGames = async (req, res) => {
     const [games, total] = await prisma.$transaction([
       prisma.game.findMany({
         where,
-        orderBy: { id: orderby },
+        orderBy: { title: orderby },
         skip,
         take: limitNum,
         include: {

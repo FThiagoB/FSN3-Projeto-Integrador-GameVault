@@ -8,7 +8,7 @@ const Navbar = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     if (!searchTerm.trim()) {
@@ -112,13 +112,13 @@ const Navbar = () => {
                       Perfil
                     </Link>
                   </li>
-                  <li>
+                  {/* <li>
                     <Link to="/settings" onClick={() => setShowOptions(false)}>
                       Configurações
                     </Link>
-                  </li>
+                  </li> */}
                   <li>
-                    <Link to="/logout" onClick={() => setShowOptions(false)}>
+                    <Link onClick={() => {setShowOptions(false); logout()}}>
                       Sair
                     </Link>
                   </li>

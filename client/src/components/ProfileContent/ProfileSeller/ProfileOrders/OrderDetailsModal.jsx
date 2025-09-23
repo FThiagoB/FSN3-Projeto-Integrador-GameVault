@@ -143,7 +143,7 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
 
   // Verifica se o pedido pode ser cancelado
   const canCancelOrder = () => {
-    return order.status === 'pending' || order.status === 'processing';
+    return (order.status === 'pending');
   };
 
   // Verifica se o pedido pode ter entrega confirmada
@@ -277,15 +277,13 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
           <div className="row">
             <div className="col-md-6">
               <p><strong>Status:</strong> {getStatusBadge(order.status)}</p>
-              <p><strong>Data do Pedido:</strong> {formatDate(order.createdAt)}</p>
-              <p><strong>Última atualização:</strong> {formatDate(order.updatedAt)}</p>
+              
+              
               <p><strong>Status do Pagamento:</strong> {getStatusBadge(order.paymentStatus)}</p>
             </div>
             <div className="col-md-6">
-              <p><strong>Subtotal:</strong> {formatCurrency(order.subtotal)}</p>
-              <p><strong>Desconto:</strong> {formatCurrency(order.discount)}</p>
-              <p><strong>Taxas:</strong> {formatCurrency(order.tax)}</p>
-              <p><strong>Frete:</strong> {formatCurrency(order.shippingCost)}</p>
+              <p><strong>Data do Pedido:</strong> {formatDate(order.createdAt)}</p>
+              <p><strong>Última atualização:</strong> {formatDate(order.updatedAt)}</p>
               <p><strong className="h6">Total: {formatCurrency(order.total)}</strong></p>
             </div>
           </div>

@@ -75,7 +75,7 @@ const ProfileSettings = ( redirectPage = undefined ) => {
               }
             >
               <button onClick={() => setActivePage("mygames")}>
-                My games
+                Products
               </button>
             </li>
             )}
@@ -86,7 +86,7 @@ const ProfileSettings = ( redirectPage = undefined ) => {
               }
             >
               <button onClick={() => setActivePage("seller-orders")}>
-                My Orders
+                Sales
               </button>
             </li>
             )}

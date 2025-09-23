@@ -16,7 +16,6 @@ import Admin from "./pages/Adm/Admin.jsx";
 import Navbar from "./components/Navbar/Navbar.jsx";
 import ProfileSettings from "./pages/Profiles/Profile.jsx";
 import { AuthProvider } from "./contexts/AuthContext";
-import ProtectedRoutes from "./contexts/RequireAuth.js";
 
 function App() {
   return (

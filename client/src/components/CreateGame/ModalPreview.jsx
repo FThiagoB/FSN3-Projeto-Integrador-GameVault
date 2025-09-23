@@ -27,7 +27,6 @@ function ModalPreview({product}) {
         fluid
         id="product-detail"
       >
-        <ToastContainer />
 
         {/* Imagem */}
         <div className="product-image-wrapper">

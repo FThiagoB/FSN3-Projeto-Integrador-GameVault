@@ -188,7 +188,7 @@ const CreateGame = () => {
       if (response.ok) {
         notifySuccess("Jogo criado com sucesso!");
 
-        clearFiels()
+        // clearFiels()
       } else {
         notifyError(`Erro: ${result.message}`);
       }
@@ -349,7 +349,7 @@ const CreateGame = () => {
             }
           </form>
         </div>
-        <ToastContainer />
+       
 
 
         <Modal show={showPreview} onHide={() => setShowPreview(false)} size="xl">
@@ -377,6 +377,7 @@ const CreateGame = () => {
             </Button>
           </Modal.Footer>
         </Modal>
+         <ToastContainer />
       </main>
     </>
   );

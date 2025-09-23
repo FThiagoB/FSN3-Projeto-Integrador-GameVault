@@ -16,7 +16,10 @@ async function handleImageUpload( req, id, type ){
 
     // Verifica se a imagem foi passada por uma URL ou via input file
     if(req.body?.url || req.file){
-        const image_title = generateFileHash(id, type);
+        console.log("type: ", type)
+        console.log("ID: ", String(id))
+        console.log("Hash: ",  generateFileHash(type, String(id)))
+        const image_title = generateFileHash(type, String(id));
         const fileFolder = path.resolve(__dirname, "..", "uploads", folder);
         let filename;
         

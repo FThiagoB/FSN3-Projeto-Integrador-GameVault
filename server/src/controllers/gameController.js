@@ -244,7 +244,7 @@ exports.createGame = async (req, res) => {
     game = await prisma.game.create(prismaQuery);
 
     // Se a imagem foi passada, realiza o download e seta
-    const filename = await handleImageUpload( req, game.id, "game" )
+    const filename = await handleImageUpload( req, game.id, "games" )
 
     if( filename ){
       game = await prisma.game.update({

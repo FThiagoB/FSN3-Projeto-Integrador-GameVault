@@ -5,8 +5,9 @@ const fs = require('fs');
 const path = require('path');
 
 // Gera um hash que servirá como nome da imagem
-function generateFileHash({ seed_text, seed_id }) {
+function generateFileHash(seed_text, seed_id) {
   const rawString = `${seed_text}-${seed_id}`;
+  console.log("Raw string:", rawString);
   return crypto.createHash('md5').update(rawString).digest('hex');
 }
 

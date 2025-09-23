@@ -12,10 +12,11 @@ router.get("/orders/me", auth, clientOnly, orderController.getTransactionsByJWT)
 router.get("/orders/me/:orderID", auth, clientOnly, orderController.getTransactionByJWT);
 router.put("/orders/me/:orderID", auth, clientOnly, orderController.setStateOrderByClient);
 
+router.get("/seller/orders/me", auth, sellerOnly, orderController.getTransactionsBySellerJWT);
 
 router.get("/transactions/seller/:id", auth, adminOnly, orderController.getTransactionsBySellerID);
 router.get("/transactions/seller/:id/:orderID", auth, adminOnly, orderController.getTransactionBySellerID);
-router.get("/transactions/seller/me", auth, sellerOnly, orderController.getTransactionsBySellerJWT);
+
 router.get("/transactions/seller/me/:orderID", auth, sellerOnly, orderController.getTransactionBySellerJWT);
 
 

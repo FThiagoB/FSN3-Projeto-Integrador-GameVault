@@ -16,6 +16,24 @@ const paymentMethods = [
     { id: 'credit_card', name: 'Cartão de Crédito' },
 ];
 
+// Função para gerar externID
+    const generateExternID = (id) => {
+        let base36 = id.toString(36).toUpperCase();
+        base36 = base36.padStart(8, '0');
+        return base36.replace(/(\w{4})(\w{4})/, 'ORD$1-$2');
+    };
+
+    // Função para pegar uma descrição do pagamento
+    const getPaymentDescription = (type, data) => {
+        if (type === "credit_card") {
+            let cardNumber = data.number;
+            let hidden_cardNumber = cardNumber.replace(/(^\w{4}).*.(\w{2})$/, `$1${"*".repeat((cardNumber.length - 11))}$2`)
+            return hidden_cardNumber;
+        }
+
+        return "";
+    };
+
 exports.validateCart = async (req, res) => {
     try {
         const { items } = req.body;
@@ -329,23 +347,7 @@ exports.processCheckout = async (req, res) => {
 }
 
 exports.getTransactionsByJWT = async (req, res) => {
-    // Função para gerar externID
-    const generateExternID = (id) => {
-        let base36 = id.toString(36).toUpperCase();
-        base36 = base36.padStart(8, '0');
-        return base36.replace(/(\w{4})(\w{4})/, 'ORD$1-$2');
-    };
-
-    // Função para pegar uma descrição do pagamento
-    const getPaymentDescription = (type, data) => {
-        if (type === "credit_card") {
-            let cardNumber = data.number;
-            let hidden_cardNumber = cardNumber.replace(/(^\w{4}).*.(\w{2})$/, `$1${"*".repeat((cardNumber.length - 11))}$2`)
-            return hidden_cardNumber;
-        }
-
-        return "";
-    };
+    
 
     try {
         const userID = parseInt(req.user.id);
@@ -693,9 +695,16 @@ exports.getTransactionsBySellerJWT = async (req, res) => {
                                 title: true,
                                 image: true,
                                 price: true,
-                                sellerID: true
+                                sellerID: true,
+                                deleted: true
                             }
                         }
+                    }
+                },
+                paymentMethod: {
+                    select: {
+                        type: true,
+                        data: true
                     }
                 }
             },
@@ -706,35 +715,23 @@ exports.getTransactionsBySellerJWT = async (req, res) => {
 
         // Contar total de pedidos para paginação
         const totalOrders = await prisma.order.count({ where });
-
-        // Formatar resposta para incluir informações do vendedor
-        const formattedOrders = orders.map(order => {
-            // Calcular totais apenas para os itens do vendedor
-            const sellerItems = order.items.filter(item => item.game.sellerID === sellerId);
-            const sellerSubtotal = sellerItems.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
-
-            return {
-                id: order.id,
-                status: order.status,
-                paymentStatus: order.paymentStatus,
-                sellerSubtotal,
-                shippingCost: order.shippingCost,
-                tax: order.tax,
-                total: order.total,
-                discount: order.discount,
-                shippingMethod: order.shippingMethod,
-                paymentMethod: order.paymentMethod,
-                createdAt: order.createdAt,
-                buyer: order.user,
-                shippingAddress: order.address,
-                items: sellerItems.map(item => ({
-                    id: item.id,
-                    quantity: item.quantity,
-                    unitPrice: item.unitPrice,
-                    game: item.game
-                }))
-            };
-        });
+        
+         // Adiciona imageUrl aos games
+        const formattedOrders = orders.map(order => ({
+            ...order,
+            externID: generateExternID(order.id),
+            paymentMethod: {
+                type: order.paymentMethod.type,
+                description: getPaymentDescription(order.paymentMethod.type, order.paymentMethod.data)
+            },
+            items: order.items.map(item => ({
+                ...item,
+                game: {
+                    ...item.game,
+                    imageUrl: `${req.protocol}://${req.get("host")}/uploads/games/${item.game.image}`
+                },
+            }))
+        }))
 
         res.status(200).json({
             orders: formattedOrders,

@@ -95,14 +95,14 @@ async function createAdmin() {
             }
         });
 
-        console.log("Admin created successfully");
+        console.log("Admin criado com sucesso");
     }
     catch (error) {
-        console.error(`createAdmin() error : ${error.message}`)
+        console.error(`problemas com createAdmin(): ${error.message}`)
     }
 }
 
-async function createSellers() {
+async function createUsers() {
     try {
         // Cadastra alguns vendedores
         await prisma.user.createMany({
@@ -184,8 +184,8 @@ async function createSellers() {
                     CPF: "62262810060",
                     name: "Lucas Ferreira",
                     phone: "987654321",
-                    password: await hashPassword("LucasFerreiraVendedor"),
-                    email: "vendedor@example.com",
+                    password: await hashPassword("senha1234"),
+                    email: "vendedor@gmail.com",
                     role: "seller"
                 },
                 {
@@ -200,10 +200,10 @@ async function createSellers() {
             ]
         });
 
-        console.log("Users created successfully");
+        console.log("Usuários criados com sucesso");
     }
     catch (error) {
-        console.error(`createSellers() error : ${error.message}`)
+        console.error(`problemas com createUsers(): ${error.message}`)
     }
 }
 
@@ -315,10 +315,10 @@ async function createAddresses() {
             ]
         });
 
-        console.log("Addresses created successfully");
+        console.log("Endereços adicionados aos usuários");
     }
     catch (error) {
-        console.error(`createAddress() error : ${error.message}`)
+        console.error(`problemas com createAddress(): ${error.message}`)
     }
 }
 
@@ -329,9 +329,9 @@ async function createShippingMethods() {
                 data: method
             });
         }
-        console.log("Shipping methods created successfully");
+        console.log("Adicionando métodos de envio");
     } catch (error) {
-        console.error(`createShippingMethods() error: ${error.message}`);
+        console.error(`problemas com createShippingMethods(): ${error.message}`);
     }
 }
 
@@ -342,9 +342,9 @@ async function createCoupons() {
                 data: coupon
             });
         }
-        console.log("Coupons created successfully");
+        console.log("Criando alguns cupoms");
     } catch (error) {
-        console.error(`createCoupons() error: ${error.message}`);
+        console.error(`problemas com createCoupons(): ${error.message}`);
     }
 }
 
@@ -366,9 +366,9 @@ async function createPaymentMethods() {
             }
         });
         
-        console.log("Payment methods created successfully");
+        console.log("Adicionando método de pagamentos");
     } catch (error) {
-        console.error(`createPaymentMethods() error: ${error.message}`);
+        console.error(`problemas com createPaymentMethods(): ${error.message}`);
     }
 }
 
@@ -388,16 +388,18 @@ async function createGames() {
                 }
             });
         }
+
+        console.log("Jogos adicionados com sucesso");
     }
     catch (error) {
-        console.error(`createGames() error : ${error.message}`)
+        console.error(`problemas com createGames() : ${error.message}`)
     }
 }
 
 // Semeia as tabelas com dados de exemplo
 async function seed() {
     await createAdmin();
-    await createSellers();
+    await createUsers();
     await createAddresses();
     await createGames();
     await createShippingMethods();

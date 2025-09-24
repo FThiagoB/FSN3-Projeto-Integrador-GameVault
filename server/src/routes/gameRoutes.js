@@ -2,18 +2,18 @@ const { Router } = require("express");
 const gameController = require("../controllers/gameController");
 const upload = require("../utils/uploadConfig");
 
-const {auth, sellerOnly} = require("./../controllers/authController");
+const {auth, sellerOnly, optionalAuth} = require("./../controllers/authController");
 
 const router = Router();
 
 // Rota para listar os jogos
-router.get("/games", gameController.getGames);
+router.get("/games", optionalAuth, gameController.getGames);
 
 // Rota para obter os gêneros dos jogos
 router.get("/games/genres", gameController.getGenres);
 
 // Obtém informações sobre um jogo aleatório da lista
-router.get("/games/random", gameController.getRandomGame);
+router.get("/games/random", optionalAuth, gameController.getRandomGame);
 
 // Obtém informações sobre um jogo específico
 router.get("/games/:id", gameController.getGamesByID);

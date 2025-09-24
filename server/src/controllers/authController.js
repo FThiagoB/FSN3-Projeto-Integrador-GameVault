@@ -29,7 +29,7 @@ exports.login = async (req, res) => {
 
     // Verifica se os campos foram passados
     if (!email || !password) {
-      return res.status(400).json({ message: "Enter email and password" });
+      return res.status(400).json({ message: "Informe email e senha" });
     }
 
     // Obtém a senha do banco
@@ -45,13 +45,13 @@ exports.login = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(401).json({ message: "Incorrect email/password." });
+      return res.status(401).json({ message: "email/senha inválidos." });
     }
 
     const match = await comparePassword(password, user.password);
 
     if (!match) {
-      return res.status(401).json({ message: "Incorrect email/password." });
+      return res.status(401).json({ message: "email/senha inválidos." });
     }
 
     const token = jwt.sign(
@@ -68,7 +68,7 @@ exports.login = async (req, res) => {
     console.error(error);
     return res
       .status(500)
-      .json({ message: `Problems logging in: ${error.message}` });
+      .json({ message: `Problemas com o login: ${error.message}` });
   }
 };
 
@@ -77,10 +77,10 @@ exports.logout = async (req, res) => {
     const authorization = req.headers["authorization"];
     const token = authorization?.split(" ")[1]; // Remove a string "Bearer "
 
-    if (!token) return res.status(403).json({ message: "Token is missing" });
+    if (!token) return res.status(403).json({ message: "É necessário informar o token" });
 
     deleteToken(token);
-    res.status(200).json({ message: "Logged out successfully" });
+    res.status(200).json({ message: "Sessão encerrada com sucesso" });
   } catch (error) {
     res.status(500).json({ message: error });
     deleteToken(token);
@@ -93,23 +93,23 @@ exports.auth = async (req, res, next) => {
     const authorization = req.headers["authorization"];
     const token = authorization?.split(" ")[1]; // Remove a string "Bearer "
 
-    if (!token) return res.status(403).json({ message: "Token is missing" });
+    if (!token) return res.status(403).json({ message: "É necessário informar o token" });
 
     // Usa o verify síncrono, que lança erro se inválido
     let decoded;
     try {
       decoded = jwt.verify(token, SECRET_JWT_KEY);
     } catch (err) {
-      return res.status(403).json({ message: "Invalid token" });
+      return res.status(403).json({ message: "Token inválido" });
     }
 
     // Checa se o ID existe no token
     if (!decoded)
-      return res.status(403).json({ message: "Invalid token payload" });
+      return res.status(403).json({ message: "Problemas com o payload do token" });
 
     // Busca o usuário no banco
     const user = await prisma.user.findUnique({ where: { id: decoded.id } });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json({ message: "Usuário não existe" });
 
     req.user = user; // passa adiante
     next();
@@ -128,10 +128,10 @@ exports.blacklist = {
 exports.sellerOnly = async (req, res, next) => {
   const { id, role } = req.user;
 
-  if (!role) return res.status(403).json({ message: "Permissions not found" });
+  if (!role) return res.status(403).json({ message: "Informações sobre permissões não encontradas" });
 
   if (role !== "seller" && role !== "admin")
-    return res.status(403).json({ message: "Unauthorized user" });
+    return res.status(403).json({ message: "Usuário não tem autorização" });
 
   next();
 };
@@ -139,9 +139,9 @@ exports.sellerOnly = async (req, res, next) => {
 exports.clientOnly = async (req, res, next) => {
   const { id, role } = req.user;
 
-  if (!role) return res.status(403).json({ message: "Permissions not found" });
+  if (!role) return res.status(403).json({ message: "Informações sobre permissões não encontradas" });
 
-  if (role !== "user") return res.status(403).json({ message: "Invalid user" });
+  if (role !== "user") return res.status(403).json({ message: "Usuário inválido" });
 
   next();
 };
@@ -149,10 +149,30 @@ exports.clientOnly = async (req, res, next) => {
 exports.adminOnly = async (req, res, next) => {
   const { id, role } = req.user;
 
-  if (!role) return res.status(403).json({ message: "Permissions not found" });
+  if (!role) return res.status(403).json({ message: "Informações sobre permissões não encontradas" });
 
   if (role !== "admin")
-    return res.status(403).json({ message: "Unauthorized user" });
+    return res.status(403).json({ message: "Usuário não tem autorização" });
 
   next();
+};
+
+// Lida com rotas que podem ser acessadas por usuários cadastrados ou não
+exports.optionalAuth = async (req, res, next) => {
+  const authorization = req.headers["authorization"];
+  const token = authorization?.split(" ")[1];
+  
+  if (!token) return next();
+
+  try {
+    const decoded = jwt.verify(token, SECRET_JWT_KEY);
+
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+    if (!user) return next();
+
+    req.user = user;
+    next();
+  } catch (error) {
+    next();
+  }
 };

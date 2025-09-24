@@ -161,11 +161,9 @@ exports.deleteUserByJWT = async (req, res) => {
 
 exports.createUser = async (req, res) => {
     try {
-        const allowedRoles = ["user", "seller"];
-
         // Campos usados diretamente no cadastro do jogo
         if (!req.body) req.body = {};
-        const { email, password, role, phone = "", name = "", CPF = "" } = req.body;
+        const { email, password, phone = "", name = "", CPF = "" } = req.body;
 
         // Verifica se todos os campos foram preenchidos
         if (!email || !password || !role) {
@@ -174,16 +172,9 @@ exports.createUser = async (req, res) => {
             });
         }
 
-        // Valida os campos 
-        if (!allowedRoles.includes(role)) {
-            return res.status(400).json({
-                message: "The specified role is invalid",
-            });
-        }
-
         // Cria o usuário
         let hashedPassword = await hashPassword(password);
-        const prismaData = { email, password: hashedPassword, role };
+        const prismaData = { email, password: hashedPassword, role: "user" };
         if (phone) prismaData.phone = phone;
         if (name) prismaData.name = name;
         if (CPF) prismaData.CPF = CPF;
@@ -337,6 +328,56 @@ exports.updateUserPassword = async (req, res) => {
         const user = await prisma.user.update({
             where: { id: userID },
             data: { password: hashedPassword }
+        });
+
+        res.status(200).json(user);
+    }
+    catch (error) {
+        console.error(error);
+
+        switch (error.code) {
+            // Restrição : Email escolhido já está em uso
+            case "P2002":
+                res.status(400).json({
+                    message: `the desired email is already in use.`,
+                });
+                break;
+
+            default:
+                res.status(500).json({ message: error.message });
+        }
+    }
+};
+
+exports.updateUserRole = async (req, res) => {
+    try {
+        const valideRoles = ["user", "seller"];
+
+        if (!req.body) req.body = {};
+        const { role, userID } = req.body;
+
+        // Verifica se os campos foram passados
+        if (!role || !userID )
+            return res.status(400).json({ message: "Informe o cargo do usuário e seu ID" });
+
+        // Verifica se o ID é numérico
+        if( Number.isNaN( parseInt(userID) ) )
+            return res.status(400).json({ message: "O ID do usuário deve ser um número inteiro" });
+
+        // Obtém as informações atuais de usuários
+        const current_user = await prisma.user.findUnique({ where: { id: parseInt(userID) } });
+
+        if (!current_user)
+            return res.status(400).json({ message: "Usuário não encontrado" });
+
+        // Verifica se o cargo atributo é válido
+        if( !valideRoles.includes(role) )
+            return res.status(400).json({ message: "O cargo atribuído é inválido." });
+
+        // Atualiza os dados do usuário
+        const user = await prisma.user.update({
+            where: { id: parseInt(userID) },
+            data: { role: role }
         });
 
         res.status(200).json(user);

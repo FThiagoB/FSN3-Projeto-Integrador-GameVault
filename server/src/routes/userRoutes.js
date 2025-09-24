@@ -15,6 +15,9 @@ router.get("/uploads/users/:image", userController.getUserImage);
 // Remove a imagem do usuário (define a imagem padrão como foto de perfil)
 router.patch("/user/picture/remove", auth, userController.removeUserPicture);
 
+// Usuário deseja ser um vendedor
+router.patch("/request-seller", auth, userController.requestSeller);
+
 // Obtém as próprias informações via token JWT
 router.get("/user", auth, userController.getUserByJWT);          
 

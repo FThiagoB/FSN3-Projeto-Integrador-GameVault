@@ -13,4 +13,7 @@ router.use("/admin", adminOnly);
 // Atualiza o cargo de um usuário específico
 router.patch("/admin/user/:userID/role", userController.updateUserRole);
 
+// Lista os usuários que desejam ser vendedores
+router.get('/admin/pending-sellers', userController.getPendingSellers);
+
 module.exports = router;

@@ -399,6 +399,58 @@ exports.updateUserRole = async (req, res) => {
     }
 };
 
+exports.requestSeller = async (req, res) => {
+  try {
+    const userID = req.user.id;
+
+    // Primeiro, busca o usuário para verificar o role atual
+    const user = await prisma.user.findUnique({
+      where: { id: userID },
+    });
+
+    if( !user )
+        return res.status(404).json({ message: "Usuário não encontrado" });
+
+    if(user.role === 'seller' || user.role === 'admin')
+        return res.status(400).json({ message: "Usuário já tem o cargo" });
+
+    if(user.wantsToBeSeller)
+        return res.status(400).json({ message: "Requisição já realizada" });
+
+    // Atualiza o usuário, setando wantsToBeSeller para true
+    const updatedUser = await prisma.user.update({
+      where: { id: userID },
+      data: { wantsToBeSeller: true }
+    });
+
+    res.status(200).json( updatedUser );
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: `Erro interno do servidor: ${error}` });
+  }
+};
+
+exports.getPendingSellers = async (req, res) => {
+  try {
+    // Recupera os usuários que desejam ser vendedores
+    const pendingSellers = await prisma.user.findMany({
+      where: { 
+        wantsToBeSeller: true,
+        role: 'user',                // Apenas usuários comuns que ainda não foram aprovados
+        isDeleted: false
+      }
+    });
+
+    const {password, ...filteredSellers} = {pendingSellers}
+
+    res.json(filteredSellers);
+  } catch (error) {
+    console.error("Erro ao buscar vendedores pendentes:", error);
+    res.status(500).json({ error: "Erro interno do servidor." });
+  }
+};
+
 exports.getUserImage = async (req, res) => {
     const imageName = req.params.image;
     const imagePath = path.resolve(

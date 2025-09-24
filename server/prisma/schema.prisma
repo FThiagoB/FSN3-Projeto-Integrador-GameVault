@@ -37,6 +37,7 @@ model User{
   email String @unique
   role String @default("user")
   isDeleted  Boolean @default(false)
+  wantsToBeSeller Boolean @default(false)
   
   addresses Address[] @relation("UserAddresses")
   
@@ -72,7 +73,6 @@ model Address{
 model Order{
   id Int @id @default(autoincrement())
   userID Int
-  status String
   total Float
   subtotal Float
   discount Float
@@ -82,7 +82,6 @@ model Order{
   shippingMethodID Int 
   paymentMethodID Int 
   couponID Int?
-  paymentStatus String
   
   user User @relation(fields: [userID], references: [id])
   address Address @relation(fields: [shippingAddressID], references: [id])
@@ -104,6 +103,7 @@ model OrderItem{
 	quantity Int
 	unitPrice Float
   status  String
+  paymentStatus String
 	
 	order Order @relation(fields: [orderID], references: [id])
 	game Game @relation(fields: [gameID], references: [id])

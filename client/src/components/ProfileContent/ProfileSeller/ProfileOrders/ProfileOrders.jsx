@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 
 import { useAuth } from './../../../../contexts/AuthContext';
 import { useCookies } from 'react-cookie';
@@ -12,22 +12,7 @@ import OrderDetailsModal from './OrderDetailsModal';
 import moment from 'moment';
 import "./ProfileOrders.css";
 
-import Badge from 'react-bootstrap/Badge';
-
-// Status badges com cores
-const getStatusBadge = (status) => {
-  const statusConfig = {
-    pending: { variant: 'warning', text: 'Pendente' },
-    completed: { variant: 'success', text: 'Concluído' },
-    cancelled: { variant: 'danger', text: 'Cancelado' },
-    shipped: { variant: 'info', text: 'Enviado' },
-    processing: { variant: 'primary', text: 'Processando' }
-  };
-  
-  const config = statusConfig[status] || { variant: 'secondary', text: status };
-  return <Badge bg={config.variant}>{config.text}</Badge>;
-};
-
+import StatusBadge from "./../../../../utils/StatusBadge"
 
 const ProfileOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -96,7 +81,7 @@ const ProfileOrders = () => {
                 <span>{moment(order.createdAt).format("DD/MM/YYYY HH:mm:ss")}</span>
               </div>
               <span>
-                {getStatusBadge(order.status)}
+                <StatusBadge status={order.status}/>
               </span>
             </div>
             <div className="order-card-body">

@@ -6,6 +6,7 @@ const orderController = require("./../controllers/orderController");
 const router = Router();
 
 router.get("/orders/me", auth, clientOnly, orderController.getTransactionsByJWT);
+router.delete("/orders/me/:orderID", auth, clientOnly, orderController.cancelOrderByClient);
 router.put("/orders/me/:orderID", auth, clientOnly, orderController.setStateOrderByClient);
 
 router.get("/seller/orders/me", auth, sellerOnly, orderController.getTransactionsBySellerJWT);

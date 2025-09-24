@@ -166,7 +166,7 @@ exports.createUser = async (req, res) => {
         const { email, password, phone = "", name = "", CPF = "" } = req.body;
 
         // Verifica se todos os campos foram preenchidos
-        if (!email || !password || !role) {
+        if (!email || !password) {
             return res.status(400).json({
                 message: "fill in all fields required for registration.",
             });
@@ -174,7 +174,7 @@ exports.createUser = async (req, res) => {
 
         // Cria o usuário
         let hashedPassword = await hashPassword(password);
-        const prismaData = { email, password: hashedPassword, role: "user" };
+        const prismaData = { email, password: hashedPassword };
         if (phone) prismaData.phone = phone;
         if (name) prismaData.name = name;
         if (CPF) prismaData.CPF = CPF;
@@ -402,6 +402,7 @@ exports.updateUserRole = async (req, res) => {
 exports.requestSeller = async (req, res) => {
   try {
     const userID = req.user.id;
+    const {state = true} = req.body;
 
     // Primeiro, busca o usuário para verificar o role atual
     const user = await prisma.user.findUnique({
@@ -412,15 +413,15 @@ exports.requestSeller = async (req, res) => {
         return res.status(404).json({ message: "Usuário não encontrado" });
 
     if(user.role === 'seller' || user.role === 'admin')
-        return res.status(400).json({ message: "Usuário já tem o cargo" });
+        return res.status(400).json({ message: "Usuário já tem um cargo atribuido" });
 
-    if(user.wantsToBeSeller)
+    if(user.wantsToBeSeller && state)
         return res.status(400).json({ message: "Requisição já realizada" });
 
     // Atualiza o usuário, setando wantsToBeSeller para true
     const updatedUser = await prisma.user.update({
       where: { id: userID },
-      data: { wantsToBeSeller: true }
+      data: { wantsToBeSeller: state }
     });
 
     res.status(200).json( updatedUser );

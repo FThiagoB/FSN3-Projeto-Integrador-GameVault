@@ -15,8 +15,6 @@ router.get("/uploads/users/:image", userController.getUserImage);
 // Remove a imagem do usuário (define a imagem padrão como foto de perfil)
 router.patch("/user/picture/remove", auth, userController.removeUserPicture);
 
-// Usuário deseja ser um vendedor
-router.patch("/request-seller", auth, userController.requestSeller);
 
 // Obtém as próprias informações via token JWT
 router.get("/user", auth, userController.getUserByJWT);          
@@ -26,6 +24,9 @@ router.put("/user", auth, upload.single("file"), userController.updateUser);
 
 // Deleta a própria conta de usuário via token JWT
 router.delete("/user", auth, userController.deleteUserByJWT);    
+
+// Usuário deseja ser um vendedor
+router.patch("/user/request-seller", auth, userController.requestSeller);
 
 // Atualiza as informações de email requerindo o email atual
 router.put("/user/update/email", auth, userController.updateUserEmail); 

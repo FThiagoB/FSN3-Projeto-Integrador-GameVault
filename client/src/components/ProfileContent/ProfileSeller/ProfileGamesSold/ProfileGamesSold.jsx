@@ -3,37 +3,15 @@ import React, { useEffect, useState } from "react";
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../contexts/AuthContext';
-import { ToastContainer, toast } from "react-toastify";
+
 
 import moment from 'moment';
 import "./ProfileGamesSold.css";
 import EditGameModal from "./EditGameModal";
 
-const notifySuccess = (Mensagem) => {
-    toast.success(Mensagem, {
-        position: "bottom-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-    });
-}
-
-const notifyError = (message) => {
-    toast.error(message, {
-        position: "bottom-right",
-        autoClose: 1500,       // um pouco mais de tempo para ler o erro
-        hideProgressBar: false,
-        closeOnClick: true,    // permitir fechar ao clicar
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-    });
-}
+import { ToastContainer } from "react-toastify";
+import useNotification from "../../../../utils/useNotification";
+import StatusBadge from "./../../../../utils/StatusBadge"
 
 const ProfileGamesSold = () => {
     const { user, deleteAcc } = useAuth();
@@ -42,6 +20,7 @@ const ProfileGamesSold = () => {
 
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedGame, setSelectedGame] = useState(null);
+    const {notifySuccess, notifyError} = useNotification
 
     // Estados para gerenciar os formulários de forma independente
     const [myGames, setMyGames] = useState([])
@@ -109,8 +88,9 @@ const ProfileGamesSold = () => {
                                     <span className="label">Price: </span>
                                     <span>R$ {game.price}</span>
                                 </div>
-                                <span className={`badge ${(!game.deleted && game.stock > 0 ) ? 'bg-success' : 'bg-danger'}`}>
-                                    {game.deleted ? 'Deleted' :  game.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                                
+                                <span>
+                                    <StatusBadge status = {game.deleted ? 'deleted' :  game.stock > 0 ? 'in_stock' : 'out_of_stock'}/>
                                 </span>
                             </div>
 

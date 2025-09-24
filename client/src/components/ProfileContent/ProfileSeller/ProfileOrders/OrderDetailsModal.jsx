@@ -15,34 +15,9 @@ import { useAuth } from '../../../../contexts/AuthContext';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from "react-router-dom";
 
-import { ToastContainer, toast } from "react-toastify";
-
-const notifySuccess = (Mensagem) => {
-  toast.success(Mensagem, {
-    position: "bottom-right",
-    autoClose: 1000,
-    hideProgressBar: false,
-    closeOnClick: false,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-  });
-}
-
-const notifyError = (message) => {
-  toast.error(message, {
-    position: "bottom-right",
-    autoClose: 1500,       // um pouco mais de tempo para ler o erro
-    hideProgressBar: false,
-    closeOnClick: true,    // permitir fechar ao clicar
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-  });
-}
-
+import { ToastContainer } from "react-toastify";
+import useNotification from "../../../../utils/useNotification";
+import StatusBadge from "./../../../../utils/StatusBadge"
 
 const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -53,6 +28,8 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
 
   const alertRef = useRef(null);
   const modalBodyRef = useRef(null);
+
+  const {notifySuccess, notifyError} = useNotification()
 
   const { user, syncData } = useAuth();
   const [cookies] = useCookies(['authToken']);
@@ -121,28 +98,6 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
       style: 'currency',
       currency: 'BRL'
     }).format(value);
-  };
-
-  // Status badges com cores
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      pending: { variant: 'warning', text: 'Pendente' },
-      delivered: { variant: 'success', text: 'Concluído' },
-      cancelled: { variant: 'danger', text: 'Cancelado' },
-      shipped: { variant: 'info', text: 'Enviado' },
-      processing: { variant: 'primary', text: 'Processando' },
-
-      partially_shipped: { variant: 'warning', text: 'Parcialmente enviado' },
-      partially_cancelled: { variant: 'warning', text: 'Parcialmente enviado' },
-      partially_completed: { variant: 'success', text: 'Parcialmente recebido' },
-
-      approved: { variant: 'success', text: 'Aprovado' },
-      rejected: { variant: 'danger', text: 'Rejeitado' },
-      refunded: { variant: 'info', text: 'Reembolsado' },
-    };
-
-    const config = statusConfig[status] || { variant: 'secondary', text: status };
-    return <Badge bg={config.variant}>{config.text}</Badge>;
   };
 
   // Verifica se o pedido pode ser cancelado
@@ -280,10 +235,10 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
           <h5 className="mb-3">Informações do Pedido</h5>
           <div className="row">
             <div className="col-md-6">
-              <p><strong>Status:</strong> {getStatusBadge(order.status)}</p>
+              <p><strong>Status:</strong> <StatusBadge status={order.status}/></p>
               
               
-              <p><strong>Status do Pagamento:</strong> {getStatusBadge(order.paymentStatus)}</p>
+              <p><strong>Status do Pagamento:</strong> <StatusBadge status={order.paymentStatus}/> </p>
             </div>
             <div className="col-md-6">
               <p><strong>Data do Pedido:</strong> {formatDate(order.createdAt)}</p>
@@ -329,7 +284,7 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
                   <td className="align-middle">
                     {formatCurrency(item.unitPrice * item.quantity)}
                   </td>
-                  <td className="align-middle">{getStatusBadge(item.status)}</td>
+                  <td className="align-middle"><StatusBadge status={item.status}/></td>
                 </tr>
               ))}
             </tbody>
@@ -390,7 +345,7 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
 
         </div>
       </Modal.Footer>
-      <ToastContainer/>
+      {/* <ToastContainer/> */}
     </Modal>,
     document.body
   );

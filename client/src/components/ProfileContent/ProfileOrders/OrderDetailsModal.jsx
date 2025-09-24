@@ -15,44 +15,10 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from "react-router-dom";
 
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
+import useNotification from "../../../utils/useNotification";
 
-const getStatusBadge = (status) => {
-  const statusConfig = {
-    pending: { variant: 'warning', text: 'Pendente' },
-    completed: { variant: 'success', text: 'Concluído' },
-    cancelled: { variant: 'danger', text: 'Cancelado' },
-    shipped: { variant: 'info', text: 'Enviado' },
-    processing: { variant: 'primary', text: 'Processando' }
-  };
-}
-
-const notifySuccess = (Mensagem) => {
-  toast.success(Mensagem, {
-    position: "bottom-right",
-    autoClose: 1000,
-    hideProgressBar: false,
-    closeOnClick: false,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-  });
-}
-
-const notifyError = (message) => {
-  toast.error(message, {
-    position: "bottom-right",
-    autoClose: 1500,       // um pouco mais de tempo para ler o erro
-    hideProgressBar: false,
-    closeOnClick: true,    // permitir fechar ao clicar
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-  });
-}
-
+import StatusBadge from "./../../../utils/StatusBadge"
 
 const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -60,6 +26,8 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
 
   const [cancelling, setCancelling] = useState(false);
   const [confirmingDelivery, setConfirmingDelivery] = useState(false);
+
+  const {notifySuccess, notifyError} = useNotification();
 
   const alertRef = useRef(null);
   const modalBodyRef = useRef(null);
@@ -74,7 +42,7 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
     };
 
     const response = await fetch(`http://localhost:4500/orders/me/${order.id}`, {
-      method: "PUT",
+      method: "DELETE",
       headers: {
           'Content-Type': 'application/json',
           "Authorization": `Bearer ${cookies.authToken}`,
@@ -133,31 +101,9 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
     }).format(value);
   };
 
-  // Status badges com cores
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      pending: { variant: 'warning', text: 'Pendente' },
-      delivered: { variant: 'success', text: 'Concluído' },
-      cancelled: { variant: 'danger', text: 'Cancelado' },
-      shipped: { variant: 'info', text: 'Enviado' },
-      processing: { variant: 'primary', text: 'Processando' },
-
-      partially_shipped: { variant: 'warning', text: 'Parcialmente enviado' },
-      partially_cancelled: { variant: 'danger', text: 'Parcialmente cancelado' },
-      partially_completed: { variant: 'success', text: 'Parcialmente recebido' },
-
-      approved: { variant: 'success', text: 'Aprovado' },
-      rejected: { variant: 'danger', text: 'Rejeitado' },
-      refunded: { variant: 'info', text: 'Reembolsado' },
-    };
-
-    const config = statusConfig[status] || { variant: 'secondary', text: status };
-    return <Badge bg={config.variant}>{config.text}</Badge>;
-  };
-
   // Verifica se o pedido pode ser cancelado
   const canCancelOrder = () => {
-    return order.status === 'pending' || order.status === 'processing';
+    return (order.status === 'pending') || (order.status === 'processing') || (order.status === 'partially_cancelled');
   };
 
   // Verifica se o pedido pode ter entrega confirmada
@@ -211,7 +157,7 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
   const cancelDelivery = () => {
     setShowDeliveryConfirm(false);
   };
-
+  
   // Use Portal para renderizar no body
   return ReactDOM.createPortal(
     <Modal
@@ -290,10 +236,10 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
           <h5 className="mb-3">Informações do Pedido</h5>
           <div className="row">
             <div className="col-md-6">
-              <p><strong>Status:</strong> {getStatusBadge(order.status)}</p>
+              <p><strong>Status:</strong> <StatusBadge status={order.status}/></p>
               <p><strong>Data do Pedido:</strong> {formatDate(order.createdAt)}</p>
               <p><strong>Última atualização:</strong> {formatDate(order.updatedAt)}</p>
-              <p><strong>Status do Pagamento:</strong> {getStatusBadge(order.paymentStatus)}</p>
+              <p><strong>Status do Pagamento:</strong> <StatusBadge status={order.paymentStatus}/></p>
             </div>
             <div className="col-md-6">
               <p><strong>Subtotal:</strong> {formatCurrency(order.subtotal)}</p>
@@ -341,7 +287,7 @@ const OrderDetailsModal = ({ show, onHide, order, refreshFetch = () => {} }) => 
                   <td className="align-middle">
                     {formatCurrency(item.unitPrice * item.quantity)}
                   </td>
-                  <td className="align-middle">{getStatusBadge(item.status)}</td>
+                  <td className="align-middle"><StatusBadge status={item.status}/></td>
                 </tr>
               ))}
             </tbody>

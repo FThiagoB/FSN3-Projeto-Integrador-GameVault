@@ -1,66 +1,21 @@
 import React from "react";
 import { useState } from "react";
-import { FaSearch } from "react-icons/fa";
-import { ToastContainer, toast } from "react-toastify";
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+
 import OrderDetailsModal from './OrderDetailsModal';
 
 import moment from 'moment';
 import "./ProfileOrders.css";
 
 import Badge from 'react-bootstrap/Badge';
+import StatusBadge from "./../../../utils/StatusBadge"
 
-// Status badges com cores
-const getStatusBadge = (status) => {
-    const statusConfig = {
-      pending: { variant: 'warning', text: 'Pendente' },
-      delivered: { variant: 'success', text: 'Concluído' },
-      cancelled: { variant: 'danger', text: 'Cancelado' },
-      shipped: { variant: 'info', text: 'Enviado' },
-      processing: { variant: 'primary', text: 'Processando' },
-
-      partially_shipped: { variant: 'warning', text: 'Parcialmente enviado' },
-      partially_cancelled: { variant: 'danger', text: 'Parcialmente cancelado' },
-      partially_completed: { variant: 'success', text: 'Parcialmente recebido' },
-
-      approved: { variant: 'success', text: 'Aprovado' },
-      rejected: { variant: 'danger', text: 'Rejeitado' },
-      refunded: { variant: 'info', text: 'Reembolsado' },
-    };
-
-    const config = statusConfig[status] || { variant: 'secondary', text: status };
-    return <Badge bg={config.variant}>{config.text}</Badge>;
-  };
-
-const notifySuccess = (Mensagem) => {
-  toast.success(Mensagem, {
-    position: "bottom-right",
-    autoClose: 1000,
-    hideProgressBar: false,
-    closeOnClick: false,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-  });
-}
-
-const notifyError = (message) => {
-  toast.error(message, {
-    position: "bottom-right",
-    autoClose: 1500,       // um pouco mais de tempo para ler o erro
-    hideProgressBar: false,
-    closeOnClick: true,    // permitir fechar ao clicar
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-  });
-}
+import { ToastContainer } from "react-toastify";
+import useNotification from "../../../utils/useNotification";
 
 const ProfileOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -69,6 +24,8 @@ const ProfileOrders = () => {
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  const {notifySuccess, notifyError} = useNotification();
 
   const navigate = useNavigate();
 
@@ -129,7 +86,7 @@ const ProfileOrders = () => {
                 <span>{moment(order.createdAt).format("DD/MM/YYYY HH:mm:ss")}</span>
               </div>
               <span>
-                {getStatusBadge(order.status)}
+                <StatusBadge status={order.status} showTooltip={true}/>
               </span>
             </div>
             <div className="order-card-body">
@@ -158,8 +115,9 @@ const ProfileOrders = () => {
           </div>
         )) : ""}
       </div>
+
       <ToastContainer />
-      {/* Modal */}
+      
       <OrderDetailsModal 
         show={showModal}
         onHide={handleCloseModal}

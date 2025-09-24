@@ -1,0 +1,95 @@
+.profileMainContent {
+  padding: 1rem;
+}
+
+.profileOrdersTitle {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #e0e0e0;
+}
+
+.ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.orderCard {
+  background: rgba(31, 41, 55, 0.8);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 1rem;
+  padding: 1rem;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.orderCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orderInfo {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.label {
+  font-weight: bold;
+}
+
+.orderCardBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.orderItemList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.orderItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.orderItemImage {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.orderItemName {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.orderCardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orderTotal {
+  font-weight: bold;
+}
+
+.profileBtnSecondary {
+  background: rgba(31, 41, 55, 0.5);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}

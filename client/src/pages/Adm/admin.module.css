@@ -1,6 +1,3 @@
-/* Importa uma fonte estilo "retro" se quiser, como a "Press Start 2P" */
-/* @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'); */
-
 :root {
   --admin-bg-color: #1a0f30; /* Fundo escuro, quase preto/roxo */
   --admin-primary-gradient: linear-gradient(
@@ -28,78 +25,57 @@
   --admin-text-pink: #ec4899;
 }
 
-/* Base reset e corpo */
-body {
-  margin: 0;
-  font-family: "Inter", sans-serif; /* Ou sua fonte preferida */
-  background-color: var(--admin-bg-color);
-  color: var(--admin-text-light);
-}
-
 /* Container Principal */
-.admin-layout {
+.adminLayout {
   display: flex;
   min-height: 100vh;
   background-color: var(--admin-bg-color);
-  background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zm0-30V0H4v4H0v2h4v4h2V6h4V4H6z"%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/svg%3E'); /* Padrão de grade sutil */
-  background-size: 30px 30px; /* Tamanho do grid */
+  background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zm0-30V0H4v4H0v2h4v4h2V6h4V4H6z"%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+  background-size: 30px 30px;
   padding: 0 4rem;
+  color: var(--admin-text-light);
 }
 
 /* Conteúdo Principal */
-.admin-main-content {
+.adminMainContent {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* Navbar Superior */
-
 /* Conteúdo Principal da Dashboard */
-.admin-content {
-  flex-grow: 1; /* Permite que o conteúdo ocupe o espaço restante */
-  padding: 2.5rem; /* Mais padding */
+.adminContent {
+  flex-grow: 1;
+  padding: 2.5rem;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem; /* Mais espaçamento entre seções */
+  gap: 2.5rem;
 }
 
 /* Cards de Métricas */
-.admin-grid-cards {
+.adminGridCards {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 1.5rem;
 }
 
-@media (min-width: 768px) {
-  .admin-grid-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .admin-grid-cards {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-.admin-card {
+.adminCard {
   background: var(--admin-card-bg);
   backdrop-filter: blur(4px);
-  padding: 1.75rem; /* Mais padding */
-  border-radius: 1rem; /* Mais arredondado */
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 15px var(--admin-text-purple); /* Sombra e brilho */
+  padding: 1.75rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 15px var(--admin-text-purple);
   border: 1px solid var(--admin-border-color);
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.admin-card:hover {
+.adminCard:hover {
   transform: translateY(-5px);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 20px var(--admin-text-blue);
 }
 
-.admin-card-subtitle {
+.adminCardSubtitle {
   font-size: 1rem;
   color: var(--admin-text-muted);
   margin-bottom: 0.5rem;
@@ -107,61 +83,56 @@ body {
   letter-spacing: 0.05em;
 }
 
-.admin-card-title {
-  font-size: 2.75rem; /* Maior */
+.adminCardTitle {
+  font-size: 2.75rem;
   font-weight: bold;
   margin-top: 0.5rem;
-  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor; /* Efeito neon */
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
 }
 
-.admin-text-blue {
+.adminTextBlue {
   color: var(--admin-text-blue);
 }
-.admin-text-green {
+.adminTextGreen {
   color: var(--admin-text-green);
 }
-.admin-text-purple {
+.adminTextPurple {
   color: var(--admin-text-purple);
 }
-.admin-text-pink {
+.adminTextPink {
   color: var(--admin-text-pink);
 }
 
 /* Tabela */
-.admin-table-container {
+.adminTableContainer {
   background: var(--admin-card-bg);
   backdrop-filter: blur(4px);
   border-radius: 1rem;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 15px var(--admin-text-green);
   border: 1px solid var(--admin-border-color);
-  overflow: hidden; /* Para cantos arredondados */
+  overflow: hidden;
 }
 
-.admin-table-header {
+.adminTableHeader {
   padding: 1.5rem 2rem;
   border-bottom: 1px solid var(--admin-border-color);
   font-weight: bold;
   color: var(--admin-text-light);
   font-size: 1.25rem;
-  background-color: rgba(99, 102, 241, 0.2); /* Fundo sutil para o header */
+  background-color: rgba(99, 102, 241, 0.2);
 }
 
-.admin-table {
+.adminTable {
   width: 100%;
   text-align: left;
   border-collapse: collapse;
 }
 
-.admin-table-head {
-  background-color: rgba(
-    99,
-    102,
-    241,
-    0.1
-  ); /* Fundo mais claro para cabeçalho da tabela */
+.adminTableHead {
+  background-color: rgba(99, 102, 241, 0.1);
 }
 
-.admin-table-head th {
+.adminTableHead th {
   padding: 1rem 2rem;
   color: var(--admin-text-blue);
   text-transform: uppercase;
@@ -169,29 +140,65 @@ body {
   letter-spacing: 0.05em;
 }
 
-.admin-table-cell {
+.adminTableCell {
   padding: 1rem 2rem;
   border-top: 1px solid var(--admin-border-color);
   color: var(--admin-text-light);
 }
 
-.admin-table-row:hover {
-  background-color: rgba(99, 102, 241, 0.08); /* Efeito hover na linha */
+.adminTableRow:hover {
+  background-color: rgba(99, 102, 241, 0.08);
 }
 
-.admin-status {
+.adminStatus {
   font-weight: bold;
   text-shadow: 0 0 5px currentColor;
 }
-.admin-status-active {
+.adminStatusActive {
   color: var(--admin-text-green);
 }
-.admin-status-pending {
+.adminStatusPending {
   color: #facc15;
-} /* Amarelo para pending */
+}
+
+.adminActionButtons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.adminActionButton {
+  background: none;
+  border: 1px solid var(--admin-border-color);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--admin-text-light);
+}
+
+.adminActionButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.adminActionButton.edit:hover {
+  border-color: var(--admin-text-blue);
+  color: var(--admin-text-blue);
+  box-shadow: 0 0 10px var(--admin-text-blue);
+}
+
+.adminActionButton.delete:hover {
+  border-color: var(--admin-text-pink);
+  color: var(--admin-text-pink);
+  box-shadow: 0 0 10px var(--admin-text-pink);
+}
 
 /* Botões */
-.admin-grid-buttons {
+.adminGridButtons {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 1.5rem;
@@ -203,19 +210,7 @@ body {
   border: 1px solid var(--admin-border-color);
 }
 
-@media (min-width: 768px) {
-  .admin-grid-buttons {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .admin-grid-buttons {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-.admin-button {
+.adminButton {
   color: #ffffff;
   padding: 1rem 1.5rem;
   border-radius: 0.75rem;
@@ -229,41 +224,41 @@ body {
   letter-spacing: 0.05em;
 }
 
-.admin-button:hover {
+.adminButton:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
-.admin-button-blue {
+.adminButtonBlue {
   background: linear-gradient(to right, #60a5fa, #3b82f6);
 }
-.admin-button-blue:hover {
+.adminButtonBlue:hover {
   background: linear-gradient(to right, #3b82f6, #2563eb);
 }
 
-.admin-button-green {
+.adminButtonGreen {
   background: linear-gradient(to right, #34d399, #10b981);
 }
-.admin-button-green:hover {
+.adminButtonGreen:hover {
   background: linear-gradient(to right, #10b981, #059669);
 }
 
-.admin-button-purple {
+.adminButtonPurple {
   background: linear-gradient(to right, #a78bfa, #8b5cf6);
 }
-.admin-button-purple:hover {
+.adminButtonPurple:hover {
   background: linear-gradient(to right, #8b5cf6, #7c3aed);
 }
 
-.admin-button-pink {
+.adminButtonPink {
   background: linear-gradient(to right, #ec4899, #be185d);
 }
-.admin-button-pink:hover {
+.adminButtonPink:hover {
   background: linear-gradient(to right, #be185d, #9d174d);
 }
 
 /* Cartão de Perfil */
-.admin-profile-card {
+.adminProfileCard {
   background: var(--admin-card-bg);
   backdrop-filter: blur(4px);
   padding: 2rem;
@@ -272,37 +267,37 @@ body {
   border: 1px solid var(--admin-border-color);
   display: flex;
   align-items: center;
-  gap: 2rem; /* Mais espaçamento */
+  gap: 2rem;
 }
 
-.admin-profile-image {
-  width: 6rem; /* Maior */
-  height: 6rem; /* Maior */
+.adminProfileImage {
+  width: 6rem;
+  height: 6rem;
   border-radius: 9999px;
-  box-shadow: 0 0 15px rgba(236, 72, 153, 0.7); /* Brilho rosa */
+  box-shadow: 0 0 15px rgba(236, 72, 153, 0.7);
   border: 3px solid var(--admin-text-pink);
 }
 
-.admin-profile-details {
+.adminProfileDetails {
   display: flex;
   flex-direction: column;
 }
 
-.admin-profile-name {
-  font-size: 1.75rem; /* Maior */
+.adminProfileName {
+  font-size: 1.75rem;
   font-weight: bold;
   color: var(--admin-text-light);
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
 }
 
-.admin-profile-role {
+.adminProfileRole {
   color: var(--admin-text-muted);
   font-size: 1.125rem;
   margin-top: 0.25rem;
 }
 
-.admin-edit-button {
-  margin-top: 1rem; /* Mais espaçamento */
+.adminEditButton {
+  margin-top: 1rem;
   background: var(--admin-primary-gradient);
   color: #ffffff;
   padding: 0.75rem 1.5rem;
@@ -314,49 +309,14 @@ body {
   font-weight: 600;
 }
 
-.admin-edit-button:hover {
+.adminEditButton:hover {
   background: linear-gradient(to right, #2563eb, #7c3aed);
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
-.admin-action-buttons {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center; /* Centraliza os botões dentro da célula */
-}
-
-.admin-action-button {
-  background: none;
-  border: 1px solid var(--admin-border-color);
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--admin-text-light);
-}
-
-.admin-action-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-}
-
-.admin-action-button.edit:hover {
-  border-color: var(--admin-text-blue);
-  color: var(--admin-text-blue);
-  box-shadow: 0 0 10px var(--admin-text-blue);
-}
-
-.admin-action-button.delete:hover {
-  border-color: var(--admin-text-pink);
-  color: var(--admin-text-pink);
-  box-shadow: 0 0 10px var(--admin-text-pink);
-}
 
 /* Estilos do Modal */
-.admin-modal-overlay {
+.adminModalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -370,7 +330,7 @@ body {
   z-index: 1000;
 }
 
-.admin-modal-content {
+.adminModalContent {
   background: var(--admin-card-bg);
   backdrop-filter: blur(12px);
   padding: 2.5rem;
@@ -394,7 +354,7 @@ body {
   }
 }
 
-.admin-modal-header {
+.adminModalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -403,13 +363,13 @@ body {
   margin-bottom: 1.5rem;
 }
 
-.admin-modal-title {
+.adminModalTitle {
   font-size: 1.75rem;
   color: var(--admin-text-blue);
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
 }
 
-.admin-modal-close-btn {
+.adminModalCloseBtn {
   background: none;
   border: none;
   color: var(--admin-text-light);
@@ -418,32 +378,28 @@ body {
   transition: color 0.3s ease;
 }
 
-.admin-modal-close-btn:hover {
+.adminModalCloseBtn:hover {
   color: var(--admin-text-pink);
 }
 
-.admin-modal-body {
+.adminModalBody {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.admin-modal-body p {
-  color: var(--admin-text-muted);
-}
-
-.admin-form-group {
+.adminFormGroup {
   display: flex;
   flex-direction: column;
 }
 
-.admin-form-group label {
+.adminFormGroup label {
   color: var(--admin-text-blue);
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
 
-.admin-form-input {
+.adminFormInput {
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid var(--admin-border-color);
   color: var(--admin-text-light);
@@ -453,14 +409,29 @@ body {
   transition: all 0.3s ease;
 }
 
-.admin-form-input:focus {
+.adminFormInput:focus {
   border-color: var(--admin-text-blue);
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.5);
 }
 
-.admin-modal-footer {
+.adminModalFooter {
   padding-top: 1.5rem;
   border-top: 1px solid var(--admin-border-color);
   margin-top: 2rem;
   text-align: right;
+}
+
+/* Media Queries para Responsividade */
+@media (min-width: 768px) {
+  .adminGridCards,
+  .adminGridButtons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .adminGridCards,
+  .adminGridButtons {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }

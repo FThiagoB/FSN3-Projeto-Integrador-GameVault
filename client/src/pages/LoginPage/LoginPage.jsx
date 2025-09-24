@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import "./LoginPage.css";
+import styles from "./login.module.css";
 import { Link } from "react-router-dom";
-import { useCookies } from 'react-cookie';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 import { ToastContainer, toast } from "react-toastify";
 
@@ -13,110 +13,108 @@ const LoginPage = () => {
   const [erroLogin, setErroLogin] = useState(false);
   const { user, logout } = useAuth();
 
-  const emailInputRef = useRef(null); // Aponta para o input de email
+  const emailInputRef = useRef(null);
   const navigate = useNavigate();
 
-  // Cookie para armazenar o token JWT
-  const [cookies, setCookie] = useCookies(['authToken']);
+  const [cookies, setCookie] = useCookies(["authToken"]);
 
-  // Bloqueia essa rota caso o usuário esteja logado
   useEffect(() => {
-    if (user){
-      if( user.role === "admin" ) navigate("/admin");
+    if (user) {
+      if (user.role === "admin") navigate("/admin");
       else navigate("/profile");
     }
   }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    try{
-      // Realiza a requisição pro backend passando email e senha
+
+    try {
       const response = await fetch(`http://localhost:4500/login`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
 
-      // Verifica se houve algum problema
       if (!response.ok) {
-        const {message} = await response.json();
-        throw new Error( message );
+        const { message } = await response.json();
+        throw new Error(message);
       }
 
-      // Armazena o token no cookie
       const { token } = await response.json();
 
-      setCookie('authToken', token, {
-        path: '/',
-        maxAge: 60 * 60 * 24, // 1 dia
+      setCookie("authToken", token, {
+        path: "/",
+        maxAge: 60 * 60 * 24,
       });
-    }
-    catch( error ){
-      console.error('Erro:', error);
-      setErroLogin( true );
+    } catch (error) {
+      console.error("Erro:", error);
+      setErroLogin(true);
       emailInputRef.current?.focus();
-      notifyError(` ${error} `);
+      notifyError(`${error}`);
     }
   };
 
-const notifyError = (message) => {
-  toast.error(message, {
-    position: "bottom-right",
-    autoClose: 1500,       // um pouco mais de tempo para ler o erro
-    hideProgressBar: false,
-    closeOnClick: true,    // permitir fechar ao clicar
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-  });
-}
+  const notifyError = (message) => {
+    toast.error(message, {
+      position: "bottom-right",
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  };
 
   return (
-    <section className="login-retro">
-      
-      <div className="login-retro__container">
-        <h1 className="login-retro__title">Login</h1>
-        <form className="login-retro__form" onSubmit={handleSubmit}>
-          <label htmlFor="email" className="login-retro__label">
+    <section className={styles.loginRetro}>
+      <div className={styles.loginRetroContainer}>
+        <h1 className={styles.loginRetroTitle}>Login</h1>
+        <form className={styles.loginRetroForm} onSubmit={handleSubmit}>
+          <label htmlFor="email" className={styles.loginRetroLabel}>
             Email
           </label>
           <input
             id="email"
             ref={emailInputRef}
             type="email"
-            className={`login-retro__input ${erroLogin? "invalid-input": ""}`}
+            className={`${styles.loginRetroInput} ${
+              erroLogin ? styles.invalidInput : ""
+            }`}
             placeholder="voce@exemplo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
 
-          <label htmlFor="password" className="login-retro__label">
+          <label htmlFor="password" className={styles.loginRetroLabel}>
             Senha
           </label>
           <input
             id="password"
             type="password"
-            className={`login-retro__input ${erroLogin? "invalid-input": ""}`}
+            className={`${styles.loginRetroInput} ${
+              erroLogin ? styles.invalidInput : ""
+            }`}
             placeholder="********"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
 
-          <button type="submit" className="login-retro__btn">
+          <button type="submit" className={styles.loginRetroBtn}>
             Entrar
           </button>
         </form>
-        <p style={{ "margin-top": "10px", "text-align": "center" }}>
+
+        <p style={{ marginTop: "10px", textAlign: "center" }}>
           Ainda sem conta? <Link to="/signup">Cadastre-se</Link>
         </p>
 
-        <ToastContainer/>
+        <ToastContainer />
       </div>
     </section>
   );

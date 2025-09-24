@@ -1,5 +1,4 @@
-/* Checkout.css */
-.checkout-page {
+.checkoutPage {
   position: relative;
   overflow: hidden;
   background: linear-gradient(to top, #312e81, #6b21a8, #be185d);
@@ -7,23 +6,24 @@
   padding: 2rem 0;
 }
 
-/* Reutilizando estilos da Hero */
-.hero-bg {
+/* Fundo animado */
+.heroBg {
   position: absolute;
   inset: 0;
+  z-index: 0;
 }
 
-.hero-circle-1,
-.hero-circle-2,
-.hero-circle-3 {
+.heroCircle1,
+.heroCircle2,
+.heroCircle3 {
   position: absolute;
   border-radius: 9999px;
   filter: blur(40px);
-  animation: pulse 2s infinite;
+  animation: pulse 4s infinite ease-in-out;
   opacity: 0.2;
 }
 
-.hero-circle-1 {
+.heroCircle1 {
   top: 25%;
   left: 25%;
   width: 8rem;
@@ -31,22 +31,22 @@
   background-color: #3b82f6;
 }
 
-.hero-circle-2 {
+.heroCircle2 {
   bottom: 25%;
   right: 25%;
   width: 10rem;
   height: 10rem;
   background-color: #8b5cf6;
-  animation-delay: 1s;
+  animation-delay: 2s;
 }
 
-.hero-circle-3 {
+.heroCircle3 {
   top: 50%;
   left: 50%;
   width: 7rem;
   height: 7rem;
   background-color: #ec4899;
-  animation-delay: 0.5s;
+  animation-delay: 1s;
 }
 
 @keyframes pulse {
@@ -62,8 +62,7 @@
 }
 
 /* Cards */
-.featured-card {
-  position: relative;
+.featuredCard {
   background: linear-gradient(
     to bottom right,
     rgba(31, 41, 55, 0.5),
@@ -75,31 +74,15 @@
   border: 1px solid rgba(55, 65, 81, 0.5);
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
 /* Tipografia */
-.title-retro {
+.titleRetro {
   font-family: "Press Start 2P", system-ui;
   font-weight: 700;
   color: white;
 }
 
-.gradient {
-  background: linear-gradient(to right, #60a5fa, #a78bfa);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.gradient-text {
+.gradient,
+.gradientText {
   background: linear-gradient(to right, #60a5fa, #a78bfa);
   -webkit-background-clip: text;
   background-clip: text;
@@ -107,47 +90,24 @@
 }
 
 /* Botões */
-.button-primary {
+.buttonPrimary {
   background: linear-gradient(to right, #3b82f6, #8b5cf6);
-  color: white;
-  padding: 0.75rem 1.5rem;
+  color: white !important;
   border-radius: 0.5rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
   border: none;
   cursor: pointer;
   text-decoration: none !important;
 }
 
-.button-primary:hover {
+.buttonPrimary:hover {
   background: linear-gradient(to right, #2563eb, #7c3aed);
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
 }
 
-.button-secondary {
-  background-color: rgba(31, 41, 55, 0.5);
-  backdrop-filter: blur(4px);
-  color: white;
-  border: 1px solid #4b5563;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  text-decoration: none !important;
-}
-
-.button-secondary:hover {
-  border-color: #60a5fa;
-  background-color: rgba(55, 65, 81, 0.5);
-  transform: translateY(-2px);
-}
-
-.button-buy {
+.buttonBuy {
   background: linear-gradient(to right, #10b981, #3b82f6);
   color: white;
   padding: 1rem 2.5rem;
@@ -157,81 +117,100 @@
   transition: all 0.3s ease;
   cursor: pointer;
   font-size: 1.25rem;
-  display: flex;
-  align-items: center;
 }
 
-.button-buy:hover {
+.buttonBuy:hover {
   background: linear-gradient(to right, #059669, #2563eb);
   transform: translateY(-3px);
   box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
 }
 
-.button-delete {
+.buttonDelete {
   transition: all 0.2s;
 }
 
-.button-delete:hover {
+.buttonDelete:hover {
   transform: scale(1.1);
   background-color: rgba(220, 53, 69, 0.2);
 }
 
 /* Cores de ícones */
-.text-blue {
+.textBlue {
   color: #60a5fa;
 }
 
-.text-purple {
+.textPurple {
   color: #a78bfa;
 }
 
-/* Formulários */
-.bg-gray-700 {
-  background-color: #2d3748 !important;
+/* Estilos para input inválido */
+/* Mantive os seletores globais para afetar .form-control do Bootstrap */
+:global(.form-control.is-invalid),
+.invalid {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
 }
-
-.form-control,
-.form-select {
+:global(.form-control) {
   background-color: #2d3748 !important;
   color: white !important;
   border: 1px solid #4a5568 !important;
 }
-
-.form-control:focus,
-.form-select:focus {
-  background-color: #2d3748 !important;
-  color: white !important;
-  border-color: #63b3ed !important;
+:global(.form-control:focus) {
   box-shadow: 0 0 0 0.25rem rgba(99, 179, 237, 0.25) !important;
+  border-color: #63b3ed !important;
+}
+:global(::placeholder) {
+  color: #a0aec0 !important;
+  opacity: 0.7 !important;
 }
 
-::placeholder {
-  color: rgb(224, 224, 224) !important;
-  opacity: 0.5 !important;
+/* Opções de Envio */
+.shippingOption {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid #4a5568;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #2d3748;
 }
 
-.invalid:hover,
-.invalid:focus{
-  border: 1px solid #c51902 !important;
-  box-shadow: 0 0 9px #c51902 !important;
-  background: rgba(31, 41, 55, 0.7) !important;
-}
-.invalid {
-  border: 1px solid #c51902 !important;
-  box-shadow: 0 0 9px #c51902 !important;
-  background: rgba(31, 41, 55, 0.7) !important;
+.shippingOption:hover {
+  border-color: #63b3ed;
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  .title-retro {
-    font-size: 1.5rem !important;
-  }
-
-  .button-primary,
-  .button-secondary {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
-  }
+.shippingOptionSelected {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
+  background-color: rgba(139, 92, 246, 0.1);
 }
 
+.shippingOption input[type="radio"] {
+  display: none;
+}
+
+.shippingOption label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+  color: #e2e8f0;
+}
+
+.shippingOptionName {
+  font-weight: 600;
+}
+
+.shippingOptionDesc {
+  font-size: 0.875rem;
+  color: #a0aec0;
+}
+
+.shippingOptionPrice {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #fff;
+}

@@ -1,0 +1,111 @@
+/* Modal dialog wrapper (applied to modal-dialog via dialogClassName) */
+.editGameModal {
+  /* nada necessário aqui por enquanto; mantém escopo */
+}
+
+/* Aplica o visual ao .modal-content via contentClassName */
+.modalContent {
+  top: 10vh;
+  transform: translate(-50%);
+  background: linear-gradient(
+    to bottom right,
+    rgba(31, 41, 55, 0.9),
+    rgba(17, 24, 39, 0.9)
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+  padding: 1.25rem;
+  color: white !important;
+  width: 70vw !important;
+  max-width: 950px;
+}
+
+/* Header / Title */
+.modalHeader {
+  border: none;
+  padding: 0 0 0.5rem 0;
+}
+.modalTitle {
+  color: #a78bfa;
+}
+
+/* Body */
+.modalBody {
+  padding: 1rem 0;
+  color: white;
+}
+
+/* Footer */
+.modalFooter {
+  border: none;
+  padding: 0.5rem 0 0 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* Buttons inside modal */
+.modalButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+/* If you want to style variants separately you can combine classes or rely on react-bootstrap */
+.modalButton--cancel {
+  background: rgba(31, 41, 55, 0.5);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: white;
+}
+
+.modalButton--confirm {
+  background: rgba(225, 29, 72, 0.5);
+  border: 1px solid rgba(225, 29, 72, 0.3);
+  color: #fda4af;
+  font-weight: bold;
+}
+
+/* Inputs & selects */
+.gameInput {
+  border-radius: 8px;
+  padding: 6px 10px;
+  width: 100%;
+}
+
+/* select genre */
+.selectGenre {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+/* preview image additional tweaks */
+.previewImage {
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* small helper text below input */
+.formText {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+}
+
+/* responsive adjustments */
+@media (max-width: 768px) {
+  .modalContent {
+    width: 92vw !important;
+    padding: 1rem;
+  }
+
+  .previewImage {
+    width: 72px !important;
+    height: 72px !important;
+  }
+}

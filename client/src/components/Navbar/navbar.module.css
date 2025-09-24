@@ -1,4 +1,4 @@
-.profile-span {
+.profileSpan {
   width: 3rem;
   height: 3rem;
   display: flex;
@@ -10,7 +10,7 @@
   transition: transform 0.2s ease;
 }
 
-.admin-navbar {
+.adminNavbar {
   background: linear-gradient(to bottom right, #312e81, #be185d);
   backdrop-filter: blur(8px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
@@ -26,11 +26,11 @@
   z-index: 2000;
 }
 
-.admin-navbar-title-link {
+.adminNavbarTitleLink {
   text-decoration: none;
 }
 
-.admin-navbar-title {
+.adminNavbarTitle {
   font-size: 1.75rem;
   font-weight: bold;
   color: var(--admin-text-blue);
@@ -39,14 +39,14 @@
   margin-left: 50px;
 }
 
-.admin-navbar-controls {
+.adminNavbarControls {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  position: relative; /* Essencial para posicionar o menu dropdown */
+  position: relative;
 }
 
-.admin-search-input {
+.adminSearchInput {
   padding: 0.75rem 1.25rem;
   border: 1px solid var(--admin-border-color);
   border-radius: 0.75rem;
@@ -56,16 +56,16 @@
   transition: all 0.3s ease;
 }
 
-.admin-search-input::placeholder {
+.adminSearchInput::placeholder {
   color: var(--admin-text-muted);
 }
 
-.admin-search-input:focus {
+.adminSearchInput:focus {
   border-color: var(--admin-text-blue);
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.5);
 }
 
-.admin-profile-icon {
+.adminProfileIcon {
   width: 3rem;
   height: 3rem;
   border-radius: 9999px;
@@ -81,17 +81,17 @@
   transition: transform 0.2s ease;
 }
 
-.admin-profile-icon:hover {
+.adminProfileIcon:hover {
   transform: scale(1.05);
 }
 
-.search-container {
+.searchContainer {
   position: relative;
 }
 
-.search-results-list {
-  position: absolute; /* Mudado para absolute para seguir o container */
-  top: calc(100% + 10px); /* Posiciona abaixo do input */
+.searchResultsList {
+  position: absolute;
+  top: calc(100% + 10px);
   left: 0;
   width: 100%;
   background: rgba(31, 41, 55, 0.7);
@@ -107,7 +107,7 @@
   z-index: 1000;
 }
 
-.search-result-item a {
+.searchResultItem a {
   display: block;
   padding: 0.75rem 1rem;
   color: var(--admin-text-light);
@@ -116,17 +116,16 @@
   transition: background-color 0.2s ease;
 }
 
-.search-result-item a:hover {
+.searchResultItem a:hover {
   background-color: rgba(96, 165, 250, 0.2);
 }
 
-.search-info-item {
+.searchInfoItem {
   padding: 0.75rem 1rem;
   color: var(--admin-text-muted);
   text-align: center;
 }
 
-/* --- Estilização do Menu Dropdown do Perfil --- */
 @keyframes fadeInMenu {
   from {
     opacity: 0;
@@ -138,9 +137,9 @@
   }
 }
 
-.admin-profile-options {
+.adminProfileOptions {
   position: absolute;
-  top: calc(100% + 15px); /* Posiciona abaixo do ícone */
+  top: calc(100% + 15px);
   right: 0;
   width: 200px;
   background: linear-gradient(
@@ -154,16 +153,16 @@
   box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
   z-index: 1000;
   animation: fadeInMenu 0.3s ease forwards;
-  overflow: hidden; /* Garante que os filhos respeitem o border-radius */
+  overflow: hidden;
 }
 
-.admin-profile-options-list {
+.adminProfileOptionsList {
   list-style: none;
   padding: 0.5rem;
   margin: 0;
 }
 
-.admin-profile-options-list li a {
+.adminProfileOptionsList li a {
   display: block;
   padding: 0.75rem 1rem;
   color: var(--admin-text-light);
@@ -172,17 +171,17 @@
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.admin-profile-options-list li a:hover {
+.adminProfileOptionsList li a:hover {
   background-color: rgba(139, 92, 246, 0.2);
   color: white;
 }
 
-.admin-profile-options-list li:not(:last-child) {
+.adminProfileOptionsList li:not(:last-child) {
   border-bottom: 1px solid rgba(139, 92, 246, 0.2);
 }
 
 @media (max-width: 766px) {
-  .admin-navbar {
+  .adminNavbar {
     display: none;
   }
 }

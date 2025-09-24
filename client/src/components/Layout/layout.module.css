@@ -1,26 +1,25 @@
-/* Estrutura Principal do Layout */
 .layout {
   display: flex;
   min-height: 100vh;
   background-color: #f3f4f6; /* cinza claro */
 }
 
-/* Sidebar no Desktop */
-.layout__sidebar-desktop {
-  display: none; /* Escondida em telas pequenas */
+/* Sidebar Desktop */
+.sidebarDesktop {
+  display: none;
   transition: width 0.3s ease-in-out;
 }
 
-.layout__sidebar-desktop--expanded {
+.sidebarDesktopExpanded {
   width: 16rem; /* 256px */
 }
 
-.layout__sidebar-desktop--collapsed {
+.sidebarDesktopCollapsed {
   width: 5rem; /* 80px */
 }
 
-/* Sidebar no Mobile */
-.layout__sidebar-mobile {
+/* Sidebar Mobile */
+.sidebarMobile {
   position: fixed;
   top: 0;
   left: 0;
@@ -30,16 +29,16 @@
   transition: transform 0.3s ease-in-out;
 }
 
-.layout__sidebar-mobile--open {
+.sidebarMobileOpen {
   transform: translateX(0);
 }
 
-.layout__sidebar-mobile-content {
+.sidebarMobileContent {
   width: 16rem; /* 256px */
 }
 
 /* Overlay do Menu Mobile */
-.layout__overlay {
+.overlay {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.6);
@@ -47,23 +46,23 @@
 }
 
 /* Conteúdo Principal */
-.layout__main {
+.main {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.layout__main-content {
+.mainContent {
   flex: 1;
 }
 
 /* Header e Botão (Mobile) */
-.layout__header-mobile {
+.headerMobile {
   padding: 1rem;
   background: linear-gradient(to bottom right, #312e81, #be185d);
 }
 
-.layout__mobile-menu-button {
+.mobileMenuButton {
   background: none;
   border: none;
   cursor: pointer;
@@ -73,14 +72,14 @@
 /* Media Queries para Responsividade */
 @media (min-width: 768px) {
   /* Esconde elementos mobile no desktop */
-  .layout__sidebar-mobile,
-  .layout__overlay,
-  .layout__header-mobile {
+  .sidebarMobile,
+  .overlay,
+  .headerMobile {
     display: none;
   }
 
   /* Mostra a sidebar desktop */
-  .layout__sidebar-desktop {
+  .sidebarDesktop {
     display: flex;
   }
 }

@@ -1,9 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "./ProductCard.css";
+import styles from "./productCard.module.css";
 import { useCart } from "../../contexts/CartContext";
 import { Button } from "react-bootstrap";
-
 import { toast } from "react-toastify";
 
 const notifySuccess = (Mensagem) =>
@@ -24,8 +23,8 @@ const ProductCard = ({ product }) => {
   if (!product) return null;
 
   return (
-    <div className="product-card">
-      <div className="product-category-tag">
+    <div className={styles.productCard}>
+      <div className={styles.productCategoryTag}>
         <Link
           to={`/produtos/${product.category}`}
           style={{ textDecoration: "none", color: "inherit" }}
@@ -36,32 +35,28 @@ const ProductCard = ({ product }) => {
       <img
         src={product.imageUrl}
         alt={product.name}
-        className="product-image"
+        className={styles.productImage}
       />
-      <div className="product-info">
-        <h3 className="product-name">{product.name}</h3>
+      <div className={styles.productInfo}>
+        <h3 className={styles.productName}>{product.name}</h3>
         <p
-          className="product-price"
+          className={styles.productPrice}
           style={{ fontFamily: "Press Start 2P", fontSize: "1.2rem" }}
         >
           R${product.price}
         </p>
-        <div
-          className="product-actions"
-          style={{ width: "100%", maxHeight: "30%", borderRadius: "10px" }}
-        >
+        <div className={styles.productActions}>
           <Button
             as={Link}
             to={`/produto/${product.id}`}
             variant="dark"
-            className="btn-card"
+            className={styles.btnCard}
           >
             Ver Detalhes
           </Button>
           <Button
-            className="btn-card-secondary"
+            className={styles.btnCardSecondary}
             onClick={() => {
-              console.log(product)
               addToCart(product, 1, product.stock);
               notifySuccess("Item adicionado ao carrinho.");
             }}

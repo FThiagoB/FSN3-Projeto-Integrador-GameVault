@@ -8,7 +8,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import "./Footer.css";
+import styles from "./footer.module.css";
 
 const Footer = () => {
   const games = [
@@ -23,56 +23,55 @@ const Footer = () => {
   const atendimento = [
     { name: "Contato", link: "/contato" },
     { name: "FAQ", link: "/faq" },
-    //{ name: "Garantia", link: "/garantia" },
-    //{ name: "Frete Grátis", link: "/frete-gratis" },
-    //{ name: "Suporte Técnico", link: "/suporte-tecnico" },
-    //{ name: "Parcerias", link: "/parcerias" },
   ];
 
   return (
-    <footer className="footer">
-      <div className="footer-container">
-        <div className="footer-grid">
+    <footer className={styles.footer}>
+      <div className={styles.footerContainer}>
+        <div className={styles.footerGrid}>
           {/* Brand */}
-          <div className="footer-brand">
-            <div className="footer-brand-logo">
-              <div className="footer-logo-circle">R</div>
+          <div className={styles.footerBrand}>
+            <div className={styles.footerBrandLogo}>
+              <div className={styles.footerLogoCircle}>R</div>
               <div>
-                <h3 className="footer-title">RetroPixel</h3>
-                <p className="footer-subtitle">Games Store</p>
+                <h3 className={styles.footerTitle}>RetroPixel</h3>
+                <p className={styles.footerSubtitle}>Games Store</p>
               </div>
             </div>
-            <p className="footer-description">
+            <p className={styles.footerDescription}>
               A maior loja de jogos retrô do Brasil. Reviva os clássicos que
               marcaram gerações com qualidade e nostalgia garantidas.
             </p>
-            <div className="footer-social">
+            <div className={styles.footerSocial}>
               {[Facebook, Twitter, Instagram, Youtube].map((Icon, index) => (
-                <button key={index} className="footer-social-btn">
-                  <Icon className="footer-social-icon" />
+                <button key={index} className={styles.footerSocialBtn}>
+                  <Icon className={styles.footerSocialIcon} />
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="footer-column">
-            <h4 className="footer-heading">Jogos</h4>
-            <ul className="footer-list">
-              {games.map((games) => (
-                <li key={games.name}>
-                  <Link to={games.link} className="footer-link">
-                    {games.name}
+          {/* Jogos */}
+          <div className={styles.footerColumn}>
+            <h4 className={styles.footerHeading}>Jogos</h4>
+            <ul className={styles.footerList}>
+              {games.map((game) => (
+                <li key={game.name}>
+                  <Link to={game.link} className={styles.footerLink}>
+                    {game.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
-          <div className="footer-column">
-            <h4 className="footer-heading">Atendimento</h4>
-            <ul className="footer-list">
+
+          {/* Atendimento */}
+          <div className={styles.footerColumn}>
+            <h4 className={styles.footerHeading}>Atendimento</h4>
+            <ul className={styles.footerList}>
               {atendimento.map((item) => (
                 <li key={item.name}>
-                  <Link to={item.link} className="footer-link">
+                  <Link to={item.link} className={styles.footerLink}>
                     {item.name}
                   </Link>
                 </li>
@@ -81,26 +80,26 @@ const Footer = () => {
           </div>
 
           {/* Contato */}
-          <div className="footer-column">
-            <h4 className="footer-heading">Contato</h4>
-            <div className="footer-contact">
-              <div className="footer-contact-item">
-                <Mail className="footer-icon" />
+          <div className={styles.footerColumn}>
+            <h4 className={styles.footerHeading}>Contato</h4>
+            <div className={styles.footerContact}>
+              <div className={styles.footerContactItem}>
+                <Mail className={styles.footerIcon} />
                 <span>contato@retropixel.com</span>
               </div>
-              <div className="footer-contact-item">
-                <Phone className="footer-icon" />
+              <div className={styles.footerContactItem}>
+                <Phone className={styles.footerIcon} />
                 <span>(85) 99999-9999</span>
               </div>
-              <div className="footer-contact-item">
-                <MapPin className="footer-icon" />
+              <div className={styles.footerContactItem}>
+                <MapPin className={styles.footerIcon} />
                 <span>Fortaleza, CE</span>
               </div>
             </div>
 
-            <div className="footer-highlight">
-              <div className="highlight-title">🔥 Atendimento 24/7</div>
-              <div className="highlight-sub">
+            <div className={styles.footerHighlight}>
+              <div className={styles.highlightTitle}>🔥 Atendimento 24/7</div>
+              <div className={styles.highlightSub}>
                 Suporte especializado em games retrô
               </div>
             </div>
@@ -108,18 +107,18 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="footer-bottom">
-          <div className="footer-bottom-left">
+        <div className={styles.footerBottom}>
+          <div className={styles.footerBottomLeft}>
             © 2025 RetroPixel Games Store. Todos os direitos reservados.
           </div>
-          <div className="footer-bottom-links">
-            <Link to="/" className="footer-link">
+          <div className={styles.footerBottomLinks}>
+            <Link to="/" className={styles.footerLink}>
               Termos de Uso
             </Link>
-            <Link to="/" className="footer-link">
+            <Link to="/" className={styles.footerLink}>
               Privacidade
             </Link>
-            <Link to="/" className="footer-link">
+            <Link to="/" className={styles.footerLink}>
               Cookies
             </Link>
           </div>

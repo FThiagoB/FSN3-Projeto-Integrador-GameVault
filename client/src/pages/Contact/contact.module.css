@@ -22,6 +22,7 @@
   margin: 0 auto;
 }
 
+/* fundo animado */
 .contact-retro__background {
   position: absolute;
   top: 0;
@@ -31,6 +32,7 @@
   z-index: 1;
 }
 
+/* círculos: classes separadas para combinar no JSX */
 .circle {
   position: absolute;
   border-radius: 9999px;
@@ -39,14 +41,18 @@
   animation: pulse 2s infinite;
 }
 
-.circle.pulse.delay0 {
+.pulse {
+  /* pulse shared behaviour (animation defined below) */
+}
+
+.delay0 {
   top: 25%;
   left: 25%;
   width: 8rem;
   height: 8rem;
   background-color: #3b82f6;
 }
-.circle.pulse.delay1 {
+.delay1 {
   bottom: 25%;
   right: 25%;
   width: 10rem;
@@ -54,7 +60,7 @@
   background-color: #8b5cf6;
   animation-delay: 1s;
 }
-.circle.pulse.delay05 {
+.delay05 {
   top: 50%;
   left: 50%;
   width: 7rem;
@@ -121,7 +127,8 @@
   color: #a78bfaaa !important;
 }
 
-.form-control:focus {
+/* Mantive form-control como global para compatibilidade com Bootstrap */
+:global(.form-control:focus) {
   border-color: #8b5cf6 !important;
 }
 
@@ -208,11 +215,10 @@
 }
 
 @media (max-width: 1023px) {
-.contact-retro__title {
+  .contact-retro__title {
     font-size: 1.5rem;
   }
   .contact-retro__email {
     font-size: 0.625rem;
   }
-
 }

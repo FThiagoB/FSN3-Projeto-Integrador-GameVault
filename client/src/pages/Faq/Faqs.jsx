@@ -1,5 +1,5 @@
-import { useState } from "react";
-import "./Faq.css";
+import React, { useState } from "react";
+import styles from "./faq.module.css";
 
 const faqs = [
   {
@@ -36,23 +36,40 @@ export default function StaticFaqSection() {
   };
 
   return (
-    <section className="faq-section">
-      <div className="faq-container">
-        <h2 className="faq-title">Perguntas Frequentes</h2>
-        <div className="faq-list">
+    <section className={styles.faqSection}>
+      <div className={styles.faqContainer}>
+        <h2 className={styles.faqTitle}>Perguntas Frequentes</h2>
+        <div className={styles.faqList}>
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className={`faq-item ${activeIndex === index ? "active" : ""}`}
+              className={`${styles.faqItem} ${
+                activeIndex === index ? styles.active : ""
+              }`}
             >
-              <button className="faq-question" onClick={() => toggle(index)}>
-                {faq.question}
-                <span className="faq-icon">
+              <button
+                className={styles.faqQuestion}
+                onClick={() => toggle(index)}
+                aria-expanded={activeIndex === index}
+                aria-controls={`faq-answer-${index}`}
+                id={`faq-question-${index}`}
+                type="button"
+              >
+                <span>{faq.question}</span>
+                <span className={styles.faqIcon}>
                   {activeIndex === index ? "−" : "+"}
                 </span>
               </button>
+
               {activeIndex === index && (
-                <div className="faq-answer">{faq.answer}</div>
+                <div
+                  id={`faq-answer-${index}`}
+                  role="region"
+                  aria-labelledby={`faq-question-${index}`}
+                  className={styles.faqAnswer}
+                >
+                  {faq.answer}
+                </div>
               )}
             </div>
           ))}

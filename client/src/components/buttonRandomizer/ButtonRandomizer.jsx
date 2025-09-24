@@ -1,51 +1,48 @@
 import React, { useState } from "react";
-import "./ButtonRandomizer.css";
+import styles from "./buttonRandomizer.module.css";
 import ProductCard from "../ProductCard/ProductCard";
 
 export default function ButtonRandomizer() {
   const [randomGame, setRandomGame] = useState(null);
-  const [isLoading, setIsLoading] = useState(false); // Estado de loading para o botão
+  const [isLoading, setIsLoading] = useState(false);
 
-  // A função agora é assíncrona para fazer a chamada à API
   const handleRandomize = async () => {
     setIsLoading(true);
-    setRandomGame(null); // Limpa o jogo anterior
+    setRandomGame(null);
     try {
       const response = await fetch("http://localhost:4500/games/random");
       if (!response.ok) {
-        console.log(response)
         throw new Error("Não foi possível sortear um jogo.");
       }
       const game = await response.json();
       setRandomGame(game);
     } catch (error) {
       console.error(error);
-      // Aqui você poderia mostrar uma notificação de erro
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <section className="randomizer-section">
-      <div className="container">
-        <div className="text-center mt-4">
-          <h2 className="randomizer-title">Não sabe qual jogo jogar?</h2>
-          <p className="randomizer-subtitle">
+    <section className={styles.randomizerSection}>
+      <div className={styles.container}>
+        <div className={`${styles.textCenter} ${styles.mt4}`}>
+          <h2 className={styles.randomizerTitle}>Não sabe qual jogo jogar?</h2>
+          <p className={styles.randomizerSubtitle}>
             Deixe que a sorte decida por você!
           </p>
         </div>
-        <div className="btn-group">
-          <div className="btn-randomizer">
+
+        <div className={styles.btnGroup}>
+          <div className={styles.btnRandomizer}>
             <button
-              className="btn-randomize"
+              className={styles.btnRandomize}
               onClick={handleRandomize}
-              disabled={isLoading} // Desabilita o botão durante o carregamento
+              disabled={isLoading}
             >
               {isLoading ? "Sorteando..." : "Me surpreenda!"}
             </button>
 
-            {/* O objeto 'randomGame' já vem pronto da API */}
             {randomGame && (
               <ProductCard
                 product={{

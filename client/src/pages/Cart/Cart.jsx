@@ -14,11 +14,10 @@ import {
   FaCcPaypal,
 } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
-import "./Cart.css"; // Importe o novo arquivo CSS
+import styles from "./cart.module.css";
 
-import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate, useParams } from 'react-router-dom';
-
+import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const {
@@ -33,13 +32,12 @@ const Cart = () => {
     selectShippingMethodById,
     shippingMethod,
     tax,
-    discount
+    discount,
   } = useCart();
 
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // ... (toda a lógica e os estados permanecem os mesmos) ...
   const [shippingMethodSelected, setShippingMethodSelected] = useState({});
   const [promoCode, setPromoCode] = useState("");
   const [promoMessage, setPromoMessage] = useState("");
@@ -50,7 +48,7 @@ const Cart = () => {
   const [itemToRemove, setItemToRemove] = useState(null);
 
   useEffect(() => {
-    if((user?.role === "seller") || (user?.role === "admin")) navigate('/profile');
+    if (user?.role === "seller" || user?.role === "admin") navigate("/profile");
   }, [user, navigate]);
 
   const notifySuccess = (Mensagem) =>
@@ -66,9 +64,11 @@ const Cart = () => {
     });
 
   useEffect(() => {
-    async function refreshMethodsShipping() { await getShippingMethods(); }
+    async function refreshMethodsShipping() {
+      await getShippingMethods();
+    }
     refreshMethodsShipping();
-  }, []);
+  }, [getShippingMethods]);
 
   const handleCheckout = () => {
     notifySuccess("Compra realizada com sucesso!");
@@ -93,11 +93,11 @@ const Cart = () => {
   const clearCart = () => {
     contextClearCart();
     setShowClearConfirm(false);
-    setDiscountValue(0)
+    setDiscountValue(0);
   };
 
   const incrementQuantity = (id, qty) => {
-    contextUpdateQuantity(id, qty + 1)
+    contextUpdateQuantity(id, qty + 1);
   };
   const decrementQuantity = (id, qty) => {
     if (qty > 1) contextUpdateQuantity(id, qty - 1);
@@ -120,7 +120,7 @@ const Cart = () => {
       setPromoValid(true);
       setPromoMessage(`Desconto aplicado com sucesso`);
       notifySuccess(promo.message);
-      setDiscountValue( subtotal * discount );
+      setDiscountValue(subtotal * discount);
     } else {
       setPromoValid(false);
       setPromoMessage(`${promo?.message}`);
@@ -134,62 +134,73 @@ const Cart = () => {
     0
   );
 
-  if( subtotal * discount !== discountValue )
-    setDiscountValue( subtotal * discount );
+  if (subtotal * discount !== discountValue)
+    setDiscountValue(subtotal * discount);
   const total = subtotal + shippingCost + tax - discountValue;
 
   return (
-    <div className="cart-page">
+    <div className={styles["cart-page"]}>
       <ToastContainer />
-      <div className="cart-container">
+      <div className={styles["cart-container"]}>
         {/* Empty Cart Message */}
         {cartItems.length === 0 && (
-          <div className="cart-empty">
-            <FaShoppingCart className="cart-empty__icon" />
-            <p className="cart-empty__text">Seu carrinho está vazio</p>
-            <Link to="/produtos" className="btn-retro btn-retro--primary">
+          <div className={styles["cart-empty"]}>
+            <FaShoppingCart className={styles["cart-empty__icon"]} />
+            <p className={styles["cart-empty__text"]}>
+              Seu carrinho está vazio
+            </p>
+            <Link
+              to="/produtos"
+              className={`${styles["btn-retro"]} ${styles["btn-retro--primary"]}`}
+            >
               Continuar Comprando
             </Link>
           </div>
         )}
 
         {/* Mobile View */}
-        <div className="cart-mobile-view">
+        <div className={styles["cart-mobile-view"]}>
           {cartItems.map((item) => (
-            <div key={item.id} className="cart-card cart-item--mobile">
-              <div className="cart-item__header">
-                <div className="cart-item__details">
+            <div
+              key={item.id}
+              className={`${styles["cart-card"]} ${styles["cart-item--mobile"]}`}
+            >
+              <div className={styles["cart-item__header"]}>
+                <div className={styles["cart-item__details"]}>
                   <img
-                    // ✅ CORREÇÃO 1 AQUI
                     src={item.imageUrl || "https://via.placeholder.com/80"}
                     alt="Product"
-                    className="cart-item__image"
+                    className={styles["cart-item__image"]}
                   />
                   <div>
-                    <h5 className="cart-item__name">{item.name}</h5>
+                    <h5 className={styles["cart-item__name"]}>{item.name}</h5>
                   </div>
                 </div>
                 <button
                   onClick={() => confirmRemoveItem(item.id)}
-                  className="cart-item__remove-btn"
+                  className={styles["cart-item__remove-btn"]}
                 >
                   <FaTrash size={24} />
                 </button>
               </div>
 
-              <div className="cart-item__grid">
-                <div className="cart-item__grid-col">
-                  <span className="cart-item__label">Quantidade:</span>
-                  <div className="quantity-control quantity-control--mobile">
+              <div className={styles["cart-item__grid"]}>
+                <div className={styles["cart-item__grid-col"]}>
+                  <span className={styles["cart-item__label"]}>
+                    Quantidade:
+                  </span>
+                  <div
+                    className={`${styles["quantity-control"]} ${styles["quantity-control--mobile"]}`}
+                  >
                     <button
-                      className="quantity-control__btn"
+                      className={styles["quantity-control__btn"]}
                       onClick={() => decrementQuantity(item.id, item.quantity)}
                     >
                       <FaChevronLeft />
                     </button>
                     <input
                       type="number"
-                      className="quantity-control__input"
+                      className={styles["quantity-control__input"]}
                       value={item.quantity}
                       onChange={(e) =>
                         handleQuantityChange(item.id, e.target.value)
@@ -197,7 +208,7 @@ const Cart = () => {
                       min="1"
                     />
                     <button
-                      className="quantity-control__btn"
+                      className={styles["quantity-control__btn"]}
                       onClick={() => incrementQuantity(item.id, item.quantity)}
                     >
                       <FaPlus />
@@ -205,16 +216,16 @@ const Cart = () => {
                   </div>
                 </div>
 
-                <div className="cart-item__grid-col">
-                  <span className="cart-item__label">Preço:</span>
-                  <div className="cart-item__price">
+                <div className={styles["cart-item__grid-col"]}>
+                  <span className={styles["cart-item__label"]}>Preço:</span>
+                  <div className={styles["cart-item__price"]}>
                     R${Number(item.price).toFixed(2)}
                   </div>
                 </div>
 
-                <div className="cart-item__grid-col">
-                  <span className="cart-item__label">Total:</span>
-                  <div className="cart-item__total">
+                <div className={styles["cart-item__grid-col"]}>
+                  <span className={styles["cart-item__label"]}>Total:</span>
+                  <div className={styles["cart-item__total"]}>
                     R${(Number(item.price) * item.quantity).toFixed(2)}
                   </div>
                 </div>
@@ -225,44 +236,54 @@ const Cart = () => {
 
         {/* Tablet/Desktop View */}
         {cartItems.length > 0 && (
-          <div className="cart-desktop-view">
-            <div className="cart-table-wrapper">
-              <table className="cart-table">
+          <div className={styles["cart-desktop-view"]}>
+            <div className={styles["cart-table-wrapper"]}>
+              <table className={styles["cart-table"]}>
                 <thead>
-                  <tr className="cart-table__header-row">
-                    <th className="cart-table__header">Produto</th>
-                    <th className="cart-table__header cart-table__header--center">
+                  <tr className={styles["cart-table__header-row"]}>
+                    <th className={styles["cart-table__header"]}>Produto</th>
+                    <th
+                      className={`${styles["cart-table__header"]} ${styles["cart-table__header--center"]}`}
+                    >
                       Quantidade
                     </th>
-                    <th className="cart-table__header cart-table__header--right">
+                    <th
+                      className={`${styles["cart-table__header"]} ${styles["cart-table__header--right"]}`}
+                    >
                       Preço
                     </th>
-                    <th className="cart-table__header cart-table__header--right">
+                    <th
+                      className={`${styles["cart-table__header"]} ${styles["cart-table__header--right"]}`}
+                    >
                       Total
                     </th>
-                    <th className="cart-table__header cart-table__header--center">
+                    <th
+                      className={`${styles["cart-table__header"]} ${styles["cart-table__header--center"]}`}
+                    >
                       Ações
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {cartItems.map((item) => (
-                    <tr key={item.id} className="cart-table__body-row">
-                      <td className="cart-table__cell">
-                        <div className="cart-item__details">
+                    <tr
+                      key={item.id}
+                      className={styles["cart-table__body-row"]}
+                    >
+                      <td className={styles["cart-table__cell"]}>
+                        <div className={styles["cart-item__details"]}>
                           <img
-                            // ✅ CORREÇÃO 2 AQUI
                             src={
                               item.imageUrl || "https://via.placeholder.com/80"
                             }
                             alt="Product"
-                            className="cart-item__image"
+                            className={styles["cart-item__image"]}
                           />
                           <div>
                             <h6>
                               <Link
                                 to={`/produto/${item.id}`}
-                                className="cart-item__link"
+                                className={styles["cart-item__link"]}
                               >
                                 {item.name}
                               </Link>
@@ -270,10 +291,12 @@ const Cart = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="cart-table__cell cart-table__cell--center">
-                        <div className="quantity-control">
+                      <td
+                        className={`${styles["cart-table__cell"]} ${styles["cart-table__cell--center"]}`}
+                      >
+                        <div className={styles["quantity-control"]}>
                           <button
-                            className="quantity-control__btn"
+                            className={styles["quantity-control__btn"]}
                             onClick={() =>
                               decrementQuantity(item.id, item.quantity)
                             }
@@ -282,7 +305,7 @@ const Cart = () => {
                           </button>
                           <input
                             type="number"
-                            className="quantity-control__input"
+                            className={styles["quantity-control__input"]}
                             value={item.quantity}
                             onChange={(e) =>
                               handleQuantityChange(item.id, e.target.value)
@@ -290,7 +313,7 @@ const Cart = () => {
                             min="1"
                           />
                           <button
-                            className="quantity-control__btn"
+                            className={styles["quantity-control__btn"]}
                             onClick={() =>
                               incrementQuantity(item.id, item.quantity)
                             }
@@ -299,20 +322,26 @@ const Cart = () => {
                           </button>
                         </div>
                       </td>
-                      <td className="cart-table__cell cart-table__cell--right">
-                        <span className="cart-item__price">
+                      <td
+                        className={`${styles["cart-table__cell"]} ${styles["cart-table__cell--right"]}`}
+                      >
+                        <span className={styles["cart-item__price"]}>
                           R${Number(item.price).toFixed(2)}
                         </span>
                       </td>
-                      <td className="cart-table__cell cart-table__cell--right">
-                        <span className="cart-item__total">
+                      <td
+                        className={`${styles["cart-table__cell"]} ${styles["cart-table__cell--right"]}`}
+                      >
+                        <span className={styles["cart-item__total"]}>
                           R${(Number(item.price) * item.quantity).toFixed(2)}
                         </span>
                       </td>
-                      <td className="cart-table__cell cart-table__cell--center">
+                      <td
+                        className={`${styles["cart-table__cell"]} ${styles["cart-table__cell--center"]}`}
+                      >
                         <button
                           onClick={() => confirmRemoveItem(item.id)}
-                          className="cart-item__remove-btn"
+                          className={styles["cart-item__remove-btn"]}
                         >
                           <FaTrash size={24} />
                         </button>
@@ -327,40 +356,62 @@ const Cart = () => {
 
         {/* Order Summary Section */}
         {cartItems.length > 0 && (
-          <div className="cart-summary-section">
-            <div className="cart-summary__main">
+          <div className={styles["cart-summary-section"]}>
+            <div className={styles["cart-summary__main"]}>
               {/* Shipping Options */}
-              <div className="cart-card">
-                <h5 className="cart-card__title">Opções de Envio</h5>
+              <div className={styles["cart-card"]}>
+                <h5 className={styles["cart-card__title"]}>Opções de Envio</h5>
 
                 {shippingMethods.map((method) => (
-                  <div key={method.id} className={`shipping-option ${shippingMethod?.id === method.id ? "shipping-option--selected" : ""}`} onClick={() => selectShippingMethodById(method.id)}>
-                    <input type="radio" name="shippingMethod" id={`shippingMethod${method.id}`} value={method.id} checked={shippingMethod?.id === method.id} onChange={() => selectShippingMethodById(method.id)} />
+                  <div
+                    key={method.id}
+                    className={`${styles["shipping-option"]} ${
+                      shippingMethod?.id === method.id
+                        ? styles["shipping-option--selected"]
+                        : ""
+                    }`}
+                    onClick={() => selectShippingMethodById(method.id)}
+                  >
+                    <input
+                      type="radio"
+                      name="shippingMethod"
+                      id={`shippingMethod${method.id}`}
+                      value={method.id}
+                      checked={shippingMethod?.id === method.id}
+                      onChange={() => selectShippingMethodById(method.id)}
+                    />
                     <label htmlFor={`shippingMethod${method.id}`}>
                       <div>
-                        <div className="shipping-option__name">{method.name}</div>
-                        <div className="shipping-option__desc">{method.description}</div>
+                        <div className={styles["shipping-option__name"]}>
+                          {method.name}
+                        </div>
+                        <div className={styles["shipping-option__desc"]}>
+                          {method.description}
+                        </div>
                       </div>
-                      <div className="shipping-option__price">R${method.price.toFixed(2)}</div>
+                      <div className={styles["shipping-option__price"]}>
+                        R${method.price.toFixed(2)}
+                      </div>
                     </label>
                   </div>
                 ))}
-
               </div>
 
               {/* Promo Code */}
-              <div className="cart-card">
-                <h5 className="cart-card__title">Código Promocional</h5>
-                <div className="promo-code__group">
+              <div className={styles["cart-card"]}>
+                <h5 className={styles["cart-card__title"]}>
+                  Código Promocional
+                </h5>
+                <div className={styles["promo-code__group"]}>
                   <input
                     type="text"
-                    className="promo-code__input"
+                    className={styles["promo-code__input"]}
                     placeholder="Digite SAVE10"
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                   />
                   <button
-                    className="promo-code__button"
+                    className={styles["promo-code__button"]}
                     type="button"
                     onClick={applyPromoCode}
                   >
@@ -369,10 +420,11 @@ const Cart = () => {
                 </div>
                 {promoMessage && (
                   <div
-                    className={`promo-code__message ${promoValid
-                      ? "promo-code__message--success"
-                      : "promo-code__message--error"
-                      }`}
+                    className={`${styles["promo-code__message"]} ${
+                      promoValid
+                        ? styles["promo-code__message--success"]
+                        : styles["promo-code__message--error"]
+                    }`}
                   >
                     {promoMessage}
                   </div>
@@ -381,45 +433,53 @@ const Cart = () => {
             </div>
 
             {/* Order Total */}
-            <div className="cart-summary__sidebar">
-              <div className="cart-card order-summary">
-                <h5 className="cart-card__title">Resumo do Pedido</h5>
-                <ul className="order-summary__list">
-                  <li className="order-summary__item">
+            <div className={styles["cart-summary__sidebar"]}>
+              <div
+                className={`${styles["cart-card"]} ${styles["order-summary"]}`}
+              >
+                <h5 className={styles["cart-card__title"]}>Resumo do Pedido</h5>
+                <ul className={styles["order-summary__list"]}>
+                  <li className={styles["order-summary__item"]}>
                     <span>Subtotal</span>
                     <span>R${subtotal.toFixed(2)}</span>
                   </li>
-                  <li className="order-summary__item">
+                  <li className={styles["order-summary__item"]}>
                     <span>Frete</span>
                     <span>R${shippingCost.toFixed(2)}</span>
                   </li>
                   {discountValue > 0 && (
-                    <li className="order-summary__item order-summary__item--discount">
+                    <li
+                      className={`${styles["order-summary__item"]} ${styles["order-summary__item--discount"]}`}
+                    >
                       <span>Desconto</span>
                       <span>-R${discountValue.toFixed(2)}</span>
                     </li>
                   )}
-                  <li className="order-summary__item">
+                  <li className={styles["order-summary__item"]}>
                     <span>Taxa</span>
                     <span>R${tax.toFixed(2)}</span>
                   </li>
-                  <li className="order-summary__item order-summary__item--total">
+                  <li
+                    className={`${styles["order-summary__item"]} ${styles["order-summary__item--total"]}`}
+                  >
                     <span>Total</span>
-                    <span className="order-summary__total-price">
+                    <span className={styles["order-summary__total-price"]}>
                       R${total.toFixed(2)}
                     </span>
                   </li>
                 </ul>
                 <Link to="/checkout">
-                  <button className="btn-retro btn-retro--checkout">
+                  <button
+                    className={`${styles["btn-retro"]} ${styles["btn-retro--checkout"]}`}
+                  >
                     Comprar
                   </button>
                 </Link>
-                <div className="order-summary__secure">
+                <div className={styles["order-summary__secure"]}>
                   <FaShieldAlt />
                   Checkout Seguro
                 </div>
-                <div className="order-summary__payment-icons">
+                <div className={styles["order-summary__payment-icons"]}>
                   <FaCcVisa size={24} />
                   <FaCcMastercard size={24} />
                   <FaCcAmex size={24} />
@@ -432,14 +492,17 @@ const Cart = () => {
 
         {/* Bottom Actions */}
         {cartItems.length > 0 && (
-          <div className="cart-actions">
-            <Link to="/produtos" className="btn-retro btn-retro--primary">
+          <div className={styles["cart-actions"]}>
+            <Link
+              to="/produtos"
+              className={`${styles["btn-retro"]} ${styles["btn-retro--primary"]}`}
+            >
               <FaShoppingCart size={24} />
               Continuar Comprando
             </Link>
             <button
               onClick={confirmClearCart}
-              className="btn-retro btn-retro--danger"
+              className={`${styles["btn-retro"]} ${styles["btn-retro--danger"]}`}
             >
               <FaTrash size={24} />
               Limpar Carrinho
@@ -450,25 +513,25 @@ const Cart = () => {
 
       {/* Confirmation Modals */}
       {showClearConfirm && (
-        <div className="modal-backdrop">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Limpar Carrinho</h5>
+        <div className={styles["modal-backdrop"]}>
+          <div className={styles["modal-content"]}>
+            <div className={styles["modal-header"]}>
+              <h5 className={styles["modal-title"]}>Limpar Carrinho</h5>
             </div>
-            <div className="modal-body">
+            <div className={styles["modal-body"]}>
               <p>Tem certeza que deseja limpar seu carrinho?</p>
             </div>
-            <div className="modal-footer">
+            <div className={styles["modal-footer"]}>
               <button
                 type="button"
-                className="modal-button modal-button--cancel"
+                className={`${styles["modal-button"]} ${styles["modal-button--cancel"]}`}
                 onClick={() => setShowClearConfirm(false)}
               >
                 Cancelar
               </button>
               <button
                 type="button"
-                className="modal-button modal-button--confirm"
+                className={`${styles["modal-button"]} ${styles["modal-button--confirm"]}`}
                 onClick={clearCart}
               >
                 Limpar
@@ -479,25 +542,25 @@ const Cart = () => {
       )}
 
       {showRemoveConfirm && (
-        <div className="modal-backdrop">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Remover Item</h5>
+        <div className={styles["modal-backdrop"]}>
+          <div className={styles["modal-content"]}>
+            <div className={styles["modal-header"]}>
+              <h5 className={styles["modal-title"]}>Remover Item</h5>
             </div>
-            <div className="modal-body">
+            <div className={styles["modal-body"]}>
               <p>Tem certeza que deseja remover este item do seu carrinho?</p>
             </div>
-            <div className="modal-footer">
+            <div className={styles["modal-footer"]}>
               <button
                 type="button"
-                className="modal-button modal-button--cancel"
+                className={`${styles["modal-button"]} ${styles["modal-button--cancel"]}`}
                 onClick={() => setShowRemoveConfirm(false)}
               >
                 Cancelar
               </button>
               <button
                 type="button"
-                className="modal-button modal-button--confirm"
+                className={`${styles["modal-button"]} ${styles["modal-button--confirm"]}`}
                 onClick={removeItem}
               >
                 Remover

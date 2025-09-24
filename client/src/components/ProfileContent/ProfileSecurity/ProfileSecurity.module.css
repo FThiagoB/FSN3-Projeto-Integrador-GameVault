@@ -1,0 +1,254 @@
+:root {
+  --profile-bg: #ffffff;
+  --profile-text-color-dark: #212529;
+  --profile-border-color: #dee2e6;
+  --profile-primary-color: #007bff;
+  --profile-danger-color: #dc3545;
+  --profile-radius: 8px;
+  --profile-gap: 1rem;
+  --profile-font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial;
+  --accent-gradient: linear-gradient(90deg, #8b5cf6 0%, #ec4899 100%);
+  --muted: #6c757d;
+}
+
+/* --------------------------------------------------------------------------
+   Container / Layout
+   -------------------------------------------------------------------------- */
+.profileMainContent,
+.profile-main-content {
+  flex-grow: 1;
+  padding: 2rem 2.5rem;
+  background-color: var(--profile-bg);
+  font-family: var(--profile-font);
+  color: var(--profile-text-color-dark);
+}
+
+/* Title */
+.profileSecurityTitle,
+.profile-security-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #2d3748;
+  font-weight: 700;
+  border-bottom: 1px solid var(--profile-border-color);
+  padding-bottom: 0.75rem;
+}
+
+/* --------------------------------------------------------------------------
+   Sections, groups and rows (reused classes)
+   -------------------------------------------------------------------------- */
+.profileFormSection,
+.profile-form-section {
+  padding: 1rem 0 1.25rem 0;
+  border-bottom: 1px solid var(--profile-border-color);
+  margin-bottom: 1.25rem;
+}
+
+.profileFormGroup,
+.profile-form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.75rem;
+}
+
+.profileFormGroup label,
+.profile-form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--profile-text-color-dark);
+  font-size: 0.95rem;
+}
+
+.profileFormGroup input,
+.profile-formGroup select,
+.profileFormGroup textarea,
+.profile-form-group input,
+.profile-form-group select,
+.profile-form-group textarea {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--profile-border-color);
+  border-radius: var(--profile-radius);
+  font-size: 0.95rem;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  font-family: inherit;
+  background: #fff;
+  color: var(--profile-text-color-dark);
+}
+
+.profileFormGroup input:focus,
+.profile-form-group input:focus,
+.profileFormGroup textarea:focus,
+.profile-form-group textarea:focus,
+.profileFormGroup select:focus,
+.profile-form-group select:focus {
+  outline: none;
+  border-color: var(--profile-primary-color);
+  box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.06);
+}
+
+/* Form row for multiple inputs inline */
+.profileFormRow,
+.profile-form-row {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.profileFormRow > .profileFormGroup,
+.profile-form-row > .profile-form-group {
+  flex: 1;
+}
+
+/* Small screens: stack rows */
+@media (max-width: 720px) {
+  .profileFormRow,
+  .profile-form-row {
+    flex-direction: column;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+.profileBtn,
+.profile-btn {
+  padding: 0.65rem 1rem;
+  border-radius: 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--profile-text-color-dark);
+}
+
+.profileBtn:focus,
+.profile-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.04);
+}
+
+.profileBtnPrimary,
+.profile-btn-primary {
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  padding-left: 1.1rem;
+  padding-right: 1.1rem;
+}
+
+.profileBtnPrimary:hover,
+.profile-btn-primary:hover {
+  filter: brightness(0.95);
+  transform: translateY(-1px);
+}
+
+/* secondary style (outline) */
+.profileBtnSecondary,
+.profile-btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  color: var(--profile-text-color-dark);
+  padding-left: 0.9rem;
+  padding-right: 0.9rem;
+}
+
+.profileBtnSecondary:hover,
+.profile-btn-secondary:hover {
+  background: rgba(139, 92, 246, 0.06);
+}
+
+/* link-like button */
+.profileBtnLink,
+.profile-btn-link {
+  background: transparent;
+  border: none;
+  color: var(--profile-primary-color);
+  padding: 0.4rem 0.6rem;
+}
+
+/* danger button */
+.profileBtnDanger,
+.profile-btn-danger {
+  background: rgba(220, 53, 69, 0.12);
+  border: 1px solid rgba(220, 53, 69, 0.18);
+  color: var(--profile-danger-color);
+  padding-left: 0.9rem;
+  padding-right: 0.9rem;
+}
+
+.profileBtnDanger:hover,
+.profile-btn-danger:hover {
+  background: rgba(220, 53, 69, 0.16);
+  transform: translateY(-1px);
+}
+
+/* Disabled/readonly field */
+.profileDisabledField,
+.profile-disabled-field {
+  background: #f8f9fa;
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   Actions area
+   -------------------------------------------------------------------------- */
+.profileFormActions,
+.profile-form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Danger zone card */
+.profileDangerZone,
+.profile-danger-zone {
+  border: 2px solid var(--profile-danger-color);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background-color: #fff6f6;
+}
+
+.profileDangerZone h3,
+.profile-danger-zone h3 {
+  color: var(--profile-danger-color);
+  margin-top: 0;
+}
+
+.profileDangerZone p,
+.profile-danger-zone p {
+  color: #721c24;
+  margin-bottom: 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   Small utilities used by this component
+   -------------------------------------------------------------------------- */
+.hint {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.fieldInline {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* make sure buttons consistent width on small view */
+@media (max-width: 480px) {
+  .profileBtnPrimary,
+  .profileBtnSecondary,
+  .profileBtnDanger,
+  .profile-btn-primary,
+  .profile-btn-secondary,
+  .profile-btn-danger {
+    width: 100%;
+  }
+}

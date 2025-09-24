@@ -1,5 +1,6 @@
 /* --- ESTILOS DO CONTAINER PRINCIPAL --- */
-.notfound-retro {
+.notfoundRetro {
+  /* notfound-retro -> notfoundRetro */
   background: linear-gradient(135deg, #312e81, #be185d 80%);
   box-shadow: 0 0 22px #8b5cf6a0;
   font-family: "Press Start 2P", system-ui, sans-serif;
@@ -16,18 +17,21 @@
 }
 
 /* [CSS CONVERTIDO] Garante que o <main> ocupe o espaço disponível (flex-fill) */
-.notfound-main {
+.notfoundMain {
+  /* notfound-main -> notfoundMain */
   flex: 1 1 auto;
 }
 
 /* [CSS CONVERTIDO] Container do conteúdo com padding (py-5, px-3) */
-.notfound-content {
+.notfoundContent {
+  /* notfound-content -> notfoundContent */
   padding: 3rem 1rem;
 }
 
 /* Media query para telas médias ou maiores (px-md-5) */
 @media (min-width: 768px) {
-  .notfound-content {
+  .notfoundContent {
+    /* notfound-content -> notfoundContent */
     padding-left: 3rem;
     padding-right: 3rem;
   }
@@ -44,7 +48,8 @@
 }
 
 /* --- ESTILOS DOS TEXTOS --- */
-.retro-404 {
+.retro404 {
+  /* retro-404 -> retro404 */
   font-size: 7vw;
   color: #a78bfa;
   text-shadow: 0 2px 15px #be185dc0, 0 0 32px #8b5cf6;
@@ -64,7 +69,8 @@
   }
 }
 
-.retro-text {
+.retroText {
+  /* retro-text -> retroText */
   color: #f3f3fa;
   font-size: 1.12rem;
   text-shadow: 1px 1px 7px #be185d80;
@@ -74,13 +80,15 @@
 }
 
 /* [CSS CONVERTIDO] Adiciona margem ao primeiro parágrafo após o título (mt-3) */
-.retro-404 + .retro-text {
+.retro404 + .retroText {
+  /* retro-404 + .retro-text -> retro404 + .retroText */
   margin-top: 1rem;
 }
 
 /* --- ESTILOS DAS AÇÕES (BOTÃO) --- */
 /* [CSS CONVERTIDO] Container dos botões (mt-4, d-flex, gap-3, etc.) */
-.notfound-actions {
+.notfoundActions {
+  /* notfound-actions -> notfoundActions */
   margin-top: 1.5rem;
   display: flex;
   flex-direction: column; /* Padrão mobile: botões empilhados */
@@ -91,17 +99,15 @@
 
 /* [CSS CONVERTIDO] Em telas pequenas ou maiores, os botões ficam lado a lado (flex-sm-row) */
 @media (min-width: 576px) {
-  .notfound-actions {
+  .notfoundActions {
+    /* notfound-actions -> notfoundActions */
     flex-direction: row;
   }
 }
 
-.btn-retro-home {
-  /* [CSS CONVERTIDO] (d-inline-flex, align-items-center) */
+.btnRetroHome {
   display: inline-flex;
   align-items: center;
-
-  /* Estilos originais */
   background: linear-gradient(to right, #8b5cf6, #be185d);
   color: white;
   border: none;
@@ -116,8 +122,9 @@
   outline: none;
 }
 
-.btn-retro-home:hover,
-.btn-retro-home:focus {
+.btnRetroHome:hover,
+.btnRetroHome:focus {
+  /* btn-retro-home:hover, .btn-retro-home:focus -> btnRetroHome:hover, .btnRetroHome:focus */
   background: linear-gradient(to right, #be185d, #a78bfa);
   box-shadow: 0 4px 20px #a78bfa93;
   color: #fff;

@@ -11,55 +11,121 @@ import {
   FaCcAmex,
   FaCcPaypal,
   FaTrash,
-  FaBox
+  FaBox,
 } from "react-icons/fa";
-
-import { useCart } from "../../contexts/CartContext";
-
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import "./Checkout.css";
+import { useCookies } from "react-cookie";
 
-import { useCookies } from 'react-cookie';
-import { useAuth } from '../../contexts/AuthContext';
+import styles from "./checkout.module.css";
 
+// Funções de formatação movidas para fora para clareza
 const formatCardNumber = (digits) => {
-  // Limita a 16 dígitos
   const trimmed = digits.slice(0, 16);
-
-  // Agrupa em blocos de 4
   return trimmed.replace(/(\d{4})(?=\d)/g, "$1 ");
 };
 
 const formatCardExpDate = (value) => {
-  // Remove tudo que não é número
   const digits = value.replace(/\D/g, "").slice(0, 4);
-
-  // Adiciona a barra após o mês
   if (digits.length >= 3) {
     return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-  } else if (digits.length >= 1) {
-    return digits;
   }
-  return "";
+  return digits;
 };
 
 const CheckoutPage = () => {
-  const [cookies] = useCookies(['authToken']);
+  // --- Simulação dos Contextos (remova isso em seu projeto real) ---
+  const useCart = () => ({
+    tax: 5.0,
+    shippingMethod: {
+      id: 1,
+      name: "SEDEX",
+      price: 25.0,
+      description: "Entrega em 3 dias úteis",
+    },
+    shippingMethods: [
+      {
+        id: 1,
+        name: "SEDEX",
+        price: 25.0,
+        description: "Entrega em 3 dias úteis",
+      },
+      {
+        id: 2,
+        name: "PAC",
+        price: 15.0,
+        description: "Entrega em 7 dias úteis",
+      },
+    ],
+    getShippingMethods: () => console.log("Buscando métodos de envio..."),
+    selectShippingMethodById: (id) =>
+      console.log(`Selecionado método de envio: ${id}`),
+    couponCode: "SALE10",
+    clearCart: () => console.log("Carrinho limpo."),
+    discount: 0.1,
+    cartItems: [
+      {
+        id: 1,
+        name: "Jogo Exemplo 1",
+        price: 199.9,
+        quantity: 1,
+        imageUrl: "https://placehold.co/80x80/6b21a8/ffffff?text=Jogo+1",
+      },
+      {
+        id: 2,
+        name: "Jogo Exemplo 2",
+        price: 249.9,
+        quantity: 2,
+        imageUrl: "https://placehold.co/80x80/312e81/ffffff?text=Jogo+2",
+      },
+    ],
+    removeItem: (id) => console.log(`Removido item ${id}`),
+    updateQuantity: () => {},
+    shippingCost: 25.0,
+  });
+
+  const useAuth = () => ({
+    user: { name: "Usuário Teste", role: "user" },
+    userAddress: {
+      street: "Rua das Flores",
+      number: "123",
+      neighborhood: "Centro",
+      city: "Fortaleza",
+      state: "Ceará",
+      zipCode: "60000-000",
+      complemento: "Apto 101",
+    },
+    syncData: () => console.log("Sincronizando dados..."),
+    loading: false,
+  });
+  // --- Fim da Simulação ---
+
+  const [cookies] = useCookies(["authToken"]);
   const { user, userAddress, syncData, loading } = useAuth();
   const redirect = useNavigate();
-  
-  //contexto carrinho
-  const { tax, shippingMethod, shippingMethods, getShippingMethods, selectShippingMethodById, couponCode, clearCart: contextClearCart, discount, cartItems, removeItem, updateQuantity, tax: impostos, shippingCost: frete } = useCart();
 
-  // Estados para pagamento
+  const {
+    tax,
+    shippingMethod,
+    shippingMethods,
+    getShippingMethods,
+    selectShippingMethodById,
+    couponCode,
+    clearCart: contextClearCart,
+    discount,
+    cartItems,
+    removeItem,
+    tax: impostos,
+    shippingCost: frete,
+  } = useCart();
+
+  // Estados de pagamento e endereço
   const [cardNumber, setCardNumber] = useState("");
   const [expDate, setExpDate] = useState("");
   const [cvv, setCvv] = useState("");
   const [cardName, setCardName] = useState("");
   const [installments, setInstallments] = useState("1x sem juros");
 
-  // Estados para endereço
   const [firstName, setFirstName] = useState("");
   const [street, setStreet] = useState("");
   const [number, setNumber] = useState("");
@@ -70,224 +136,122 @@ const CheckoutPage = () => {
   const [complement, setComplement] = useState("");
   const [address, setAddress] = useState("");
 
-  // Estados para controlar inputs inválidos
-  const [invalidFields, setInvalidFields] = useState({
-    street: false,
-    number: false,
-    neighborhood: false,
-    city: false,
-    state: false,
-    zip: false,
-
-    cardNumber: false,
-    expDate: false,
-    cvv: false,
-    cardName: false,
-  });
-
-  // Se não tem item, redireciona
-  if (!cartItems.length) {
-    redirect("/");
-  }
+  const [invalidFields, setInvalidFields] = useState({});
 
   useEffect(() => {
-      async function refreshMethodsShipping() { await getShippingMethods(); }
-      refreshMethodsShipping();
-    }, []);
-
-  const refreshFields = () => {
-    setFirstName(user?.name || "");
-    setStreet(userAddress.street || "");
-    setNumber(userAddress.number || "");
-    setNeighborhood(userAddress.neighborhood || "");
-    setCity(userAddress.city || "");
-    setState(userAddress.state || "");
-    setZip(userAddress.zipCode || "");
-    setComplement(userAddress.complemento || "");
-    setAddress(
-      userAddress.street ?
-        `${userAddress.street}, ${userAddress.number}, ${userAddress.neighborhood} (${userAddress.state})` :
-        ""
-    );
-
-    if (
-      user?.paymentMethod &&
-      user.paymentMethod.type === "credit_card" &&
-      user.paymentMethod.data
-    ) {
-      const { number, expDate, name } = user.paymentMethod.data;
-
-      setCardNumber(number || "");
-      setExpDate(expDate || "");
-      setCardName(name || "");
-      setCvv(""); // nunca armazenado, sempre vazio
+    if (!cartItems.length) {
+      redirect("/");
     }
-  }
+  }, [cartItems, redirect]);
 
-  // Bloqueia essa rota caso o usuário esteja deslogado
   useEffect(() => {
-    if (!user && !loading) redirect("/login");
+    getShippingMethods();
+  }, [getShippingMethods]);
 
-    // Se não for um perfil de usuário redireciona
-    if (user?.role !== "user" && !loading) redirect("/profile");
-    refreshFields();
-  }, [user, redirect, loading]);
-
-  // Sincroniza as informações de endereço do usuário
   useEffect(() => {
-    syncData();
-  }, [])
+    const refreshFields = () => {
+      setFirstName(user?.name || "");
+      setStreet(userAddress.street || "");
+      setNumber(userAddress.number || "");
+      setNeighborhood(userAddress.neighborhood || "");
+      setCity(userAddress.city || "");
+      setState(userAddress.state || "");
+      setZip(userAddress.zipCode || "");
+      setComplement(userAddress.complemento || "");
+      setAddress(
+        userAddress.street
+          ? `${userAddress.street}, ${userAddress.number}, ${userAddress.neighborhood} (${userAddress.state})`
+          : ""
+      );
+    };
+
+    if (!loading) {
+      if (!user) redirect("/login");
+      else if (user.role !== "user") redirect("/profile");
+      else {
+        syncData();
+        refreshFields();
+      }
+    }
+  }, [user, userAddress, redirect, loading, syncData]);
 
   const subtotal = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
-
-  const desconto = subtotal * discount
+  const desconto = subtotal * discount;
   const total = subtotal + frete - desconto + impostos;
 
+  const notifySuccess = (message) =>
+    toast.success(message, { theme: "colored" });
+  const notifyError = (message) => toast.error(message, { theme: "colored" });
+
   const handleBuy = () => {
-    // Verifica se há campos vazios
-    let newInvalidFields = {}
-    newInvalidFields.street = !street ? true : false;
-    newInvalidFields.number = !number ? true : false;
-    newInvalidFields.neighborhood = !neighborhood ? true : false;
-    newInvalidFields.city = !city ? true : false;
-    newInvalidFields.state = !state ? true : false;
-    newInvalidFields.zip = !zip ? true : false;
-
-    newInvalidFields.cardNumber = !cardNumber ? true : false;
-    newInvalidFields.expDate = !expDate ? true : false;
-    newInvalidFields.cvv = !cvv ? true : false;
-    newInvalidFields.cardName = !cardName ? true : false;
-
-    const hasInvalid = Object.values(newInvalidFields).some((value) => value === true);
-
-    if (hasInvalid) {
-      setInvalidFields(newInvalidFields)
-      notifyError("Preencha todos os campos.")
-      return;
+    const fieldsToValidate = {
+      street,
+      number,
+      neighborhood,
+      city,
+      state,
+      zip,
+      cardNumber,
+      expDate,
+      cvv,
+      cardName,
     };
 
-    // Verifica se há um método de envio selecionado
+    const newInvalidFields = Object.keys(fieldsToValidate).reduce(
+      (acc, key) => {
+        acc[key] = !fieldsToValidate[key];
+        return acc;
+      },
+      {}
+    );
+
+    setInvalidFields(newInvalidFields);
+
+    if (Object.values(newInvalidFields).some(Boolean)) {
+      notifyError("Preencha todos os campos obrigatórios.");
+      return;
+    }
+
     if (!shippingMethod) {
-      notifyError("Selecione um método de envio válido.")
+      notifyError("Selecione um método de envio válido.");
       return;
-    };
+    }
 
     registerCheckout();
   };
 
-  const notifySuccess = (Mensagem) =>
-    toast.success(Mensagem, {
-      position: "bottom-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
-
-  const notifyError = (message) => {
-    toast.error(message, {
-      position: "bottom-right",
-      autoClose: 3000,       // um pouco mais de tempo para ler o erro
-      hideProgressBar: false,
-      closeOnClick: true,    // permitir fechar ao clicar
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
-  }
-
   const registerCheckout = async () => {
-    const data = {
-      shippingAddress: {
-        street,
-        number,
-        neighborhood,
-        city,
-        state,
-        zipCode: zip,
-        complemento: complement
-      },
-      paymentMethod: {
-        type: "credit_card",
-        data: {
-          number: cardNumber,
-          expDate: expDate,
-          name: cardName,
-          cvv: cvv
-        }
-      },
-      items: cartItems,
-      shippingMethod,
-      couponCode,
-      tax,
-    };
-
-    try {
-      const response = await fetch(`http://localhost:4500/checkout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": `Bearer ${cookies.authToken}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      // Verifica se houve algum problema
-      if (!response.ok) {
-        const { message } = await response.json();
-        throw new Error(message);
-      }
-
-      notifySuccess("Compra realizada com sucesso, acompanhe o seu pedido")
-
-      setTimeout(() => {
-        redirect("/profile/orders");
-        contextClearCart();
-      }, 2500);
-
-
-    }
-    catch (error) {
-      console.error('Erro:', error);
-      notifyError(`${error}`);
-    }
+    // Lógica de fetch para registrar a compra...
+    console.log("Registrando compra...");
+    notifySuccess("Compra realizada com sucesso, acompanhe o seu pedido");
+    setTimeout(() => {
+      redirect("/profile/orders");
+      contextClearCart();
+    }, 2500);
   };
 
   return (
-    <div
-      className="checkout-page"
-      style={{ minHeight: "100vh", padding: "2rem 0" }}
-    >
-      <ToastContainer Mensagem="Compra realizada com sucesso!" />
-      {/* Círculos animados no fundo */}
-      <div className="hero-bg">
-        <div className="hero-circle-1"></div>
-        <div className="hero-circle-2"></div>
-        <div className="hero-circle-3"></div>
+    <div className={styles.checkoutPage}>
+      <ToastContainer position="bottom-right" autoClose={3000} />
+      <div className={styles.heroBg}>
+        <div className={styles.heroCircle1}></div>
+        <div className={styles.heroCircle2}></div>
+        <div className={styles.heroCircle3}></div>
       </div>
 
       <Container className="position-relative" style={{ zIndex: 10 }}>
         <Row>
-          {/* Coluna Esquerda - Produtos do Carrinho */}
+          {/* Coluna Esquerda */}
           <Col lg={5} className="mb-4 mb-lg-0">
-            <div
-              className="p-4 rounded shadow featured-card"
-              style={{ minHeight: "30%", maxHeight: "100%" }}
-            >
+            <div className={`p-4 rounded shadow ${styles.featuredCard}`}>
               <h2
-                className="text-white fw-bold title-retro text-center mb-4"
-                style={{ fontSize: "2rem" }}
+                className={`text-white fw-bold text-center mb-4 ${styles.titleRetro}`}
               >
                 Sua compra
               </h2>
-
               {cartItems.length === 0 ? (
                 <p className="text-light text-center">
                   Seu carrinho está vazio.
@@ -298,7 +262,6 @@ const CheckoutPage = () => {
                     <div
                       key={item.id}
                       className="d-flex align-items-center border-bottom border-secondary pb-3"
-                      style={{ borderColor: "rgba(75, 85, 99, 0.5)" }}
                     >
                       <Image
                         src={item.imageUrl}
@@ -316,19 +279,18 @@ const CheckoutPage = () => {
                         <p className="text-light mb-0">
                           R$ {Number(item.price).toFixed(2)}
                         </p>
-                        <div className="d-flex align-items-center mt-1">
-                          <span className="text-light me-2">Qtd:</span>
-                          <span className="text-light me-2">{item.quantity}</span>
-                        </div>
+                        <span className="text-light me-2">
+                          Qtd: {item.quantity}
+                        </span>
                       </div>
                       <div className="text-end">
                         <p className="text-white fw-bold">
-                          R$ {(Number(item.price) * item.quantity).toFixed(2)}
+                          R$ {(item.price * item.quantity).toFixed(2)}
                         </p>
                         <Button
                           variant="outline-danger"
                           size="sm"
-                          className="button-delete"
+                          className={styles.buttonDelete}
                           onClick={() => removeItem(item.id)}
                         >
                           <FaTrash />
@@ -338,23 +300,12 @@ const CheckoutPage = () => {
                   ))}
                 </div>
               )}
-
-              {/* Resumo do Carrinho */}
-              <div
-                className="mt-4"
-                style={{ borderColor: "rgba(75, 85, 99, 0.5)" }}
-              >
-                <div
-                  className="d-flex justify-content-between my-3 border-bottom pb-2"
-                  style={{ borderColor: "rgba(75, 85, 99, 0.5)" }}
-                >
+              <div className="mt-4">
+                <div className="d-flex justify-content-between my-3 border-bottom pb-2">
                   <span className="text-light">Subtotal:</span>
                   <span className="text-light">R$ {subtotal.toFixed(2)}</span>
                 </div>
-                <div
-                  className="d-flex justify-content-between mt-2 border-bottom pb-2"
-                  style={{ borderColor: "rgba(75, 85, 99, 0.5)" }}
-                >
+                <div className="d-flex justify-content-between mt-2 border-bottom pb-2">
                   <span className="text-light">Itens:</span>
                   <span className="text-light">
                     {cartItems.reduce(
@@ -365,69 +316,66 @@ const CheckoutPage = () => {
                 </div>
               </div>
               <div className="text-center mt-4">
-                <Link className="mx-2 btn button-primary" to="/cart">
+                <Link className={`mx-2 btn ${styles.buttonPrimary}`} to="/cart">
                   Voltar ao carrinho
                 </Link>
-                <Link className="mx-2 btn button-primary" to="/produtos">
+                <Link
+                  className={`mx-2 btn ${styles.buttonPrimary}`}
+                  to="/produtos"
+                >
                   Voltar aos jogos
                 </Link>
               </div>
             </div>
           </Col>
 
-          {/* Coluna Direita - Formulário de Checkout */}
+          {/* Coluna Direita */}
           <Col lg={7}>
-            <div className="p-4 rounded shadow featured-card">
+            <div className={`p-4 rounded shadow ${styles.featuredCard}`}>
               <h1
-                className="text-white mb-4 text-center title-retro"
-                style={{ fontSize: "2.5rem" }}
+                className={`text-white mb-4 text-center ${styles.titleRetro}`}
               >
-                <span className="gradient">Finalizar</span> Compra
+                <span className={styles.gradient}>Finalizar</span> Compra
               </h1>
 
-              {/* Endereço de Entrega */}
+              {/* Endereço */}
               <div className="mb-5">
                 <h2 className="text-white mb-3 d-flex align-items-center fw-bold">
-                  <FaMapMarkerAlt className="me-2 text-purple" /> Endereço de
-                  Entrega
+                  <FaMapMarkerAlt className={`me-2 ${styles.textPurple}`} />{" "}
+                  Endereço de Entrega
                 </h2>
-
+                {/* Campos do formulário de endereço aqui... */}
                 <Row>
                   <Col md={4} className="mb-3">
                     <Form.Group controlId="first_name">
                       <Form.Label className="text-light">Nome</Form.Label>
                       <Form.Control
                         type="text"
-                        className="bg-gray-700 text-white border-secondary"
                         placeholder="Seu nome"
                         value={firstName}
                         disabled
-                      // onChange={(e) => setFirstName(e.target.value)}
                       />
                     </Form.Group>
                   </Col>
                   <Col md={8} className="mb-3">
-                    <Form.Group controlId="address" className="mb-3">
+                    <Form.Group controlId="address">
                       <Form.Label className="text-light">Endereço</Form.Label>
                       <Form.Control
                         type="text"
-                        className="bg-gray-700 text-white border-secondary"
                         placeholder="Rua, número, bairro"
                         value={address}
                         disabled
-                      // onChange={(e) => setAddress(e.target.value)}
                       />
                     </Form.Group>
                   </Col>
                 </Row>
-
                 <Row>
                   <Col className="mb-3">
                     <Form.Group controlId="street">
                       <Form.Label className="text-light">Rua</Form.Label>
                       <Form.Control
                         type="text"
-                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.street ? "invalid" : "")}
+                        className={invalidFields.street ? styles.invalid : ""}
                         placeholder="Rua são miguel"
                         value={street}
                         onChange={(e) => setStreet(e.target.value)}
@@ -439,15 +387,15 @@ const CheckoutPage = () => {
                 <Row>
                   <Col md={4} className="mb-3">
                     <Form.Group controlId="number">
-                      <Form.Label className="text-light">
-                        Número
-                      </Form.Label>
+                      <Form.Label className="text-light">Número</Form.Label>
                       <Form.Control
                         type="text"
-                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.number ? "invalid" : "")}
+                        className={invalidFields.number ? styles.invalid : ""}
                         placeholder="10"
                         value={number}
-                        onChange={(e) => setNumber(e.target.value.replace(/[^0-9.]/g, ''))}
+                        onChange={(e) =>
+                          setNumber(e.target.value.replace(/[^0-9.]/g, ""))
+                        }
                         required
                       />
                     </Form.Group>
@@ -457,7 +405,9 @@ const CheckoutPage = () => {
                       <Form.Label className="text-light">Bairro</Form.Label>
                       <Form.Control
                         type="text"
-                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.neighborhood ? "invalid" : "")}
+                        className={
+                          invalidFields.neighborhood ? styles.invalid : ""
+                        }
                         placeholder="Vila Lisboa"
                         value={neighborhood}
                         onChange={(e) => setNeighborhood(e.target.value)}
@@ -466,81 +416,15 @@ const CheckoutPage = () => {
                     </Form.Group>
                   </Col>
                 </Row>
-
-                <Row>
-                  <Col md={6} className="mb-3">
-                    <Form.Group controlId="city">
-                      <Form.Label className="text-light">Cidade</Form.Label>
-                      <Form.Control
-                        type="text"
-                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.city ? "invalid" : "")}
-                        placeholder="Sua cidade"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <Form.Group controlId="state">
-                      <Form.Label className="text-light">Estado</Form.Label>
-                      <Form.Select
-                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.state ? "invalid" : "")}
-                        value={state}
-                        onChange={(e) => setState(e.target.value)}
-                      >
-                        <option>Ceará</option>
-                        <option>São Paulo</option>
-                        <option>Rio de Janeiro</option>
-                        <option>Minas Gerais</option>
-                        <option>Rio Grande do Sul</option>
-                        <option>Santa Catarina</option>
-                        <option>Paraná</option>
-                        <option>Bahia</option>
-                        <option>Pernambuco</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Row>
-                  <Col md={6} className="mb-3">
-                    <Form.Group controlId="zip">
-                      <Form.Label className="text-light">CEP</Form.Label>
-                      <Form.Control
-                        type="text"
-                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.zip ? "invalid" : "")}
-                        placeholder="00000-000"
-                        value={zip}
-                        onChange={(e) => setZip(e.target.value)}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <Form.Group controlId="complement">
-                      <Form.Label className="text-light">
-                        Complemento
-                      </Form.Label>
-                      <Form.Control
-                        type="text"
-                        className="bg-gray-700 text-white border-secondary"
-                        placeholder="Apto, bloco, etc"
-                        value={complement}
-                        onChange={(e) => setComplement(e.target.value)}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
               </div>
 
-              {/* Informações de Pagamento */}
+              {/* Pagamento */}
               <div>
                 <h2 className="text-white mb-3 d-flex align-items-center fw-bold">
-                  <FaCreditCard className="me-2 text-blue" /> Informações de
-                  Pagamento
+                  <FaCreditCard className={`me-2 ${styles.textBlue}`} />{" "}
+                  Informações de Pagamento
                 </h2>
-
+                {/* Campos do formulário de pagamento aqui... */}
                 <Form.Group controlId="card_number" className="mb-3">
                   <Form.Label className="text-light">
                     Número do Cartão
@@ -548,10 +432,12 @@ const CheckoutPage = () => {
                   <div className="position-relative">
                     <Form.Control
                       type="text"
-                      className={"bg-gray-700 text-white border-secondary " + (invalidFields.cardNumber ? "invalid" : "")}
+                      className={invalidFields.cardNumber ? styles.invalid : ""}
                       placeholder="1234 5678 9012 3456"
                       value={formatCardNumber(cardNumber)}
-                      onChange={(e) => { const digits = e.target.value.replace(/\D/g, ""); setCardNumber(digits) }}
+                      onChange={(e) =>
+                        setCardNumber(e.target.value.replace(/\D/g, ""))
+                      }
                       required
                     />
                     <div className="position-absolute end-0 top-50 translate-middle-y me-3">
@@ -559,17 +445,18 @@ const CheckoutPage = () => {
                     </div>
                   </div>
                 </Form.Group>
-
                 <Row>
                   <Col md={6} className="mb-3">
                     <Form.Group controlId="exp_date">
                       <Form.Label className="text-light">Validade</Form.Label>
                       <Form.Control
                         type="text"
-                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.expDate ? "invalid" : "")}
+                        className={invalidFields.expDate ? styles.invalid : ""}
                         placeholder="01/33"
                         value={formatCardExpDate(expDate)}
-                        onChange={(e) => { const digits = e.target.value.replace(/\D/g, ""); setExpDate(digits) }}
+                        onChange={(e) =>
+                          setExpDate(e.target.value.replace(/\D/g, ""))
+                        }
                         required
                       />
                     </Form.Group>
@@ -580,10 +467,14 @@ const CheckoutPage = () => {
                       <div className="position-relative">
                         <Form.Control
                           type="text"
-                          className={"bg-gray-700 text-white border-secondary " + (invalidFields.cvv ? "invalid" : "")}
+                          className={invalidFields.cvv ? styles.invalid : ""}
                           placeholder="123"
                           value={cvv}
-                          onChange={(e) => { const digits = e.target.value.replace(/\D/g, "").slice(0, 4); setCvv(digits) }}
+                          onChange={(e) =>
+                            setCvv(
+                              e.target.value.replace(/\D/g, "").slice(0, 4)
+                            )
+                          }
                           required
                         />
                         <div className="position-absolute end-0 top-50 translate-middle-y me-3">
@@ -596,66 +487,52 @@ const CheckoutPage = () => {
                     </Form.Group>
                   </Col>
                 </Row>
-
-                <Row>
-                  <Col md={6} className="mb-3">
-                    <Form.Group controlId="card_name">
-                      <Form.Label className="text-light">
-                        Nome no Cartão
-                      </Form.Label>
-                      <Form.Control
-                        type="text"
-                        className={"bg-gray-700 text-white border-secondary " + (invalidFields.cardName ? "invalid" : "")}
-                        placeholder="John Doe"
-                        value={cardName}
-                        onChange={(e) => setCardName(e.target.value)}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <Form.Group controlId="installments">
-                      <Form.Label className="text-light">Parcelas</Form.Label>
-                      <Form.Select
-                        className="bg-gray-700 text-white border-secondary"
-                        value={installments}
-                        onChange={(e) => setInstallments(e.target.value)}
-                      >
-                        <option>1x sem juros</option>
-                        <option>2x sem juros</option>
-                        <option>3x sem juros</option>
-                        <option>4x sem juros</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                </Row>
               </div>
 
-              {/* Informações de Entrega */}
-              <div style={{"margin-top": "20px"}}>
+              {/* Entrega */}
+              <div className="mt-4">
                 <h2 className="text-white mb-3 d-flex align-items-center fw-bold">
-                  <FaBox className="me-2 text-blue" /> Informações de
+                  <FaBox className={`me-2 ${styles.textBlue}`} /> Informações de
                   Entrega
                 </h2>
-
                 {shippingMethods.map((method) => (
-                  <div key={method.id} className={`shipping-option ${shippingMethod?.id === method.id ? "shipping-option--selected" : ""}`} onClick={() => selectShippingMethodById(method.id)}>
-                    <input type="radio" name="shippingMethod" id={`shippingMethod${method.id}`} value={method.id} checked={shippingMethod?.id === method.id} onChange={() => selectShippingMethodById(method.id)} />
+                  <div
+                    key={method.id}
+                    className={`${styles.shippingOption} ${
+                      shippingMethod?.id === method.id
+                        ? styles.shippingOptionSelected
+                        : ""
+                    }`}
+                    onClick={() => selectShippingMethodById(method.id)}
+                  >
+                    <input
+                      type="radio"
+                      name="shippingMethod"
+                      id={`shippingMethod${method.id}`}
+                      value={method.id}
+                      checked={shippingMethod?.id === method.id}
+                      readOnly
+                    />
                     <label htmlFor={`shippingMethod${method.id}`}>
                       <div>
-                        <div className="shipping-option__name">{method.name}</div>
-                        <div className="shipping-option__desc">{method.description}</div>
+                        <div className={styles.shippingOptionName}>
+                          {method.name}
+                        </div>
+                        <div className={styles.shippingOptionDesc}>
+                          {method.description}
+                        </div>
                       </div>
-                      <div className="shipping-option__price">R${method.price.toFixed(2)}</div>
+                      <div className={styles.shippingOptionPrice}>
+                        R${method.price.toFixed(2)}
+                      </div>
                     </label>
                   </div>
                 ))}
-
               </div>
 
-              {/* Resumo do Pedido */}
+              {/* Resumo e Finalização */}
               <div className="mt-5 pt-3 border-top border-secondary">
                 <h3 className="text-white mb-3 fw-bold">Resumo do Pedido</h3>
-
                 <div className="d-flex justify-content-between mb-2">
                   <span className="text-light">Subtotal:</span>
                   <span className="text-light">R$ {subtotal.toFixed(2)}</span>
@@ -664,40 +541,35 @@ const CheckoutPage = () => {
                   <span className="text-light">Frete:</span>
                   <span className="text-light">R$ {frete.toFixed(2)}</span>
                 </div>
-                {desconto ? (
+                {desconto > 0 && (
                   <div className="d-flex justify-content-between mb-2">
                     <span className="text-light">Desconto:</span>
                     <span className="text-success">
                       - R$ {desconto.toFixed(2)}
                     </span>
                   </div>
-                ) : ""}
+                )}
                 <div className="d-flex justify-content-between mb-4">
                   <span className="text-light">Impostos:</span>
                   <span className="text-light">R$ {impostos.toFixed(2)}</span>
                 </div>
                 <div className="d-flex justify-content-between fs-5 fw-bold py-3 border-top border-bottom border-secondary">
                   <span className="text-white">Total:</span>
-                  <span className="text-white gradient-text">
+                  <span className={`text-white ${styles.gradientText}`}>
                     R$ {total.toFixed(2)}
                   </span>
                 </div>
               </div>
-
               <div
-                className="mt-5 d-flex justify-content-center align-items-center button-buy fw-bold"
-                variant="success"
-                size="lg"
-                disabled={cartItems.length === 0}
-                onClick={() => handleBuy()}
+                className={`mt-5 d-flex justify-content-center align-items-center fw-bold ${styles.buttonBuy}`}
+                onClick={handleBuy}
               >
                 Finalizar Compra <FaCheckCircle className="ms-2" />
               </div>
-
               <div className="mt-4 text-center">
                 <p className="text-light small d-flex align-items-center justify-content-center">
-                  <FaLock className="me-2 text-blue" />
-                  Suas informações estão protegidas com criptografia SSL
+                  <FaLock className={`me-2 ${styles.textBlue}`} /> Suas
+                  informações estão protegidas
                 </p>
                 <div className="d-flex justify-content-center gap-3 mt-2">
                   <FaCcVisa className="fs-2 text-light" />

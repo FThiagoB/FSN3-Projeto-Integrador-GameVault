@@ -1,40 +1,32 @@
-.randomizer-section {
+.randomizerSection {
   padding: 4rem 1rem;
-  /* background: linear-gradient(to bottom, #be185d, #6b21a8, #1e3a8a); */
-  opacity: calc();
   position: relative;
   overflow: hidden;
   z-index: 1;
   font-family: "Press Start 2P", system-ui;
 }
 
-/* .product-grid-title {
-  font-size: 2.125rem;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 1rem;
-}
-  */
-
-.randomizer-title {
+.randomizerTitle {
   font-size: 2rem;
   font-weight: bold;
   color: white;
   margin-bottom: 1rem;
 }
 
-.randomizer-subtitle {
+.randomizerSubtitle {
   font-size: 1rem;
   font-weight: normal;
   color: #d1d5db;
 }
 
-.btn-group {
+.btnGroup {
+  display: flex;
   justify-content: center;
   gap: 10px;
   margin-bottom: 20px;
 }
-.btn-randomizer {
+
+.btnRandomizer {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -47,7 +39,7 @@
   transition: background-color 0.3s ease;
 }
 
-.btn-randomize {
+.btnRandomize {
   background: linear-gradient(to right, #3b82f6, #8b5cf6);
   color: white;
   padding: 1rem 2rem;
@@ -57,15 +49,23 @@
   cursor: pointer;
   transition: background 0.3s;
   white-space: nowrap;
-  font-size: 0.9rem !important;
+  font-size: 0.9rem;
 }
 
-.btn-randomize:hover {
+.btnRandomize:hover {
   background: linear-gradient(to right, #2563eb, #7c3aed);
 }
 
+.textCenter {
+  text-align: center;
+}
+
+.mt4 {
+  margin-top: 1rem;
+}
+
 @media (max-width: 767px) {
-  .randomizer-title {
+  .randomizerTitle {
     font-size: 1.25rem;
   }
 }

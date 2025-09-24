@@ -1,32 +1,25 @@
-import React from "react";
-import { useState } from "react";
-
-import { useAuth } from '../../../contexts/AuthContext';
-import { useCookies } from 'react-cookie';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 
-import OrderDetailsModal from './OrderDetailsModal';
-
-import moment from 'moment';
-import "./ProfileOrders.css";
-
-import Badge from 'react-bootstrap/Badge';
-import StatusBadge from "./../../../utils/StatusBadge"
-
+import OrderDetailsModal from "./OrderDetailsModal";
+import StatusBadge from "../../../utils/StatusBadge";
 import { ToastContainer } from "react-toastify";
 import useNotification from "../../../utils/useNotification";
 
+import moment from "moment";
+import styles from "./profileOrders.module.css";
+
 const ProfileOrders = () => {
   const [orders, setOrders] = useState([]);
-  const { user, syncData } = useAuth();
-  const [cookies] = useCookies(['authToken']);
+  const { user } = useAuth();
+  const [cookies] = useCookies(["authToken"]);
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  const {notifySuccess, notifyError} = useNotification();
-
+  const { notifySuccess, notifyError } = useNotification();
   const navigate = useNavigate();
 
   const handleViewDetails = (order) => {
@@ -39,13 +32,13 @@ const ProfileOrders = () => {
     setSelectedOrder(null);
   };
 
-  const fetchOrdesItems = async (zipCode) => {
+  const fetchOrdersItems = async () => {
     try {
       const response = await fetch(`http://localhost:4500/orders/me`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${cookies.authToken}`,
-        }
+          Authorization: `Bearer ${cookies.authToken}`,
+        },
       });
 
       if (!response.ok) {
@@ -54,80 +47,81 @@ const ProfileOrders = () => {
       }
 
       const data = await response.json();
-      setOrders( data.orders );
-
-      console.log(data)
+      setOrders(data.orders || []);
     } catch (error) {
       console.error(`Problemas na requisição: ${error}`);
     }
   };
 
-  // Bloqueia essa rota caso o usuário esteja deslogado
   useEffect(() => {
-    if (!user) navigate('/login');
-
-    fetchOrdesItems();
+    if (!user) navigate("/login");
+    fetchOrdersItems();
   }, [user, navigate]);
 
   return (
-    <main className="profile-main-content">
-      <h2 className="profile-orders-title">My Orders</h2>
+    <main className={styles.profileMainContent}>
+      <h2 className={styles.profileOrdersTitle}>My Orders</h2>
 
-      <div className="orders-list">
-        {orders ? orders.map((order) => (
-          <div key={order.id} className="order-card">
-            <div className="order-card-header">
-              <div className="order-info">
-                <span className="label">Order ID: </span>
+      <div className={styles.ordersList}>
+        {orders.map((order) => (
+          <div key={order.id} className={styles.orderCard}>
+            <div className={styles.orderCardHeader}>
+              <div className={styles.orderInfo}>
+                <span className={styles.label}>Order ID: </span>
                 <span>{order.externID}</span>
               </div>
-              <div className="order-info">
-                <span className="label">Date: </span>
-                <span>{moment(order.createdAt).format("DD/MM/YYYY HH:mm:ss")}</span>
+              <div className={styles.orderInfo}>
+                <span className={styles.label}>Date: </span>
+                <span>
+                  {moment(order.createdAt).format("DD/MM/YYYY HH:mm:ss")}
+                </span>
               </div>
               <span>
-                <StatusBadge status={order.status} showTooltip={true}/>
+                <StatusBadge status={order.status} showTooltip={true} />
               </span>
             </div>
-            <div className="order-card-body">
-              <ul className="order-item-list">
+
+            <div className={styles.orderCardBody}>
+              <ul className={styles.orderItemList}>
                 {order.items.map((item, index) => (
-                  <li key={index} className="order-item">
+                  <li key={index} className={styles.orderItem}>
                     <img
                       src={item.game.imageUrl}
                       alt={item.game.title}
-                      className="order-item-image"
+                      className={styles.orderItemImage}
                     />
-                    <span className="order-item-name">{item.game.title} (x{item.quantity})</span>
+                    <span className={styles.orderItemName}>
+                      {item.game.title} (x{item.quantity})
+                    </span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="order-card-footer">
-              <span className="order-total">Total: R$ {Number(order.total).toFixed(2)}</span>
 
+            <div className={styles.orderCardFooter}>
+              <span className={styles.orderTotal}>
+                Total: R$ {Number(order.total).toFixed(2)}
+              </span>
               <div className="d-flex gap-4">
-                <button className="profile-btn profile-btn-secondary" onClick={() => handleViewDetails(order)}>
+                <button
+                  className={styles.profileBtnSecondary}
+                  onClick={() => handleViewDetails(order)}
+                >
                   View Details
                 </button>
               </div>
             </div>
           </div>
-        )) : ""}
+        ))}
       </div>
 
       <ToastContainer />
-      
-      <OrderDetailsModal 
+
+      <OrderDetailsModal
         show={showModal}
         onHide={handleCloseModal}
         order={selectedOrder}
-        style={{ zIndex: 3080 }}
-        className="custom-order-modal"
-        backdropClassName="custom-order-modal-backdrop"
-        dialogClassName="custom-order-modal-dialog"
-        centered
-        refreshFetch={fetchOrdesItems}
+        refreshFetch={fetchOrdersItems}
       />
     </main>
   );

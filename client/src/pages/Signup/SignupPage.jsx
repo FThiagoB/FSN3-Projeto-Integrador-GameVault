@@ -1,50 +1,47 @@
 import React, { useEffect, useState } from "react";
-import "./Signup.css";
-import { Link } from "react-router-dom";
+import styles from "./signup.module.css";
+import { Link, useNavigate } from "react-router-dom";
 
-import { useCookies } from 'react-cookie';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useCookies } from "react-cookie";
+import { useAuth } from "../../contexts/AuthContext";
 
 import { ToastContainer, toast } from "react-toastify";
 
 const SignupPage = () => {
-
   const notifySuccess = (Mensagem) =>
-  toast.success(Mensagem, {
-    position: "bottom-right",
-    autoClose: 1000,
-    hideProgressBar: false,
-    closeOnClick: false,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-  });
+    toast.success(Mensagem, {
+      position: "bottom-right",
+      autoClose: 1000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
 
-const notifyError = (message) => {
-  toast.error(message, {
-    position: "bottom-right",
-    autoClose: 1500,       // um pouco mais de tempo para ler o erro
-    hideProgressBar: false,
-    closeOnClick: true,    // permitir fechar ao clicar
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-  });
-}
+  const notifyError = (message) => {
+    toast.error(message, {
+      position: "bottom-right",
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  };
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("");
 
-  const [role, setRole] = useState('');
-
-  const [cookies] = useCookies(['authToken']);
+  const [cookies] = useCookies(["authToken"]);
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   // Bloqueia essa rota caso o usuário esteja logado
   useEffect(() => {
@@ -61,24 +58,22 @@ const notifyError = (message) => {
     }
 
     const data = {
-      name: name,
-      email: email,
-      password: password,
+      name,
+      email,
+      password,
       role: "user",
     };
 
     try {
-      // Realiza a requisição pro backend passando email e senha
       const response = await fetch(`http://localhost:4500/signin`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          "Authorization": `Bearer ${cookies.authToken}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cookies.authToken}`,
         },
         body: JSON.stringify(data),
       });
 
-      // Verifica se houve algum problema
       if (!response.ok) {
         const { message } = await response.json();
         throw new Error(message);
@@ -88,80 +83,78 @@ const notifyError = (message) => {
       setTimeout(() => {
         navigate("/login");
       }, 1500);
-      
-    }
-    catch (error) {
-      console.error('Erro:', error);
+    } catch (error) {
+      console.error("Erro:", error);
       notifyError(`${error}`);
     }
   };
 
   return (
-    <section className="signup-retro">
-      <div className="signup-retro__container">
-        <h1 className="signup-retro__title">Registro</h1>
-        <form className="signup-retro__form" onSubmit={handleSubmit}>
-          <label htmlFor="name" className="signup-retro__label">
+    <section className={styles.signupRetro}>
+      <div className={styles.signupRetroContainer}>
+        <h1 className={styles.signupRetroTitle}>Registro</h1>
+        <form className={styles.signupRetroForm} onSubmit={handleSubmit}>
+          <label htmlFor="name" className={styles.signupRetroLabel}>
             Nome
           </label>
           <input
             id="name"
             type="text"
-            className="signup-retro__input"
+            className={styles.signupRetroInput}
             placeholder="Seu nome"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
           />
 
-          <label htmlFor="email" className="signup-retro__label">
+          <label htmlFor="email" className={styles.signupRetroLabel}>
             Email
           </label>
           <input
             id="email"
             type="email"
-            className="signup-retro__input"
+            className={styles.signupRetroInput}
             placeholder="voce@exemplo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
 
-          <label htmlFor="password" className="signup-retro__label">
+          <label htmlFor="password" className={styles.signupRetroLabel}>
             Senha
           </label>
           <input
             id="password"
             type="password"
-            className="signup-retro__input"
+            className={styles.signupRetroInput}
             placeholder="********"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
 
-          <label htmlFor="confirmPassword" className="signup-retro__label">
+          <label htmlFor="confirmPassword" className={styles.signupRetroLabel}>
             Confirmar Senha
           </label>
           <input
             id="confirmPassword"
             type="password"
-            className="signup-retro__input"
+            className={styles.signupRetroInput}
             placeholder="********"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
 
-          <button type="submit" className="signup-retro__btn">
+          <button type="submit" className={styles.signupRetroBtn}>
             Registrar
           </button>
         </form>
-        <p style={{ "margin-top": "10px", "text-align": "center" }}>
+        <p style={{ marginTop: "10px", textAlign: "center" }}>
           Já tem uma conta? <Link to="/login">Entrar</Link>
         </p>
       </div>
-      <ToastContainer/>
+      <ToastContainer />
     </section>
   );
 };

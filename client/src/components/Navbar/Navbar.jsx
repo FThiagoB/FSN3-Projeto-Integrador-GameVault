@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import "./Navbar.css";
 import { Link } from "react-router-dom";
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from "../../contexts/AuthContext";
+import styles from "./navbar.module.css"; // CSS Module
 
 const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,74 +51,75 @@ const Navbar = () => {
     setSearchResults([]);
   };
 
-  // CSS embutido para evitar problemas de importação e modularizar o estilo
-
   return (
-    <header className="admin-navbar">
-      <Link to="/" className="admin-navbar-title-link">
-        <h1 className="admin-navbar-title">RETRO</h1>
+    <header className={styles.adminNavbar}>
+      <Link to="/" className={styles.adminNavbarTitleLink}>
+        <h1 className={styles.adminNavbarTitle}>RETRO</h1>
       </Link>
-      <div className="admin-navbar-controls">
-
-        {(!user || (user && (user.role === "user")))  && (
-          <>
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Buscar jogos..."
-                className="admin-search-input"
-                id="search-field"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                autoComplete="off"
-                name="no-autofill"
-              />
-              {(isLoading ||
-                searchResults.length > 0 ||
-                (searchTerm && !isLoading)) && (
-                  <ul className="search-results-list">
-                    {isLoading && <li className="search-info-item">Buscando...</li>}
-                    {!isLoading &&
-                      searchResults.length > 0 &&
-                      searchResults.map((game) => (
-                        <li key={game.id} className="search-result-item">
-                          <a href={`/produto/${game.id}`} onClick={handleResultClick}>
-                            {game.title}
-                          </a>
-                        </li>
-                      ))}
-                    {!isLoading && searchResults.length === 0 && searchTerm && (
-                      <li className="search-info-item">Nenhum jogo encontrado.</li>
-                    )}
-                  </ul>
+      <div className={styles.adminNavbarControls}>
+        {(!user || (user && user.role === "user")) && (
+          <div className={styles.searchContainer}>
+            <input
+              type="text"
+              placeholder="Buscar jogos..."
+              className={styles.adminSearchInput}
+              id="search-field"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              autoComplete="off"
+              name="no-autofill"
+            />
+            {(isLoading ||
+              searchResults.length > 0 ||
+              (searchTerm && !isLoading)) && (
+              <ul className={styles.searchResultsList}>
+                {isLoading && (
+                  <li className={styles.searchInfoItem}>Buscando...</li>
                 )}
-            </div>
-          </>
+                {!isLoading &&
+                  searchResults.length > 0 &&
+                  searchResults.map((game) => (
+                    <li key={game.id} className={styles.searchResultItem}>
+                      <a
+                        href={`/produto/${game.id}`}
+                        onClick={handleResultClick}
+                      >
+                        {game.title}
+                      </a>
+                    </li>
+                  ))}
+                {!isLoading && searchResults.length === 0 && searchTerm && (
+                  <li className={styles.searchInfoItem}>
+                    Nenhum jogo encontrado.
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
         )}
 
-        { user && (
+        {user && (
           <>
-
             <img
               src={user.imageUrl}
-              className="admin-profile-icon"
+              className={styles.adminProfileIcon}
               onClick={() => setShowOptions(!showOptions)}
             />
             {showOptions && (
-              <div className="admin-profile-options">
-                <ul className="admin-profile-options-list">
+              <div className={styles.adminProfileOptions}>
+                <ul className={styles.adminProfileOptionsList}>
                   <li>
                     <Link to="/profile" onClick={() => setShowOptions(false)}>
                       Perfil
                     </Link>
                   </li>
-                  {/* <li>
-                    <Link to="/settings" onClick={() => setShowOptions(false)}>
-                      Configurações
-                    </Link>
-                  </li> */}
                   <li>
-                    <Link onClick={() => {setShowOptions(false); logout()}}>
+                    <Link
+                      onClick={() => {
+                        setShowOptions(false);
+                        logout();
+                      }}
+                    >
                       Sair
                     </Link>
                   </li>

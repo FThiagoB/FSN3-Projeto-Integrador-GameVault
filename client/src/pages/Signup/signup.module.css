@@ -1,4 +1,4 @@
-.signup-retro {
+.signupRetro {
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -10,7 +10,7 @@
   user-select: none;
 }
 
-.signup-retro__container {
+.signupRetroContainer {
   background: linear-gradient(
     to bottom right,
     rgba(31, 41, 55, 0.7),
@@ -23,7 +23,7 @@
   max-width: 450px;
 }
 
-.signup-retro__title {
+.signupRetroTitle {
   font-size: 2.5rem;
   color: #a78bfa;
   text-align: center;
@@ -31,19 +31,19 @@
   text-shadow: 0 0 12px #be185daa;
 }
 
-.signup-retro__form {
+.signupRetroForm {
   display: flex;
   flex-direction: column;
   gap: 1.3rem;
 }
 
-.signup-retro__label {
+.signupRetroLabel {
   font-size: 0.7rem;
   color: #d1d5db;
   letter-spacing: 0.05em;
 }
 
-.signup-retro__input {
+.signupRetroInput {
   background: rgba(31, 41, 55, 0.5);
   color: white;
   border: 1px solid #4b5563;
@@ -54,18 +54,18 @@
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.signup-retro__input::placeholder {
+.signupRetroInput::placeholder {
   color: #a78bfaaa;
 }
 
-.signup-retro__input:focus {
+.signupRetroInput:focus {
   outline: none;
   border-color: #8b5cf6;
   box-shadow: 0 0 9px #8b5cf6;
   background: rgba(31, 41, 55, 0.7);
 }
 
-.signup-retro__btn {
+.signupRetroBtn {
   background: linear-gradient(to right, #3b82f6, #8b5cf6);
   color: white;
   font-family: "Press Start 2P", system-ui, sans-serif;
@@ -80,8 +80,8 @@
   box-shadow: 0 4px 15px rgba(139, 92, 246, 0.6);
 }
 
-.signup-retro__btn:hover,
-.signup-retro__btn:focus {
+.signupRetroBtn:hover,
+.signupRetroBtn:focus {
   background: linear-gradient(to right, #8b5cf6, #be185d);
   box-shadow: 0 0 20px #a78bfa;
   outline: none;

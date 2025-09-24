@@ -1,27 +1,36 @@
 import React from "react";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import "./Contact.css";
+import styles from "./contact.module.css";
 
 const Contact = () => {
   return (
     <section
-      className="contact-retro position-relative overflow-hidden"
+      className={`${styles["contact-retro"]} position-relative overflow-hidden`}
       style={{ minHeight: "100vh", width: "100%", padding: "5rem 1rem" }}
     >
       {/* Círculos animados no fundo */}
-      <div className="contact-retro__background">
-        <div className="circle pulse delay0"></div>
-        <div className="circle pulse delay1"></div>
-        <div className="circle pulse delay05"></div>
+      <div className={styles["contact-retro__background"]}>
+        <div
+          className={`${styles.circle} ${styles.pulse} ${styles.delay0}`}
+        ></div>
+        <div
+          className={`${styles.circle} ${styles.pulse} ${styles.delay1}`}
+        ></div>
+        <div
+          className={`${styles.circle} ${styles.pulse} ${styles.delay05}`}
+        ></div>
       </div>
 
       {/* Container principal */}
-      <div className="box-contact position-relative" style={{ zIndex: 10 }}>
+      <div
+        className={`${styles["box-contact"]} position-relative`}
+        style={{ zIndex: 10 }}
+      >
         {/* Header */}
         <div className="text-center w-100 mb-4">
-          <h1 className="contact-retro__title">Entre em Contato</h1>
-          <p className="contact-retro__subtitle mx-auto">
+          <h1 className={styles["contact-retro__title"]}>Entre em Contato</h1>
+          <p className={styles["contact-retro__subtitle"]}>
             Algum jogo não está funcionando? Tem alguma dúvida? Entre em contato
             conosco.
           </p>
@@ -29,13 +38,17 @@ const Contact = () => {
 
         {/* Form */}
         <div className="row justify-content-center">
-          <div className=""> {/* <div className="col-lg-6 col-md-8"> */}
-            <div className="contact-retro__form-container">
+          <div className="">
+            {" "}
+            {/* mantive estrutura para facilitar integração com bootstrap */}
+            <div className={styles["contact-retro__form-container"]}>
               <form className="row g-3">
-                <div className="content-input col-md-6">
+                <div
+                  className={`content-input col-md-6 ${styles["content-input"]}`}
+                >
                   <label
                     htmlFor="name"
-                    className="form-label contact-retro__label"
+                    className={`form-label ${styles["contact-retro__label"]}`}
                   >
                     Nome
                   </label>
@@ -43,14 +56,17 @@ const Contact = () => {
                     type="text"
                     id="name"
                     name="name"
-                    className="contact-retro__input"
+                    className={`${styles["contact-retro__input"]} form-control`}
                     placeholder="Seu nome"
                   />
                 </div>
-                <div className="content-input col-md-6">
+
+                <div
+                  className={`content-input col-md-6 ${styles["content-input"]}`}
+                >
                   <label
                     htmlFor="email"
-                    className="form-label contact-retro__label"
+                    className={`form-label ${styles["contact-retro__label"]}`}
                   >
                     Email
                   </label>
@@ -58,29 +74,33 @@ const Contact = () => {
                     type="email"
                     id="email"
                     name="email"
-                    className="contact-retro__input"
+                    className={`${styles["contact-retro__input"]} form-control`}
                     placeholder="voce@exemplo.com"
                   />
                 </div>
-                <div className="content-input col-12">
+
+                <div
+                  className={`content-input col-12 ${styles["content-input"]}`}
+                >
                   <label
                     htmlFor="message"
-                    className="form-label contact-retro__label"
+                    className={`form-label ${styles["contact-retro__label"]}`}
                   >
                     Mensagem
                   </label>
                   <textarea
                     id="message"
                     name="message"
-                    className="contact-retro__input contact-retro__textarea"
+                    className={`${styles["contact-retro__input"]} ${styles["contact-retro__textarea"]} form-control`}
                     rows="5"
                     placeholder="Sua mensagem..."
                   />
                 </div>
+
                 <div className="col-12 text-center mt-4">
                   <button
                     type="submit"
-                    className="btn-lg contact-retro__btn"
+                    className={`btn-lg ${styles["contact-retro__btn"]}`}
                   >
                     Enviar Mensagem
                   </button>
@@ -88,24 +108,36 @@ const Contact = () => {
               </form>
 
               {/* Contact Info */}
-              <div className="contact-retro__contact-info">
+              <div className={styles["contact-retro__contact-info"]}>
                 <a
                   href="mailto:suporte@gamevault.com"
-                  className="contact-retro__email"
+                  className={styles["contact-retro__email"]}
                 >
                   suporte@gamevault.com
                 </a>
-                <div className="contact-retro__socials">
-                  <Link to="#" className="social-icon text-white">
+                <div className={styles["contact-retro__socials"]}>
+                  <Link
+                    to="#"
+                    className={`${styles["social-icon"]} text-white`}
+                  >
                     <FaFacebook size={20} />
                   </Link>
-                  <Link to="#" className="social-icon text-white">
+                  <Link
+                    to="#"
+                    className={`${styles["social-icon"]} text-white`}
+                  >
                     <FaTwitter size={20} />
                   </Link>
-                  <Link to="#" className="social-icon text-white">
+                  <Link
+                    to="#"
+                    className={`${styles["social-icon"]} text-white`}
+                  >
                     <FaInstagram size={20} />
                   </Link>
-                  <Link to="#" className="social-icon text-white">
+                  <Link
+                    to="#"
+                    className={`${styles["social-icon"]} text-white`}
+                  >
                     <FaLinkedin size={20} />
                   </Link>
                 </div>

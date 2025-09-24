@@ -1,30 +1,26 @@
-.product-card {
+.productCard {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   overflow: hidden;
   max-width: 100%;
   background-color: #221b3d;
-  box-shadow:
-    0 8px 25px rgba(0, 0, 0, 0.5),
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5),
     inset 0 0 10px rgba(255, 255, 255, 0.05);
-  transition:
-    transform 0.3s ease-in-out,
-    box-shadow 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
   position: relative;
   color: #e0e0e0;
 }
 
-.product-card:hover {
+.productCard:hover {
   transform: translateY(-10px) scale(1.02);
-  box-shadow:
-    0 15px 35px rgba(0, 0, 0, 0.6),
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6),
     inset 0 0 15px rgba(255, 255, 255, 0.1);
   border-color: rgba(160, 32, 240, 0.5);
 }
 
-.product-category-tag {
+.productCategoryTag {
   position: absolute;
   top: 15px;
   right: 15px;
@@ -41,30 +37,30 @@
   text-align: center;
 }
 
-.product-image {
+.productImage {
   width: 100%;
   height: 220px;
   object-fit: contain;
-  background-color: linear-gradient(to right, #3b82f6, #8b5cf6);
   padding: 15px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
 }
 
-.product-info {
+.productInfo {
   padding: 20px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
-.product-name {
+.productName {
   font-size: 1.5em;
   font-weight: 700;
   margin: 0 0 10px 0;
   color: #fff;
 }
 
-.product-price {
+.productPrice {
   font-size: 24px;
   font-weight: bold;
   color: #34d399 !important;
@@ -72,15 +68,15 @@
   margin-bottom: 20px;
 }
 
-.product-actions {
+.productActions {
   display: flex;
   flex: 1;
   gap: 10px;
   margin-top: auto;
 }
 
-.btn-card-secondary,
-.btn-card {
+.btnCard,
+.btnCardSecondary {
   display: flex !important;
   justify-content: center;
   align-items: center;
@@ -97,25 +93,21 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.btn-card {
+.btnCard {
   background: linear-gradient(45deg, #a020f0, #8a2be2) !important;
   color: #fff !important;
-  transition: all 0.3s ease !important;
 }
 
-.btn-card:hover {
+.btnCard:hover {
   background: linear-gradient(45deg, #8a2be2, #a020f0) !important;
   transform: translateY(-3px);
-  transition: all 0.3s ease !important;
 }
 
-.btn-card-secondary {
-  background-color: linear-gradient(to right, #10b981, #3b82f6) !important;
+.btnCardSecondary {
+  background: linear-gradient(to right, #10b981, #3b82f6) !important;
   color: #fff;
-  transition: all 0.3s ease !important;
 }
 
-.btn-card-secondary:hover {
+.btnCardSecondary:hover {
   transform: translateY(-3px);
-  transition: all 0.3s ease !important;
 }

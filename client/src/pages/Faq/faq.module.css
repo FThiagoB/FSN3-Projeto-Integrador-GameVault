@@ -1,4 +1,6 @@
-.faq-section {
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
+.faqSection {
   margin: 0 auto;
   padding: 4rem 1rem;
   background: linear-gradient(to top, #312e81, #6b21a8, #be185d);
@@ -7,7 +9,7 @@
   font-family: "Press Start 2P", system-ui, sans-serif;
 }
 
-.faq-container {
+.faqContainer {
   max-width: 900px;
   margin: 0 auto;
   background: linear-gradient(
@@ -20,7 +22,7 @@
   box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
 }
 
-.faq-title {
+.faqTitle {
   font-size: 2rem;
   color: #a78bfa;
   text-align: center;
@@ -28,24 +30,27 @@
   text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
 
-.faq-list {
+.faqList {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.faq-item {
+/* Item */
+.faqItem {
   border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 0.5rem;
   cursor: pointer;
   transition: background-color 0.2s;
+  overflow: hidden;
 }
 
-.faq-item.active {
+.active {
   background: rgba(139, 92, 246, 0.2);
 }
 
-.faq-question {
+/* Question button */
+.faqQuestion {
   width: 100%;
   text-align: left;
   padding: 1rem 1.5rem;
@@ -61,22 +66,26 @@
   transition: background 0.2s ease;
 }
 
-.faq-question:hover {
+.faqQuestion:hover {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
-.faq-icon {
+/* Icon */
+.faqIcon {
   font-size: 1.8rem;
   margin-left: 1rem;
   color: #8b5cf6;
   transition: transform 0.3s ease;
 }
 
-.faq-item.active .faq-icon {
+/* rotate icon when parent item has .active */
+.active :global(.faqIcon),
+.active .faqIcon {
   transform: rotate(180deg);
 }
 
-.faq-answer {
+/* Answer */
+.faqAnswer {
   padding: 1rem 1.5rem;
   font-size: 1rem;
   color: #e0e7ff;
@@ -85,8 +94,9 @@
   animation: fadeIn 0.3s ease-in-out;
 }
 
+/* Responsive */
 @media (max-width: 1023px) {
-  .faq-title {
+  .faqTitle {
     font-size: 1.5rem;
   }
 }

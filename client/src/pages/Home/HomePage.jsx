@@ -1,35 +1,28 @@
-import React, { useState, useEffect } from "react"; // Importe useState e useEffect
+import React, { useState, useEffect } from "react";
 import { Play, Star } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
-import { useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
-// 1. CORRIJA O CAMINHO DA IMAGEM
-// Se a pasta 'pages' e 'assets' estão dentro de 'src', você precisa subir dois níveis
 import zeldaCover from "../../assets/zelda-wallpaper.jpg";
 import Newsletter from "../../components/newsletter/Newsletter";
 import ProductGrid from "../../components/ProductShowCase/ProductsShowCase";
 import ButtonRandomizer from "../../components/buttonRandomizer/ButtonRandomizer";
-import "./Home.css";
+import styles from "./home.module.css";
 
 const Hero = () => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
-  // 3. CRIE ESTADOS PARA O PRODUTO EM DESTAQUE
   const [featuredProduct, setFeaturedProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 4. BUSQUE O PRODUTO EM DESTAQUE NA API
   useEffect(() => {
     const fetchFeaturedProduct = async () => {
       try {
-        // Vamos buscar um jogo específico (ex: ID 1) para ser o destaque
         const response = await fetch("http://localhost:4500/games/24");
-        if (!response.ok) {
+        if (!response.ok)
           throw new Error("Produto em destaque não encontrado.");
-        }
         const data = await response.json();
         setFeaturedProduct(data);
       } catch (error) {
@@ -42,120 +35,90 @@ const Hero = () => {
     fetchFeaturedProduct();
   }, []);
 
-  // Formata o preço para sempre ter duas casas decimais
   const formattedPrice = featuredProduct
     ? `R$ ${Number(featuredProduct.price).toFixed(2).replace(".", ",")}`
     : "";
 
   return (
-    <section className="hero-section">
-      {/* <ToastContainer />
-      <div className="hero-bg">
-        <div className="hero-circle-1"></div>
-        <div className="hero-circle-2"></div>
-        <div className="hero-circle-3"></div>
-      </div> */}
+    <section className={styles.heroSection}>
+      <div className={styles.heroContainer}>
+        <div className={styles.heroGrid}>
+          <div className={styles.heroLeft}>
+            <div className={styles.heroText}>
+              <h1 className={styles.heroTitle}>Reviva os Clássicos</h1>
+              <p className={styles.heroSubtitle}>
+                Descubra a maior coleção de jogos retrô dos anos 2000-2010.
+                Nostalgia em pixels!
+              </p>
+            </div>
 
-      <div className="hero-container">
-        <div className="hero-grid">
-          <div className="hero-left">
-            {/* Coluna Esquerda */}
+            <div
+              className={styles.heroButtons}
+              style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}
+            >
+              <Link to={"/produtos"} className={styles.buttonPrimary}>
+                <Play className={styles.icon} />
+                Explorar Jogos
+              </Link>
+            </div>
 
-            <div className="hero-left">
-              <div className="hero-text">
-                <h1 className="hero-title">
-                  Reviva os Clássicos
-                </h1>
-
-                <p className="hero-subtitle">
-                  Descubra a maior coleção de jogos retrô dos anos 2000-2010.
-                  Nostalgia em pixels!
-                </p>
+            <div className={styles.stats}>
+              <div className={styles.stat}>
+                <div className={styles.value} style={{ color: "#60a5fa" }}>
+                  100+
+                </div>
+                <div className={styles.label}>Jogos</div>
               </div>
 
-              {/* Botões */}
-
-              <div
-                className="hero-buttons"
-                style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}
-              >
-                <Link to={"/produtos"} className="button-primary">
-                  <Play className="icon" />
-                  Explorar Jogos
-                </Link>
-
-                {/* <Link to={"/ofertas"} className="button-secondary">
-
-Ver Ofertas
-
-</Link> */}
+              <div className={styles.stat}>
+                <div className={styles.value} style={{ color: "#a78bfa" }}>
+                  7
+                </div>
+                <div className={styles.label}>Consoles</div>
               </div>
 
-              {/* Estatísticas */}
-
-              <div className="stats">
-                <div className="stat">
-                  <div className="value" style={{ color: "#60a5fa" }}>
-                    100+
-                  </div>
-
-                  <div className="label">Jogos</div>
+              <div className={styles.stat}>
+                <div className={styles.value} style={{ color: "#ec4899" }}>
+                  50K+
                 </div>
-
-                <div className="stat">
-                  <div className="value" style={{ color: "#a78bfa" }}>
-                    7
-                  </div>
-
-                  <div className="label">Consoles</div>
-                </div>
-
-                <div className="stat">
-                  <div className="value" style={{ color: "#ec4899" }}>
-                    50K+
-                  </div>
-
-                  <div className="label">Gamers</div>
-                </div>
+                <div className={styles.label}>Gamers</div>
               </div>
             </div>
           </div>
 
-          <div className="hero-right">
-            {/* 5. RENDERIZE O CARD DE DESTAQUE APENAS SE OS DADOS FORAM CARREGADOS */}
+          <div className={styles.heroRight}>
             {isLoading ? (
               <p>Carregando destaque...</p>
             ) : featuredProduct ? (
-              <div className="featured-card">
-                <div className="featured-badge">
-                  <Star className="icon" />
+              <div className={styles.featuredCard}>
+                <div className={styles.featuredBadge}>
+                  <Star className={styles.icon} />
                   Destaque
                 </div>
 
-                <div className="featured-preview">
-                  {/* Usa a imagem real do produto vinda da API */}
+                <div className={styles.featuredPreview}>
                   <img
-                    src={featuredProduct.imageUrl}
+                    src={featuredProduct.imageUrl || zeldaCover}
                     alt={featuredProduct.title}
-                    className="featured-image"
+                    className={styles.featuredImage}
                   />
                 </div>
 
-                <div className="featured-info">
+                <div className={styles.featuredInfo}>
                   <div>
-                    {/* Usa os dados reais do produto */}
                     <h3>{featuredProduct.title}</h3>
                     <p>{featuredProduct.genre}</p>
                   </div>
-                  <div className="price text-right">
-                    <div className="current">{formattedPrice}</div>
+                  <div className="text-right">
+                    <div className={styles.price}>
+                      <div className={styles.current}>{formattedPrice}</div>
+                    </div>
                   </div>
                 </div>
 
                 <button
-                  className="button-buy"
+                  className={styles.buttonBuy}
                   onClick={() => {
-                    // 6. ADICIONA O PRODUTO CORRETO AO CARRINHO
                     addToCart(
                       {
                         id: featuredProduct.id,
@@ -163,7 +126,7 @@ Ver Ofertas
                         price: featuredProduct.price,
                         category: featuredProduct.genre,
                         imageUrl: featuredProduct.imageUrl,
-                        stock: featuredProduct.stock
+                        stock: featuredProduct.stock,
                       },
                       1
                     );
@@ -179,10 +142,11 @@ Ver Ofertas
           </div>
         </div>
       </div>
+
       <ProductGrid />
       <ButtonRandomizer />
       <Newsletter />
-      <ToastContainer/>
+      <ToastContainer />
     </section>
   );
 };

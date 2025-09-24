@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../Sidebar/Sidebar"; // Ajuste o caminho se necessário
 import { FaBars } from "react-icons/fa";
-import "./Layout.css"; // Importa o CSS dedicado
+import styles from "./layout.module.css"; // Importa o CSS Module
 
 const Layout = ({ children }) => {
   const [isSidebarExpanded, setSidebarExpanded] = useState(true);
@@ -17,18 +17,18 @@ const Layout = ({ children }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const sidebarDesktopClasses = `layout__sidebar-desktop ${
+  const sidebarDesktopClasses = `${styles.sidebarDesktop} ${
     isSidebarExpanded
-      ? "layout__sidebar-desktop--expanded"
-      : "layout__sidebar-desktop--collapsed"
+      ? styles.sidebarDesktopExpanded
+      : styles.sidebarDesktopCollapsed
   }`;
 
-  const sidebarMobileClasses = `layout__sidebar-mobile ${
-    isMobileMenuOpen ? "layout__sidebar-mobile--open" : ""
+  const sidebarMobileClasses = `${styles.sidebarMobile} ${
+    isMobileMenuOpen ? styles.sidebarMobileOpen : ""
   }`;
 
   return (
-    <div className="layout">
+    <div className={styles.layout}>
       {/* Sidebar Desktop */}
       <div className={sidebarDesktopClasses}>
         <Sidebar
@@ -39,7 +39,7 @@ const Layout = ({ children }) => {
 
       {/* Sidebar Mobile */}
       <div className={sidebarMobileClasses}>
-        <div className="layout__sidebar-mobile-content">
+        <div className={styles.sidebarMobileContent}>
           <Sidebar
             isExpanded={true}
             onToggle={() => setMobileMenuOpen(false)}
@@ -50,23 +50,23 @@ const Layout = ({ children }) => {
       {/* Overlay Mobile */}
       {isMobileMenuOpen && (
         <div
-          className="layout__overlay"
+          className={styles.overlay}
           onClick={() => setMobileMenuOpen(false)}
         ></div>
       )}
 
       {/* Conteúdo Principal */}
-      <div className="layout__main">
-        <header className="layout__header-mobile">
+      <div className={styles.main}>
+        <header className={styles.headerMobile}>
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="layout__mobile-menu-button"
+            className={styles.mobileMenuButton}
           >
             <FaBars size={24} />
           </button>
         </header>
 
-        <main className="layout__main-content">{children}</main>
+        <main className={styles.mainContent}>{children}</main>
       </div>
     </div>
   );

@@ -1,11 +1,13 @@
 .profileMainContent {
   padding: 1rem;
+  width: 100%;
 }
 
 .profileOrdersTitle {
   font-size: 1.8rem;
   margin-bottom: 1.5rem;
-  color: #e0e0e0;
+  color: #220707;
+  text-align: center;
 }
 
 .ordersList {

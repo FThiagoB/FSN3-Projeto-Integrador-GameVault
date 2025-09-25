@@ -240,7 +240,7 @@ const OrderDetailsModal = ({
               </tr>
             </thead>
             <tbody>
-              {order.items.map((item) => (
+              {order?.items?.map((item) => (
                 <tr key={item.game.id}>
                   <td>
                     <div className="d-flex align-items-center">
@@ -273,12 +273,12 @@ const OrderDetailsModal = ({
         <div className="mb-4">
           <h5 className="mb-3">Endereço de Entrega</h5>
           <div className="border rounded p-3">
-            <p><strong>Endereço:</strong> {order.address.street}, {order.address.number}</p>
-            <p><strong>Bairro:</strong> {order.address.neighborhood}</p>
-            <p><strong>Cidade/Estado:</strong> {order.address.city}</p>
-            <p><strong>CEP:</strong> {order.address.zipCode}</p>
-            {order.address.label && (
-              <p><strong>Label:</strong> {order.address.label}</p>
+            <p><strong>Endereço:</strong> {order?.address?.street}, {order?.address?.number}</p>
+            <p><strong>Bairro:</strong> {order?.address?.neighborhood}</p>
+            <p><strong>Cidade/Estado:</strong> {order?.address?.city}</p>
+            <p><strong>CEP:</strong> {order?.address?.zipCode}</p>
+            {order?.address?.label && (
+              <p><strong>Label:</strong> {order?.address?.label}</p>
             )}
           </div>
         </div>

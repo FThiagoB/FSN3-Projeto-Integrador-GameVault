@@ -61,7 +61,7 @@ const ProfileOrders = () => {
 
   return (
     <main className={styles.profileMainContent}>
-      <h2 className={styles.profileOrdersTitle}>My Orders</h2>
+      <h2 className={styles.profileOrdersTitle}>Meus Pedidos</h2>
 
       <div className={styles.ordersList}>
         {orders.map((order) => (

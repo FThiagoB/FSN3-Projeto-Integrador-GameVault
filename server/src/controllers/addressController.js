@@ -113,7 +113,7 @@ exports.updateAddressByJWT = async (req, res) => {
         if( label ) dataQuery.label = label;
 
         const updatedAddress = await prisma.address.update({
-            where: {id: userId},
+            where: {id: addressId},
             data: dataQuery
         });
 

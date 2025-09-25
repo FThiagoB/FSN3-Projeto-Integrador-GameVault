@@ -24,6 +24,11 @@ import styles from "./checkout.module.css";
 import { useCart } from "../../contexts/CartContext";
 import { useAuth } from '../../contexts/AuthContext';
 
+function formatCEP(value) {
+  return value
+    .replace(/(\d{5})(\d{3})/, "$1-$2")
+}
+
 // Funções de formatação movidas para fora para clareza
 const formatCardNumber = (digits) => {
   const trimmed = digits.slice(0, 16);
@@ -84,8 +89,17 @@ const CheckoutPage = () => {
 
   useEffect(() => {
     async function refreshMethodsShipping() { await getShippingMethods(); }
-    if (!shippingMethod) refreshMethodsShipping();
-  }, []);
+    if(!Object.keys(shippingMethod).length){
+      console.log("Entrou")
+      refreshMethodsShipping();
+    }
+  });
+
+  useEffect(() => {
+    setAddress(
+      `${street ? street : ""} ${number ? "," + number : ""} ${neighborhood ? "," + neighborhood : ""} ${state ? "(" + state + ")" : ""}`
+    );
+  }, [street, neighborhood, state, number])
 
   const refreshFields = () => {
     setFirstName(user?.name || "");
@@ -123,6 +137,10 @@ const CheckoutPage = () => {
   // Sincroniza as informações de endereço do usuário
   useEffect(() => {
     syncData();
+    if(!Object.keys(shippingMethod).length){
+      console.log("Buscando endereço")
+      getShippingMethods()
+    }
   }, [])
 
   useEffect(() => {
@@ -172,13 +190,31 @@ const CheckoutPage = () => {
       return;
     }
 
-    if (!shippingMethod) {
+    if(!Object.keys(shippingMethod).length) {
       notifyError("Selecione um método de envio válido.");
       return;
     }
 
     registerCheckout();
   };
+
+  console.log({
+    dados: {
+      street,
+      number,
+      neighborhood,
+      city,
+      state,
+      zip,
+      cardNumber,
+      expDate,
+      cvv,
+      cardName,
+    },
+    shippingMethod
+  })
+  console.log("Método de envio vazio: ", !Object.keys(shippingMethod).length)
+
 
   const registerCheckout = async () => {
     const data = {
@@ -387,6 +423,19 @@ const CheckoutPage = () => {
                       />
                     </Form.Group>
                   </Col>
+                  <Col className="mb-3">
+                    <Form.Group controlId="zip">
+                      <Form.Label className="text-light">CEP</Form.Label>
+                      <Form.Control
+                        type="text"
+                        className={invalidFields.zip ? styles.invalid : ""}
+                        placeholder="00000-000"
+                        value={formatCEP(zip)}
+                        onChange={(e) => setZip(e.target.value.replace(/[^0-9.]/g, "").slice(0, 8))}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
                 </Row>
                 <Row>
                   <Col md={4} className="mb-3">
@@ -415,6 +464,38 @@ const CheckoutPage = () => {
                         placeholder="Vila Lisboa"
                         value={neighborhood}
                         onChange={(e) => setNeighborhood(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={4} className="mb-3">
+                    <Form.Group controlId="city">
+                      <Form.Label className="text-light">Cidade</Form.Label>
+                      <Form.Control
+                        type="text"
+                        className={invalidFields.city ? styles.invalid : ""}
+                        placeholder="Fortaleza"
+                        value={city}
+                        onChange={(e) =>
+                          setCity(e.target.value)
+                        }
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={8} className="mb-3">
+                    <Form.Group controlId="neighborhood">
+                      <Form.Label className="text-light">Estado</Form.Label>
+                      <Form.Control
+                        type="text"
+                        className={
+                          invalidFields.state ? styles.invalid : ""
+                        }
+                        placeholder="Ceará"
+                        value={state}
+                        onChange={(e) => setState(e.target.value)}
                         required
                       />
                     </Form.Group>
@@ -452,7 +533,7 @@ const CheckoutPage = () => {
                       </div>
                     </Form.Group>
                   </Col>
-                   <Col md={6} className="mb-3">
+                  <Col md={6} className="mb-3">
                     <Form.Group controlId="card_number" className="mb-3">
                       <Form.Label className="text-light">
                         Nome do Cartão
@@ -558,7 +639,7 @@ const CheckoutPage = () => {
                     </label>
                   </div>
                 ))}
-                {console.log(shippingMethod)}
+
               </div>
 
               {/* Resumo e Finalização */}

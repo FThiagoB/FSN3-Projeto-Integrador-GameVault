@@ -88,15 +88,11 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    fetchDashboardData()
-  }, [])
-  // Bloqueia essa rota caso o usuário esteja deslogado
-  // if (!user) navigate("/login");
-  // Bloqueia essa rota caso o usuário não é admin
-  // else if (user.role !== "admin") navigate("/profile");
+    if (!user) navigate("/login");
+    else if (user.role !== "admin") navigate("/profile");
 
-  const users = [
-  ];
+    fetchDashboardData()
+  }, [navigate])
 
   // Abre o modal e preenche o formulário com os dados do usuário
   const handleEditClick = (user) => {
@@ -148,7 +144,7 @@ const Admin = () => {
               <h2
                 className={`${styles.adminCardTitle} ${styles.adminTextGreen}`}
               >
-                R$ {(dashboardData?.summary?.revenue?.delivered + dashboardData?.summary?.revenue?.pending) | 0}
+                R$ {(dashboardData?.summary?.revenue?.delivered) | 0}
               </h2>
             </div>
             <div className={styles.adminCard}>
@@ -229,7 +225,6 @@ const Admin = () => {
                   <th className={styles.adminTableCell}>Name</th>
                   <th className={styles.adminTableCell}>Email</th>
                   <th className={styles.adminTableCell}>Role</th>
-                  <th className={styles.adminTableCell}>Status</th>
                   <th
                     className={styles.adminTableCell}
                     style={{ textAlign: "center" }}
@@ -247,23 +242,8 @@ const Admin = () => {
                         <td className={styles.adminTableCell}>{iterativeUser.email}</td>
                         <td className={styles.adminTableCell}>{cargos[iterativeUser.role]}</td>
                         <td
-                          className={`${styles.adminTableCell} ${styles.adminStatus
-                            } ${iterativeUser.status === "Active"
-                              ? styles.adminStatusActive
-                              : styles.adminStatusPending
-                            }`}
-                        >
-                          {iterativeUser.status}
-                        </td>
-                        <td
                           className={`${styles.adminTableCell} ${styles.adminActionButtons}`}
                         >
-                          <button
-                            className={`${styles.adminActionButton} ${styles.edit}`}
-                            onClick={() => handleEditClick(iterativeUser)}
-                          >
-                            <FaPencilAlt />
-                          </button>
                           <button
                             className={`${styles.adminActionButton} ${styles.delete}`}
                             onClick={() => handleDeleteClick(iterativeUser)}
@@ -280,11 +260,6 @@ const Admin = () => {
           </div>
 
           <div className={styles.adminGridButtons}>
-            <button
-              className={`${styles.adminButton} ${styles.adminButtonPurple}`}
-            >
-              Gerenciar jogos
-            </button>
             <button
               className={`${styles.adminButton} ${styles.adminButtonPink}`}
             >

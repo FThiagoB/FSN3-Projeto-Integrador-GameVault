@@ -10,12 +10,20 @@ import ProductGrid from "../../components/ProductShowCase/ProductsShowCase";
 import ButtonRandomizer from "../../components/buttonRandomizer/ButtonRandomizer";
 import styles from "./home.module.css";
 
+import { useAuth } from "../../contexts/AuthContext";
+
 const Hero = () => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
   const [featuredProduct, setFeaturedProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const { user } = useAuth();
+
+  useEffect( () => {
+    if (user?.role === "admin") navigate("/admin");
+  }, [navigate]);
 
   useEffect(() => {
     const fetchFeaturedProduct = async () => {

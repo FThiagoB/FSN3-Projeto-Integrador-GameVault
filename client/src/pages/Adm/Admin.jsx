@@ -1,10 +1,13 @@
 import styles from "./admin.module.css";
-import { FaPencilAlt, FaTrash, FaTimes, FaSave, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
+import { FaPencilAlt, FaTrash, FaTimes, FaSave, FaThumbsUp, FaThumbsDown, FaCog, FaEye, FaCreditCard } from "react-icons/fa";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "../../contexts/AuthContext";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+
+import AdminOrderModal from "./AdminOrderModal";
+import StatusBadge from "../../utils/StatusBadge";
 
 const Admin = () => {
   const { user } = useAuth();
@@ -16,8 +19,74 @@ const Admin = () => {
   const [formData, setFormData] = useState({ name: "", email: "", role: "" });
 
   const [dashboardData, setDashboardData] = useState({});
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [orders, setOrders] = useState([]);
+
+  // Estados para controlar o modal
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+
+  // Funções auxiliares para formatar status
+  const getStatusLabel = (status) => {
+    const statusLabels = {
+      pending: 'Pendente',
+      processing: 'Processando',
+      shipped: 'Enviado',
+      delivered: 'Entregue',
+      cancelled: 'Cancelado'
+    };
+    return statusLabels[status] || status;
+  };
+
+  const getPaymentStatusLabel = (paymentStatus) => {
+    const paymentLabels = {
+      pending: 'Pendente',
+      processing: 'Processando',
+      paid: 'Pago',
+      failed: 'Falhou',
+      refunded: 'Reembolsado',
+      cancelled: 'Cancelado'
+    };
+    return paymentLabels[paymentStatus] || paymentStatus;
+  };
+
+  // Funções de manipulação
+  const handleManageOrder = (order) => {
+    setSelectedOrder(order);
+    setShowOrderModal(true);
+  };
+
+  const handleViewOrder = (order) => {
+    // Aqui você pode implementar uma visualização apenas leitura
+    // ou redirecionar para uma página de detalhes
+    console.log('Visualizar pedido:', order);
+    // Alternativa: abrir o mesmo modal em modo leitura
+    setSelectedOrder(order);
+    setShowOrderModal(true);
+  };
+
+
+  const handleCloseOrderModal = () => {
+    setShowOrderModal(false);
+    setSelectedOrder(null);
+  };
 
   const cargos = { seller: "Vendedor", user: "Cliente", admin: "Administrador" }
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+  };
+
+  const handleUpdateOrder = (updatedOrder) => {
+    if (orders) {
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === updatedOrder.id ? updatedOrder : order
+        )
+      );
+    }
+    console.log("Mudou: ", orders)
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -41,6 +110,55 @@ const Admin = () => {
     }
   };
 
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch(`http://localhost:4500/admin/orders`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${cookies.authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.error(`Problemas na requisição: ${response}`);
+        return;
+      }
+
+      const data = await response.json();
+      // Garanta que data.orders seja um array
+      setOrders(Array.isArray(data) ? data : []);
+      console.log({ data })
+    } catch (error) {
+      console.error(`Problemas na requisição: ${error}`);
+    }
+  };
+
+  const confirmPagamento = async (orderID) => {
+    try {
+      console.log(`/admin/confirm-payment/${orderID}`) // Agora usa orderID
+      const response = await fetch(`http://localhost:4500/admin/confirm-payment/${orderID}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${cookies.authToken}`,
+          "Content-Type": "application/json" // Adicione este header
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Erro na requisição: ${response.status} - ${errorText}`);
+        return;
+      }
+
+      fetchDashboardData();
+      fetchOrders();
+    } catch (error) {
+      console.error(`Problemas na requisição: ${error}`);
+      fetchDashboardData();
+      fetchOrders();
+    }
+  }
+
   const deleteUser = async (userID) => {
     try {
       const response = await fetch(`http://localhost:4500/admin/user/${userID}`, {
@@ -56,9 +174,11 @@ const Admin = () => {
       }
 
       fetchDashboardData();
+      fetchOrders();
     } catch (error) {
       console.error(`Problemas na requisição: ${error}`);
       fetchDashboardData();
+      fetchOrders();
     }
   };
 
@@ -92,7 +212,8 @@ const Admin = () => {
     else if (user.role !== "admin") navigate("/profile");
 
     fetchDashboardData()
-  }, [navigate])
+    fetchOrders()
+  }, [user, navigate])
 
   // Abre o modal e preenche o formulário com os dados do usuário
   const handleEditClick = (user) => {
@@ -100,7 +221,7 @@ const Admin = () => {
     setFormData({ name: user.name, email: user.email, role: user.role });
     setIsModalOpen(true);
   };
-
+  console.log({ orders })
   // Lógica de exclusão (pode ser aprimorada)
   const handleDeleteClick = (user) => {
     // Em uma aplicação real, evite usar window.confirm
@@ -217,6 +338,105 @@ const Admin = () => {
             </div>
           ) : (<></>)}
 
+          {(orders && orders.length)?(
+            <div className={styles.adminTableContainer}>
+              <div className={styles.adminTableHeader}>Pedidos Recentes</div>
+              <table className={styles.adminTable}>
+                <thead className={styles.adminTableHead}>
+                  <tr>
+                    <th className={styles.adminTableCell}>ID do Pedido</th>
+                    <th className={styles.adminTableCell}>Cliente</th>
+                    <th className={styles.adminTableCell}>Data</th>
+                    <th className={styles.adminTableCell}>Status</th>
+                    <th className={styles.adminTableCell}>Pagamento</th>
+                    <th className={styles.adminTableCell}>Total</th>
+                    <th className={styles.adminTableCell} style={{ textAlign: "center" }}>
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {console.log("Dentro: ", Object.keys(orders).length)}
+                  {console.log("Dentro: ", orders)}
+
+                  {(orders ?? []).map((order) => (
+                    <tr key={order.id} className={styles.adminTableRow}>
+                      <td className={styles.adminTableCell}>
+                        <strong>{order.externID}</strong>
+                      </td>
+                      <td className={styles.adminTableCell}>
+                        <div>
+                          <strong>{order.user.name}</strong>
+                          <br />
+                          <small className="text-muted">{order.user.email}</small>
+                        </div>
+                      </td>
+                      <td className={styles.adminTableCell}>
+                        {new Date(order.createdAt).toLocaleDateString('pt-BR')}
+                        <br />
+                        <small className="text-muted">
+                          {new Date(order.createdAt).toLocaleTimeString('pt-BR', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </small>
+                      </td>
+                      <td className={styles.adminTableCell}>
+                        <span className={`${styles.statusBadge} ${styles[order.status]}`}>
+                          <StatusBadge status={order.status}/>
+                        </span>
+                      </td>
+                      <td className={styles.adminTableCell}>
+                        <span className={`${styles.statusBadge} ${styles[order.paymentStatus]}`}>
+                          <StatusBadge status={order.paymentStatus}/>
+                        </span>
+                      </td>
+                      <td className={styles.adminTableCell}>
+                        <strong>
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL'
+                          }).format(order.total)}
+                        </strong>
+                      </td>
+                      <td className={`${styles.adminTableCell} ${styles.adminActionButtons}`}>
+                        {/* <button
+                          className={`${styles.adminActionButton} ${styles.manage}`}
+                          onClick={() => handleManageOrder(order)}
+                          title="Gerenciar Pedido"
+                        >
+                          <FaCog />
+                        </button>
+                        <button
+                          className={`${styles.adminActionButton} ${styles.view}`}
+                          onClick={() => handleViewOrder(order)}
+                          title="Ver Detalhes"
+                        >
+                          <FaEye />
+                          FaCreditCard
+                        </button> */}
+                        {["cancelled", "delivered", "completed"].includes(order.status)?(
+
+                            <div>Pedido finalizado</div>
+                        ):(
+                          <button
+                            className={`${styles.adminActionButton} ${styles.manage}`}
+                            onClick={() => confirmPagamento(order.id)}
+                            title="Confirmar pagamento"
+                          >
+                            <FaCreditCard />
+                          </button>
+                          )}
+                      </td>
+                    </tr>
+                  ))}
+
+                </tbody>
+              </table>
+            </div>
+          ):(<></>)}
+
+
           <div className={styles.adminTableContainer}>
             <div className={styles.adminTableHeader}>Cadastros recentes</div>
             <table className={styles.adminTable}>
@@ -262,6 +482,7 @@ const Admin = () => {
           <div className={styles.adminGridButtons}>
             <button
               className={`${styles.adminButton} ${styles.adminButtonPink}`}
+              onClick={() => setShowEditModal(true)}
             >
               Gerenciar pedidos
             </button>
@@ -345,6 +566,15 @@ const Admin = () => {
             </div>
           </div>
         </main>
+
+        {selectedOrder && (
+          <AdminOrderModal
+            show={showOrderModal}
+            onHide={handleCloseModal}
+            order={selectedOrder}
+            onUpdateOrder={handleUpdateOrder}
+          />
+        )}
       </div>
     </div>
   );

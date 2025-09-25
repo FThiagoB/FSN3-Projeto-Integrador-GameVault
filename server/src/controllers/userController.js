@@ -486,3 +486,48 @@ exports.removeUserPicture = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
+
+exports.confirmPayment = async (req, res) => {
+  try {
+    const { orderID } = req.params;
+
+    // Validar orderID
+    const orderId = parseInt(orderID);
+    if (isNaN(orderId)) {
+      return res.status(400).json({ error: 'ID do pedido inválido' });
+    }
+
+    // Buscar o pedido
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      return res.status(404).json({ error: 'Pedido não encontrado' });
+    }
+
+
+    // Atualizar status dos itens não cancelados para "delivered"
+    const updatedItems = await prisma.orderItem.updateMany({
+      where: {
+        orderID: orderId,
+        status: { not: 'cancelled' }
+      },
+      data: {
+        status: 'delivered',
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Entrega confirmada com sucesso!',
+      deliveredItems: updatedItems.count
+    });
+
+  } catch (error) {
+    console.error('Erro ao confirmar entrega:', error);
+    res.status(500).json({ error: 'Erro interno do servidor ao confirmar entrega' });
+  }
+}

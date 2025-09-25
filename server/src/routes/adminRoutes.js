@@ -23,6 +23,10 @@ router.get('/admin/dashboard', adminController.getDashboadInfo);
 // Transforma um usuário em vendedor
 router.patch('/admin/user/:userID/seller', adminController.setUserToSeller);
 
+// Atualiza o cargo de um usuário específico
+router.get("/admin/orders", adminController.getOrders);
+
+router.patch("/admin/confirm-payment/:orderID", adminController.confirmPayment);
 
 // Atualiza o cargo de um usuário específico
 router.delete("/admin/user/:userID", adminController.deleteUserByID);

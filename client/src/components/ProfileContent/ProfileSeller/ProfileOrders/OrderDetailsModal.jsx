@@ -25,7 +25,7 @@ const ItemActionsDropdown = ({ item, onUpdateStatus, updatingItemId }) => {
 
   const canCancel = item.status !== 'cancelled' && item.status !== 'delivered';
   const canProcess = item.status === 'pending';
-  const canShip = item.status === 'processing' //&& item.paymentStatus === "paid";
+  const canShip = item.status === 'processing' && item.paymentStatus === "paid";
 
   return (
     <Dropdown

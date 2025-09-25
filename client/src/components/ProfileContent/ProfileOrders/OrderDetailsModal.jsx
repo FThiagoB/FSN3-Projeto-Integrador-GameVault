@@ -40,6 +40,40 @@ const OrderDetailsModal = ({
 
   console.log({order})
 
+  const setDelivery = async (orderID) => {
+    try {
+      const response = await fetch(`http://localhost:4500/user/confirm-payment/${orderID}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${cookies.authToken}`,
+          "Content-Type": "application/json"
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json()
+        console.error(`Problemas na requisição: ${data?.message}`);
+        return;
+      }
+
+      notifySuccess("Status alterado com sucesso");
+      refreshFetch();
+      setTimeout(onHide, 1500);
+    } catch (error) {
+
+      console.error(`Problemas na requisição: ${error}`);
+    }
+  };
+
+
+  const canConfirmDelivery = () => {
+    if (!order?.items || order.items.length === 0) return false;
+    
+    return order.items.every(item => 
+      (item.paymentStatus === 'paid') && (item.status === "shipped" || item.status === 'cancelled')
+    );
+  };
+
   async function changeStatus(status) {
     try {
       const payload = { orderStatus: status };
@@ -103,8 +137,7 @@ const OrderDetailsModal = ({
 
   const canCancelOrder = () =>
     ["pending", "processing", "partially_cancelled"].includes(order.status);
-  const canConfirmDelivery = () =>
-    ["shipped", "delivered"].includes(order.status);
+  
 
   const handleCancelClick = () => setShowCancelConfirm(true);
   const handleDeliveryClick = () => {
@@ -328,7 +361,7 @@ const OrderDetailsModal = ({
               onClick={() =>
                 !showCancelConfirm &&
                 !showDeliveryConfirm &&
-                handleDeliveryClick()
+                setDelivery(order.id)
               }
               disabled={confirmingDelivery}
             >

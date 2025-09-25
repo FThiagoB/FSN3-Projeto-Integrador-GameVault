@@ -1,0 +1,96 @@
+/* regras locais (module) */
+.customOrderModal {
+  /* esta classe será aplicada ao .modal-dialog (dialogClassName) */
+  z-index: 1060;
+}
+
+/* backdrop é gerado fora do modal (body) — precisa ser global */
+:global(.modal-backdrop) {
+  z-index: 1050;
+}
+
+/* se você tiver uma navbar global, ajuste também (global) */
+:global(.admin-navbar) {
+  z-index: 1030;
+}
+
+/* estiliza o conteúdo do modal (bootstrap usa .modal-content dentro do dialog) */
+.customOrderModal :global(.modal-content) {
+  left: 50%;
+  transform: translate(-50%);
+  background: linear-gradient(
+    to bottom right,
+    rgba(31, 41, 55, 0.9),
+    rgba(17, 24, 39, 0.9)
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+  padding: 1.5rem;
+  color: white !important;
+  width: 50vw !important;
+  max-width: none;
+}
+
+/* header / title / body / footer — aplicados diretamente via props className no JSX */
+.modalHeader {
+  border: none;
+  padding: 0 0 0.5rem 0;
+}
+
+.modalTitle {
+  color: #a78bfa;
+}
+
+.modalBody {
+  padding: 1.5rem 0;
+  color: white;
+}
+
+/* footer */
+.modalFooter {
+  border: none;
+  padding: 0.5rem 0 0 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* botões customizados que adicionamos */
+.modalButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* cancel variant */
+.modalButtonCancel {
+  background: rgba(31, 41, 55, 0.5);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: white;
+}
+
+/* confirm / danger variant */
+.modalButtonConfirm {
+  background: rgba(225, 29, 72, 0.12);
+  border: 1px solid rgba(225, 29, 72, 0.2);
+  color: #fda4af;
+  font-weight: 700;
+}
+
+/* pequenas adaptações responsivas */
+@media (max-width: 768px) {
+  .customOrderModal :global(.modal-content) {
+    width: 90vw !important;
+    padding: 1rem;
+  }
+
+  .modalFooter {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+}

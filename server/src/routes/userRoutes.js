@@ -27,6 +27,7 @@ router.delete("/user", auth, userController.deleteUserByJWT);
 
 // Usuário deseja ser um vendedor
 router.patch("/user/request-seller", auth, userController.requestSeller);
+router.patch("/user/confirm-payment/:orderID", userController.confirmPayment);
 
 // Atualiza as informações de email requerindo o email atual
 router.put("/user/update/email", auth, userController.updateUserEmail); 

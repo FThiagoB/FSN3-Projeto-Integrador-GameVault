@@ -33,6 +33,7 @@ const Cart = () => {
     shippingMethod,
     tax,
     discount,
+    couponCode
   } = useCart();
 
   const { user } = useAuth();
@@ -49,6 +50,7 @@ const Cart = () => {
 
   useEffect(() => {
     if (user?.role === "seller" || user?.role === "admin") navigate("/profile");
+    if(couponCode) setPromoCode(couponCode)
   }, [user, navigate]);
 
   const notifySuccess = (Mensagem) =>
@@ -64,11 +66,9 @@ const Cart = () => {
     });
 
   useEffect(() => {
-    async function refreshMethodsShipping() {
-      await getShippingMethods();
-    }
-    refreshMethodsShipping();
-  }, [getShippingMethods]);
+      async function refreshMethodsShipping() { await getShippingMethods(); }
+      refreshMethodsShipping();
+    }, []);
 
   const handleCheckout = () => {
     notifySuccess("Compra realizada com sucesso!");
@@ -406,7 +406,7 @@ const Cart = () => {
                   <input
                     type="text"
                     className={styles["promo-code__input"]}
-                    placeholder="Digite SAVE10"
+                    placeholder="Digite GAME20"
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                   />

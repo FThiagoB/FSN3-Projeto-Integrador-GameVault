@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Button, Image } from "react-bootstrap";
+
 import {
   FaMapMarkerAlt,
   FaCreditCard,
@@ -13,11 +14,15 @@ import {
   FaTrash,
   FaBox,
 } from "react-icons/fa";
+
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { useCookies } from "react-cookie";
 
 import styles from "./checkout.module.css";
+
+import { useCart } from "../../contexts/CartContext";
+import { useAuth } from '../../contexts/AuthContext';
 
 // Funções de formatação movidas para fora para clareza
 const formatCardNumber = (digits) => {
@@ -34,72 +39,6 @@ const formatCardExpDate = (value) => {
 };
 
 const CheckoutPage = () => {
-  // --- Simulação dos Contextos (remova isso em seu projeto real) ---
-  const useCart = () => ({
-    tax: 5.0,
-    shippingMethod: {
-      id: 1,
-      name: "SEDEX",
-      price: 25.0,
-      description: "Entrega em 3 dias úteis",
-    },
-    shippingMethods: [
-      {
-        id: 1,
-        name: "SEDEX",
-        price: 25.0,
-        description: "Entrega em 3 dias úteis",
-      },
-      {
-        id: 2,
-        name: "PAC",
-        price: 15.0,
-        description: "Entrega em 7 dias úteis",
-      },
-    ],
-    getShippingMethods: () => console.log("Buscando métodos de envio..."),
-    selectShippingMethodById: (id) =>
-      console.log(`Selecionado método de envio: ${id}`),
-    couponCode: "SALE10",
-    clearCart: () => console.log("Carrinho limpo."),
-    discount: 0.1,
-    cartItems: [
-      {
-        id: 1,
-        name: "Jogo Exemplo 1",
-        price: 199.9,
-        quantity: 1,
-        imageUrl: "https://placehold.co/80x80/6b21a8/ffffff?text=Jogo+1",
-      },
-      {
-        id: 2,
-        name: "Jogo Exemplo 2",
-        price: 249.9,
-        quantity: 2,
-        imageUrl: "https://placehold.co/80x80/312e81/ffffff?text=Jogo+2",
-      },
-    ],
-    removeItem: (id) => console.log(`Removido item ${id}`),
-    updateQuantity: () => {},
-    shippingCost: 25.0,
-  });
-
-  const useAuth = () => ({
-    user: { name: "Usuário Teste", role: "user" },
-    userAddress: {
-      street: "Rua das Flores",
-      number: "123",
-      neighborhood: "Centro",
-      city: "Fortaleza",
-      state: "Ceará",
-      zipCode: "60000-000",
-      complemento: "Apto 101",
-    },
-    syncData: () => console.log("Sincronizando dados..."),
-    loading: false,
-  });
-  // --- Fim da Simulação ---
-
   const [cookies] = useCookies(["authToken"]);
   const { user, userAddress, syncData, loading } = useAuth();
   const redirect = useNavigate();
@@ -124,7 +63,6 @@ const CheckoutPage = () => {
   const [expDate, setExpDate] = useState("");
   const [cvv, setCvv] = useState("");
   const [cardName, setCardName] = useState("");
-  const [installments, setInstallments] = useState("1x sem juros");
 
   const [firstName, setFirstName] = useState("");
   const [street, setStreet] = useState("");
@@ -145,33 +83,52 @@ const CheckoutPage = () => {
   }, [cartItems, redirect]);
 
   useEffect(() => {
-    getShippingMethods();
-  }, [getShippingMethods]);
+    async function refreshMethodsShipping() { await getShippingMethods(); }
+    if (!shippingMethod) refreshMethodsShipping();
+  }, []);
+
+  const refreshFields = () => {
+    setFirstName(user?.name || "");
+    setStreet(userAddress.street || "");
+    setNumber(userAddress.number || "");
+    setNeighborhood(userAddress.neighborhood || "");
+    setCity(userAddress.city || "");
+    setState(userAddress.state || "");
+    setZip(userAddress.zipCode || "");
+    setComplement(userAddress.complemento || "");
+    setAddress(
+      userAddress.street
+        ? `${userAddress.street}, ${userAddress.number}, ${userAddress.neighborhood} (${userAddress.state})`
+        : ""
+    );
+
+    if (
+      user?.paymentMethod &&
+      user.paymentMethod.type === "credit_card" &&
+      user.paymentMethod.data
+    ) {
+      const { number, expDate, name } = user.paymentMethod.data;
+
+      setCardNumber(number || "");
+      setExpDate(expDate || "");
+      setCardName(name || "");
+      setCvv(""); // nunca armazenado, sempre vazio
+    }
+  };
 
   useEffect(() => {
-    const refreshFields = () => {
-      setFirstName(user?.name || "");
-      setStreet(userAddress.street || "");
-      setNumber(userAddress.number || "");
-      setNeighborhood(userAddress.neighborhood || "");
-      setCity(userAddress.city || "");
-      setState(userAddress.state || "");
-      setZip(userAddress.zipCode || "");
-      setComplement(userAddress.complemento || "");
-      setAddress(
-        userAddress.street
-          ? `${userAddress.street}, ${userAddress.number}, ${userAddress.neighborhood} (${userAddress.state})`
-          : ""
-      );
-    };
+    refreshFields();
+  }, [user, redirect, loading]);
 
+  // Sincroniza as informações de endereço do usuário
+  useEffect(() => {
+    syncData();
+  }, [])
+
+  useEffect(() => {
     if (!loading) {
       if (!user) redirect("/login");
       else if (user.role !== "user") redirect("/profile");
-      else {
-        syncData();
-        refreshFields();
-      }
     }
   }, [user, userAddress, redirect, loading, syncData]);
 
@@ -224,13 +181,60 @@ const CheckoutPage = () => {
   };
 
   const registerCheckout = async () => {
-    // Lógica de fetch para registrar a compra...
-    console.log("Registrando compra...");
-    notifySuccess("Compra realizada com sucesso, acompanhe o seu pedido");
-    setTimeout(() => {
-      redirect("/profile/orders");
-      contextClearCart();
-    }, 2500);
+    const data = {
+      shippingAddress: {
+        street,
+        number,
+        neighborhood,
+        city,
+        state,
+        zipCode: zip,
+        complemento: complement
+      },
+      paymentMethod: {
+        type: "credit_card",
+        data: {
+          number: cardNumber,
+          expDate: expDate,
+          name: cardName,
+          cvv: cvv
+        }
+      },
+      items: cartItems,
+      shippingMethod,
+      couponCode,
+      tax,
+    };
+
+    try {
+      const response = await fetch(`http://localhost:4500/checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${cookies.authToken}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      // Verifica se houve algum problema
+      if (!response.ok) {
+        const { message } = await response.json();
+        throw new Error(message);
+      }
+
+      notifySuccess("Compra realizada com sucesso, acompanhe o seu pedido")
+
+      setTimeout(() => {
+        redirect("/profile/orders");
+        contextClearCart();
+      }, 2500);
+
+
+    }
+    catch (error) {
+      console.error('Erro:', error);
+      notifyError(`${error}`);
+    }
   };
 
   return (
@@ -425,26 +429,52 @@ const CheckoutPage = () => {
                   Informações de Pagamento
                 </h2>
                 {/* Campos do formulário de pagamento aqui... */}
-                <Form.Group controlId="card_number" className="mb-3">
-                  <Form.Label className="text-light">
-                    Número do Cartão
-                  </Form.Label>
-                  <div className="position-relative">
-                    <Form.Control
-                      type="text"
-                      className={invalidFields.cardNumber ? styles.invalid : ""}
-                      placeholder="1234 5678 9012 3456"
-                      value={formatCardNumber(cardNumber)}
-                      onChange={(e) =>
-                        setCardNumber(e.target.value.replace(/\D/g, ""))
-                      }
-                      required
-                    />
-                    <div className="position-absolute end-0 top-50 translate-middle-y me-3">
-                      <FaCreditCard className="fs-4 text-light" />
-                    </div>
-                  </div>
-                </Form.Group>
+                <Row>
+                  <Col md={6} className="mb-3">
+                    <Form.Group controlId="card_number" className="mb-3">
+                      <Form.Label className="text-light">
+                        Número do Cartão
+                      </Form.Label>
+                      <div className="position-relative">
+                        <Form.Control
+                          type="text"
+                          className={invalidFields.cardNumber ? styles.invalid : ""}
+                          placeholder="1234 5678 9012 3456"
+                          value={formatCardNumber(cardNumber)}
+                          onChange={(e) =>
+                            setCardNumber(e.target.value.replace(/\D/g, ""))
+                          }
+                          required
+                        />
+                        <div className="position-absolute end-0 top-50 translate-middle-y me-3">
+                          <FaCreditCard className="fs-4 text-light" />
+                        </div>
+                      </div>
+                    </Form.Group>
+                  </Col>
+                   <Col md={6} className="mb-3">
+                    <Form.Group controlId="card_number" className="mb-3">
+                      <Form.Label className="text-light">
+                        Nome do Cartão
+                      </Form.Label>
+                      <div className="position-relative">
+                        <Form.Control
+                          type="text"
+                          className={invalidFields.cardName ? styles.invalid : ""}
+                          placeholder="João"
+                          value={cardName}
+                          onChange={(e) =>
+                            setCardName(e.target.value)
+                          }
+                          required
+                        />
+                        <div className="position-absolute end-0 top-50 translate-middle-y me-3">
+                          <FaCreditCard className="fs-4 text-light" />
+                        </div>
+                      </div>
+                    </Form.Group>
+                  </Col>
+                </Row>
                 <Row>
                   <Col md={6} className="mb-3">
                     <Form.Group controlId="exp_date">
@@ -498,11 +528,10 @@ const CheckoutPage = () => {
                 {shippingMethods.map((method) => (
                   <div
                     key={method.id}
-                    className={`${styles.shippingOption} ${
-                      shippingMethod?.id === method.id
-                        ? styles.shippingOptionSelected
-                        : ""
-                    }`}
+                    className={`${styles.shippingOption} ${shippingMethod?.id === method.id
+                      ? styles.shippingOptionSelected
+                      : ""
+                      }`}
                     onClick={() => selectShippingMethodById(method.id)}
                   >
                     <input
@@ -512,6 +541,7 @@ const CheckoutPage = () => {
                       value={method.id}
                       checked={shippingMethod?.id === method.id}
                       readOnly
+                      onChange={() => selectShippingMethodById(method.id)}
                     />
                     <label htmlFor={`shippingMethod${method.id}`}>
                       <div>
@@ -528,6 +558,7 @@ const CheckoutPage = () => {
                     </label>
                   </div>
                 ))}
+                {console.log(shippingMethod)}
               </div>
 
               {/* Resumo e Finalização */}

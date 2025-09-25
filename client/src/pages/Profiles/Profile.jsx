@@ -37,10 +37,14 @@ const ProfileSettings = (redirectPage = undefined) => {
 
   useEffect(() => {
     if (!user) navigate("/login");
+
+    setTimeout(() => {
+         window.scrollTo(0, 0);
+      }, 100);
   }, [user, navigate]);
 
   return (
-    <div className={styles.profileContainer}>
+    <div className={styles.profileContainer} id="profile-container">
       <aside className={styles.profileSidebar}>
         <nav className={styles.profileSidebarNav}>
           <ul>

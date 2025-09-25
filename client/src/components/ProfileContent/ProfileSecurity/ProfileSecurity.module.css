@@ -227,6 +227,15 @@
   margin-bottom: 1rem;
 }
 
+/* Zone card */
+.profileInfoZone,
+.profile-info-zone {
+  border: 2px solid var(--profile-primary-color);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background-color: #fef6ff;
+}
+
 /* --------------------------------------------------------------------------
    Small utilities used by this component
    -------------------------------------------------------------------------- */

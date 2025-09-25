@@ -33,7 +33,7 @@ const notifyError = (message) => {
 };
 
 const ProfileSecurity = () => {
-  const { user, deleteAcc } = useAuth();
+  const { user, deleteAcc, syncData } = useAuth();
   const [cookies] = useCookies(["authToken"]);
   const navigate = useNavigate();
 
@@ -63,6 +63,30 @@ const ProfileSecurity = () => {
   const handleEmailChange = (e) => {
     const { name, value } = e.target;
     setEmailData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const callRequestToSeller = async () => {
+    try {
+      const response = await fetch(`http://localhost:4500/user/request-seller`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cookies.authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const { message } = await response.json();
+        throw new Error(message);
+      }
+
+      notifySuccess("Pedido realizado com sucesso, aguarde avaliação");
+      syncData();
+      
+    } catch (error) {
+      console.error("Erro:", error);
+      notifyError(`${error}`);
+    }
   };
 
   const callUpdateEmail = async () => {
@@ -271,7 +295,39 @@ const ProfileSecurity = () => {
           </div>
         </div>
 
+        {/* Zona para se inscrever como vendedor */}
+        {(user?.role === "user" ?? false) ? (
+        <div
+          className={`${styles.profileFormSection} ${styles.profileInfoZone}`}
+        >
+          <h3>Torne-se um Vendedor na Nossa Plataforma!</h3>
+          <p>
+            Deseja compartilhar seus jogos com uma comunidade apaixonada? Cadastre-se como vendedor e comece a vender na nossa plataforma!
+          </p>
+          {console.log(user)}
+
+          {((user?.wantsToBeSeller == false) ?? false) ? (
+            <button
+              type="button"
+              className={`${styles.profileBtn} ${styles.profileBtnPrimary}`}
+              onClick={async () => {
+                await callRequestToSeller();
+              }}
+            >
+              Pedir análise
+            </button>
+          ) : (<>
+            <button
+              type="button"
+              className={`${styles.profileBtn}`} disabled style={{"cursor": "default"}}>
+              Aguardando avaliação
+            </button>
+          </>)}
+        </div>
+        ) : (<></>)}
+
         {/* Zona de Perigo para Deletar a Conta */}
+        {(user?.role !== "admin" ?? false) ? (
         <div
           className={`${styles.profileFormSection} ${styles.profileDangerZone}`}
         >
@@ -292,6 +348,7 @@ const ProfileSecurity = () => {
             Delete My Account
           </button>
         </div>
+        ) : (<></>)}
 
         <ToastContainer />
       </main>

@@ -92,7 +92,7 @@ const ProfileContent = () => {
 
   useEffect(() => {
     if (!user) navigate("/login");
-    syncData();
+    if (!user) syncData();
   }, [user, navigate]);
 
   const handleReset = () => {

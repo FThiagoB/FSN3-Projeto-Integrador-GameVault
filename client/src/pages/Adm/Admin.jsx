@@ -1,44 +1,101 @@
 import styles from "./admin.module.css";
-import { FaPencilAlt, FaTrash, FaTimes, FaSave } from "react-icons/fa";
-import { useState } from "react";
+import { FaPencilAlt, FaTrash, FaTimes, FaSave, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
+import { useEffect, useState } from "react";
 
-// Removi os hooks não utilizados para este exemplo, mas você pode adicioná-los de volta
-// import { useAuth } from "../../contexts/AuthContext";
-// import { useCookies } from "react-cookie";
-// import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
-  // const { user } = useAuth();
-  // const [cookies] = useCookies(["authToken"]);
-  // const navigate = useNavigate();
+  const { user } = useAuth();
+  const [cookies] = useCookies(["authToken"]);
+  const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [formData, setFormData] = useState({ name: "", email: "", role: "" });
 
-  // Mock de usuário para o exemplo funcionar sem o contexto de autenticação
-  const user = { role: "admin" };
+  const [dashboardData, setDashboardData] = useState({});
 
+  const cargos = { seller: "Vendedor", user: "Cliente", admin: "Administrador" }
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch(`http://localhost:4500/admin/dashboard`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${cookies.authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.error(`Problemas na requisição: ${response}`);
+        return;
+      }
+
+      const data = await response.json();
+      setDashboardData(data);
+      console.log({ data })
+    } catch (error) {
+      console.error(`Problemas na requisição: ${error}`);
+    }
+  };
+
+  const deleteUser = async (userID) => {
+    try {
+      const response = await fetch(`http://localhost:4500/admin/user/${userID}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${cookies.authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.error(`Problemas na requisição: ${response}`);
+        return;
+      }
+
+      fetchDashboardData();
+    } catch (error) {
+      console.error(`Problemas na requisição: ${error}`);
+      fetchDashboardData();
+    }
+  };
+
+  const setUserSeller = async (sellerID, state) => {
+    try {
+      console.log(`http://localhost:4500/admin/user/${sellerID}/seller`)
+      const response = await fetch(`http://localhost:4500/admin/user/${sellerID}/seller`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${cookies.authToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ state }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json()
+        console.error(`Problemas na requisição: ${data?.message}`);
+        return;
+      }
+
+      fetchDashboardData();
+    } catch (error) {
+
+      console.error(`Problemas na requisição: ${error}`);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
   // Bloqueia essa rota caso o usuário esteja deslogado
   // if (!user) navigate("/login");
   // Bloqueia essa rota caso o usuário não é admin
   // else if (user.role !== "admin") navigate("/profile");
 
   const users = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      role: "Admin",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@example.com",
-      role: "Editor",
-      status: "Pending",
-    },
   ];
 
   // Abre o modal e preenche o formulário com os dados do usuário
@@ -54,8 +111,7 @@ const Admin = () => {
     if (
       window.confirm(`Tem certeza que deseja excluir o usuário ${user.name}?`)
     ) {
-      console.log(`Usuário ${user.name} excluído!`);
-      // Aqui você adicionaria a lógica para remover o usuário da lista
+      deleteUser(user.id)
     }
   };
 
@@ -88,41 +144,85 @@ const Admin = () => {
           <div className={styles.adminGridCards}>
             {/* Seus cards aqui */}
             <div className={styles.adminCard}>
-              <p className={styles.adminCardSubtitle}>Total Users</p>
-              <h2
-                className={`${styles.adminCardTitle} ${styles.adminTextBlue}`}
-              >
-                1,240
-              </h2>
-            </div>
-            <div className={styles.adminCard}>
-              <p className={styles.adminCardSubtitle}>Revenue</p>
+              <p className={styles.adminCardSubtitle}>Vendas concluidas</p>
               <h2
                 className={`${styles.adminCardTitle} ${styles.adminTextGreen}`}
               >
-                $24,500
+                R$ {(dashboardData?.summary?.revenue?.delivered + dashboardData?.summary?.revenue?.pending) | 0}
               </h2>
             </div>
             <div className={styles.adminCard}>
-              <p className={styles.adminCardSubtitle}>New Orders</p>
+              <p className={styles.adminCardSubtitle}>Nossos vendedores</p>
+              <h2
+                className={`${styles.adminCardTitle} ${styles.adminTextBlue}`}
+              >
+                {dashboardData?.summary?.totalUsers?.seller | 0}
+              </h2>
+            </div>
+            <div className={styles.adminCard}>
+              <p className={styles.adminCardSubtitle}>Total de pedidos</p>
               <h2
                 className={`${styles.adminCardTitle} ${styles.adminTextPurple}`}
               >
-                320
+                {dashboardData?.summary?.totalOrders?.total | 0}
               </h2>
             </div>
             <div className={styles.adminCard}>
-              <p className={styles.adminCardSubtitle}>Pending Tickets</p>
+              <p className={styles.adminCardSubtitle}>total de Jogos disponíveis</p>
               <h2
-                className={`${styles.adminCardTitle} ${styles.adminTextPink}`}
+                className={`${styles.adminCardTitle} ${styles.adminTextPurple}`}
               >
-                12
+                {dashboardData?.summary?.totalGames | 0}
               </h2>
             </div>
           </div>
 
+          {(dashboardData?.recentActivity?.pendingSellers?.length ?? false) ? (
+            <div className={styles.adminTableContainer}>
+              <div className={styles.adminTableHeader}>Candidatos a Vendedor</div>
+              <table className={styles.adminTable}>
+                <thead className={styles.adminTableHead}>
+                  <tr>
+                    <th className={styles.adminTableCell}>Name</th>
+                    <th className={styles.adminTableCell}>Email</th>
+                    <th
+                      className={styles.adminTableCell}
+                      style={{ textAlign: "center" }}
+                    >
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(dashboardData?.recentActivity?.pendingSellers ?? []).map((user) => (
+                    <tr key={user.id} className={styles.adminTableRow}>
+                      <td className={styles.adminTableCell}>{user.name}</td>
+                      <td className={styles.adminTableCell}>{user.email}</td>
+                      <td
+                        className={`${styles.adminTableCell} ${styles.adminActionButtons}`}
+                      >
+                        <button
+                          className={`${styles.adminActionButton} ${styles.edit}`}
+                          onClick={() => { setUserSeller(user.id, true) }}
+                        >
+                          <FaThumbsUp />
+                        </button>
+                        <button
+                          className={`${styles.adminActionButton} ${styles.delete}`}
+                          onClick={() => setUserSeller(user.id, false)}
+                        >
+                          <FaThumbsDown />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (<></>)}
+
           <div className={styles.adminTableContainer}>
-            <div className={styles.adminTableHeader}>User List</div>
+            <div className={styles.adminTableHeader}>Cadastros recentes</div>
             <table className={styles.adminTable}>
               <thead className={styles.adminTableHead}>
                 <tr>
@@ -139,39 +239,41 @@ const Admin = () => {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
-                  <tr key={user.id} className={styles.adminTableRow}>
-                    <td className={styles.adminTableCell}>{user.name}</td>
-                    <td className={styles.adminTableCell}>{user.email}</td>
-                    <td className={styles.adminTableCell}>{user.role}</td>
-                    <td
-                      className={`${styles.adminTableCell} ${
-                        styles.adminStatus
-                      } ${
-                        user.status === "Active"
-                          ? styles.adminStatusActive
-                          : styles.adminStatusPending
-                      }`}
-                    >
-                      {user.status}
-                    </td>
-                    <td
-                      className={`${styles.adminTableCell} ${styles.adminActionButtons}`}
-                    >
-                      <button
-                        className={`${styles.adminActionButton} ${styles.edit}`}
-                        onClick={() => handleEditClick(user)}
-                      >
-                        <FaPencilAlt />
-                      </button>
-                      <button
-                        className={`${styles.adminActionButton} ${styles.delete}`}
-                        onClick={() => handleDeleteClick(user)}
-                      >
-                        <FaTrash />
-                      </button>
-                    </td>
-                  </tr>
+                {(dashboardData?.recentActivity?.users ?? []).map((iterativeUser) => (
+                  <>
+                    {iterativeUser.id === user?.id ? (<></>) : (
+                      <tr key={iterativeUser.id} className={styles.adminTableRow}>
+                        <td className={styles.adminTableCell}>{iterativeUser.name}</td>
+                        <td className={styles.adminTableCell}>{iterativeUser.email}</td>
+                        <td className={styles.adminTableCell}>{cargos[iterativeUser.role]}</td>
+                        <td
+                          className={`${styles.adminTableCell} ${styles.adminStatus
+                            } ${iterativeUser.status === "Active"
+                              ? styles.adminStatusActive
+                              : styles.adminStatusPending
+                            }`}
+                        >
+                          {iterativeUser.status}
+                        </td>
+                        <td
+                          className={`${styles.adminTableCell} ${styles.adminActionButtons}`}
+                        >
+                          <button
+                            className={`${styles.adminActionButton} ${styles.edit}`}
+                            onClick={() => handleEditClick(iterativeUser)}
+                          >
+                            <FaPencilAlt />
+                          </button>
+                          <button
+                            className={`${styles.adminActionButton} ${styles.delete}`}
+                            onClick={() => handleDeleteClick(iterativeUser)}
+                          >
+                            <FaTrash />
+                          </button>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>
@@ -179,24 +281,14 @@ const Admin = () => {
 
           <div className={styles.adminGridButtons}>
             <button
-              className={`${styles.adminButton} ${styles.adminButtonBlue}`}
-            >
-              Add User
-            </button>
-            <button
-              className={`${styles.adminButton} ${styles.adminButtonGreen}`}
-            >
-              Export Data
-            </button>
-            <button
               className={`${styles.adminButton} ${styles.adminButtonPurple}`}
             >
-              Generate Report
+              Gerenciar jogos
             </button>
             <button
               className={`${styles.adminButton} ${styles.adminButtonPink}`}
             >
-              Delete Records
+              Gerenciar pedidos
             </button>
           </div>
           {isModalOpen && selectedUser && (
@@ -267,14 +359,14 @@ const Admin = () => {
           )}
           <div className={styles.adminProfileCard}>
             <img
-              src="https://i.pravatar.cc/100"
+              src={user?.imageUrl}
               alt="Profile"
               className={styles.adminProfileImage}
             />
             <div className={styles.adminProfileDetails}>
-              <h3 className={styles.adminProfileName}>Sophia Ray</h3>
-              <p className={styles.adminProfileRole}>Administrator</p>
-              <button className={styles.adminEditButton}>Edit Profile</button>
+              <h3 className={styles.adminProfileName}>{user?.name}</h3>
+              <p className={styles.adminProfileRole}>{cargos[(user?.role) ?? "admin"]}</p>
+              <button className={styles.adminEditButton} onClick={() => navigate("/profile")}>Editar perfil</button>
             </div>
           </div>
         </main>

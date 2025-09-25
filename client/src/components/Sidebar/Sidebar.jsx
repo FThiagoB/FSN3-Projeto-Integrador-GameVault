@@ -74,26 +74,38 @@ const Sidebar = ({ isExpanded, onToggle }) => {
       };
 
   const mainLinks = [
-    { icon: <FaHome size={22} />, text: "Home", to: "/" },
-    { icon: <FaEnvelope size={22} />, text: "Contato", to: "/contato" },
-    { icon: <FaQuestionCircle size={22} />, text: "FAQ", to: "/faq" },
   ];
 
   if (!user || user.role === "user") {
+    mainLinks.splice(0, 0, {
+      icon: <FaHome size={22} />,
+      text: "Home",
+      to: "/",
+    });
     mainLinks.splice(1, 0, {
       icon: <FaBoxOpen size={22} />,
       text: "Produtos",
       to: "/produtos",
     });
-    mainLinks.push({
+    mainLinks.splice(2, 0, {
       icon: <FaShoppingCart size={22} />,
       text: "Carrinho",
       to: "/cart",
     });
+    mainLinks.splice(3, 0, {
+      icon: <FaEnvelope size={22} />,
+      text: "Contato",
+      to: "/contato",
+    });
+    mainLinks.splice(4, 0, {
+      icon: <FaQuestionCircle size={22} />,
+      text: "FAQ",
+      to: "/faq",
+    });
   }
 
   if (user && user.role === "admin") {
-    mainLinks.push({
+    mainLinks.splice(0, 0, {
       icon: <FaTachometerAlt size={22} />,
       text: "Dashboard",
       to: "/admin",
@@ -101,7 +113,17 @@ const Sidebar = ({ isExpanded, onToggle }) => {
   }
 
   if (user && user.role === "seller") {
-    mainLinks.splice(3, 0,{
+     mainLinks.splice(1, 0, {
+      icon: <FaEnvelope size={22} />,
+      text: "Contato",
+      to: "/contato",
+    });
+    mainLinks.splice(2, 0, {
+      icon: <FaQuestionCircle size={22} />,
+      text: "FAQ",
+      to: "/faq",
+    });
+    mainLinks.splice(0, 0,{
       icon: <FaMoneyBillWave size={22} />,
       text: "My Sales",
       to: "/profile/seller-orders",

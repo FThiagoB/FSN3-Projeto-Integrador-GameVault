@@ -10,6 +10,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const addressRoutes = require("./routes/addressRoutes");
 const couponRoutes = require("./routes/couponRoutes");
 const shippingMethodRoutes = require("./routes/shippingMethodRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 app = express();
 const porta = 4500;
@@ -33,6 +34,7 @@ app.use(orderRoutes);
 app.use(addressRoutes);
 app.use(couponRoutes)
 app.use(shippingMethodRoutes);
+app.use(adminRoutes);
 
 app.listen(porta, () => {
   console.log(`Servidor iniciado na porta http://localhost:${porta}`);

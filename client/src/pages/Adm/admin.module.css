@@ -138,12 +138,17 @@
   text-transform: uppercase;
   font-size: 0.875rem;
   letter-spacing: 0.05em;
+  text-align: center;
 }
 
 .adminTableCell {
   padding: 1rem 2rem;
   border-top: 1px solid var(--admin-border-color);
   color: var(--admin-text-light);
+}
+
+.adminTableRow {
+  text-align: center;
 }
 
 .adminTableRow:hover {
@@ -199,9 +204,11 @@
 
 /* Botões */
 .adminGridButtons {
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 1.5rem;
+  gap: 5rem;
   background: var(--admin-card-bg);
   backdrop-filter: blur(4px);
   padding: 2rem;

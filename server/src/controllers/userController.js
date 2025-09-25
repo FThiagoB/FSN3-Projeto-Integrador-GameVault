@@ -402,6 +402,7 @@ exports.updateUserRole = async (req, res) => {
 exports.requestSeller = async (req, res) => {
   try {
     const userID = req.user.id;
+    if( !req.body ) req.body = {}
     const {state = true} = req.body;
 
     // Primeiro, busca o usuário para verificar o role atual

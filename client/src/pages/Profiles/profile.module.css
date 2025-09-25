@@ -54,6 +54,7 @@
 }
 
 .profileNavActive button {
-  color: var(--profile-text-color-dark);
-  font-weight: 700;
+  color: var(--profile-text-color-dark) !important;
+  font-weight: 700 !important;
+  background-color: #e9ecef5e !important;
 }

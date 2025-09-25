@@ -463,7 +463,7 @@ exports.getTransactionsByJWT = async (req, res) => {
             status: getOrderStatusFromItems(order.items),
             paymentStatus: getPaymentStatusFromItems(order.items),
 
-            externID: generateExternID(order.id),
+            externID: generateExternID(String(order.id)),
             paymentMethod: {
                 type: order.paymentMethod.type,
                 description: getPaymentDescription(order.paymentMethod.type, order.paymentMethod.data)
@@ -562,6 +562,7 @@ exports.getTransactionsBySellerJWT = async (req, res) => {
                         unitPrice: true,
                         quantity: true,
                         paymentStatus: true,
+                        id: true
                     }
                 },
                 paymentMethod: {
@@ -617,6 +618,119 @@ exports.getTransactionsBySellerJWT = async (req, res) => {
                 total: totalOrders,
                 pages: Math.ceil(totalOrders / limit)
             }
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message })
+    }
+}
+
+exports.getTransactionBySellerJWT = async (req, res) => {
+    try {
+        const sellerID = parseInt(req.user.id);
+        const orderID = parseInt(req.params.orderID);
+
+        // Monta os filtros
+        const where = {
+            id: orderID,
+            items: {
+                some: {
+                    game: {
+                        sellerID: sellerID
+                    }
+                }
+            }
+        };
+
+        // Buscar o pedido específico
+        const order = await prisma.order.findFirst({
+            where,
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                },
+                address: {
+                    select: {
+                        label: true,
+                        street: true,
+                        number: true,
+                        neighborhood: true,
+                        city: true,
+                        state: true,
+                        zipCode: true
+                    }
+                },
+                items: {
+                    where: {
+                        game: {
+                            sellerID: sellerID
+                        }
+                    },
+                    select: {
+                        game: {
+                            select: {
+                                id: true,
+                                title: true,
+                                image: true,
+                                price: true,
+                                sellerID: true,
+                                deleted: true
+                            }
+                        },
+                        status: true,
+                        unitPrice: true,
+                        quantity: true,
+                        paymentStatus: true,
+                        id: true
+                    }
+                },
+                paymentMethod: {
+                    select: {
+                        type: true,
+                        data: true
+                    }
+                }
+            },
+        });
+
+        if (!order)
+            return res.status(404).json({ message: "Pedido não encontrado" });
+
+        // Calcula o valor total recebido pelo vendedor daquele pedido
+        const totalSeller = order.items.reduce((sum, item) => {
+            return sum + (item.unitPrice * item.quantity);
+        }, 0);
+
+        // Remove alguns campos que o vendedor não deve ter acesso (igual na original)
+        const { subtotal, discount, tax, couponID, ...filteredOrder } = order;
+
+        // Formata igual à função original
+        const formattedOrder = {
+            ...filteredOrder,
+            total: totalSeller,
+            externID: generateExternID(order.id),
+            status: getOrderStatusFromItems(order.items),
+            paymentStatus: getPaymentStatusFromItems(order.items),
+            paymentMethod: {
+                type: order.paymentMethod.type,
+                description: getPaymentDescription(order.paymentMethod.type, order.paymentMethod.data),
+            },
+            items: order.items.map(item => ({
+                ...item,
+                game: {
+                    ...item.game,
+                    imageUrl: `${req.protocol}://${req.get("host")}/uploads/games/${item.game.image}`
+                },
+            }))
+        };
+
+        res.status(200).json({
+            order: formattedOrder
         });
     }
     catch (error) {
@@ -895,36 +1009,60 @@ exports.cancelOrderBySeller = async (req, res) => {
     }
 };
 
-exports.shipOrderBySeller = async (req, res) => {
+exports.changeStatusOrderItemBySeller = async (req, res) => {
     try {
-        const { orderID } = req.params;
+        const { orderID, itemID } = req.params;
         const sellerID = req.user.id;
+        const { status } = req.body;
 
-        const order = await prisma.order.findFirst({
-            where: {
-                id: orderID,
-                items: {
-                    every: {
-                        game: {
-                            sellerID: sellerID
-                        }
-                    }
-                }
+        // Verifica a existência dos IDs
+        if (!orderID || !itemID)
+            return res.status(400).json({ message: "ID do pedido e do produto são necessários" });
+
+        // Verifica a existência dos IDs
+        if (!status)
+            return res.status(400).json({ message: "Defina o status do pedido" });
+
+        // Verificar se orderID é um número válido
+        if (Number.isNaN(parseInt(orderID)) || Number.isNaN(parseInt(itemID)))
+            return res.status(400).json({ message: "ID do pedido e do produto devem ser inteiros" });
+
+        // Resgata o item do pedido especificado
+        const orderItem = await prisma.orderItem.findUnique({
+            where: { id: parseInt(itemID) }
+        });
+
+        // Verifica se existe
+        if (!orderItem)
+            return res.status(404).json({ message: "O item não foi localizado" });
+
+        // Verifica se a alteração de status é possível
+        if (["shipped", "cancelled", "delivered"].includes(orderItem.status))
+            return res.status(400).json({ message: "O item especificado não pode mais ser alterado pelo vendedor" });
+
+        // Verifica se quer enviar antes de receber o pagamento
+        if (status === "shipped" && ["cancelled", "pending", "processing"].includes(orderItem.paymentStatus))
+            return res.status(400).json({ message: "O item ainda não deve ser enviado, espere a confirmação do pagamento" });
+
+        let newPaymentStatus = orderItem.paymentStatus;
+        if (status === "cancelled") {
+            // Item foi pago
+            if (orderItem.paymentStatus === "paid")
+                newPaymentStatus = "refunded"
+
+            else
+                newPaymentStatus = "cancelled"
+        }
+
+        await prisma.orderItem.update({
+            where: { id: parseInt(itemID) },
+            data: {
+                status: status,
+                paymentStatus: newPaymentStatus
             }
         });
 
-        if (!order)
-            return res.status(404).json({ message: "Request not found or you do not have permission" });
-
-        if (order.status !== 'paid')
-            return res.status(400).json({ message: "The order is not paid" });
-
-        const updatedOrder = await prisma.order.update({
-            where: { id: orderID },
-            data: { status: 'shipped' },
-        });
-
-        res.status(200).json(updatedOrder);
+        res.status(200).json("Item atualizado com sucesso");
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message })

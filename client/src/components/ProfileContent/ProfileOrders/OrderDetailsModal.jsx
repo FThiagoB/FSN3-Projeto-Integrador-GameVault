@@ -1,29 +1,35 @@
-import React, { useState, useEffect, useRef } from "react";
-import ReactDOM from "react-dom";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import Table from "react-bootstrap/Table";
-import Alert from "react-bootstrap/Alert";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import Table from 'react-bootstrap/Table';
+import Badge from 'react-bootstrap/Badge';
+import Alert from 'react-bootstrap/Alert';
+import { useState } from "react";
+import { useRef } from "react";
+import { useEffect } from "react";
 
-import { useAuth } from "../../../contexts/AuthContext";
-import { useCookies } from "react-cookie";
+import { useAuth } from '../../../contexts/AuthContext';
+import { useCookies } from 'react-cookie';
+import { useNavigate } from "react-router-dom";
 
 import { ToastContainer } from "react-toastify";
 import useNotification from "../../../utils/useNotification";
-import StatusBadge from "../../../utils/StatusBadge";
 
+import StatusBadge from "./../../../utils/StatusBadge"
 import styles from "./orderDetailsModal.module.css";
 
 const OrderDetailsModal = ({
   show,
   onHide,
-  order,
+  parentOrder,
   refreshFetch = () => {},
 }) => {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showDeliveryConfirm, setShowDeliveryConfirm] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [confirmingDelivery, setConfirmingDelivery] = useState(false);
+  const [order, setOrder] = useState({});
 
   const { notifySuccess, notifyError } = useNotification();
   const alertRef = useRef(null);
@@ -31,6 +37,8 @@ const OrderDetailsModal = ({
 
   const { user } = useAuth();
   const [cookies] = useCookies(["authToken"]);
+
+  console.log({order})
 
   async function changeStatus(status) {
     try {
@@ -59,6 +67,10 @@ const OrderDetailsModal = ({
       notifyError(`${error}`);
     }
   }
+
+  useEffect( () => {
+    setOrder(parentOrder)
+  }, [parentOrder])
 
   useEffect(() => {
     if (
@@ -194,7 +206,107 @@ const OrderDetailsModal = ({
           </Alert>
         )}
 
-        {/* Informações Gerais, Itens, Endereço e Pagamento permanecem iguais, sem alteração de classes externas */}
+        {/* Informações Gerais do Pedido */}
+        <div className="mb-4">
+          <h5 className="mb-3">Informações do Pedido</h5>
+          <div className="row">
+            <div className="col-md-6">
+              <p><strong>Status:</strong> <StatusBadge status={order.status}/></p>
+              <p><strong>Data do Pedido:</strong> {formatDate(order.createdAt)}</p>
+              <p><strong>Última atualização:</strong> {formatDate(order.updatedAt)}</p>
+              <p><strong>Status do Pagamento:</strong> <StatusBadge status={order.paymentStatus}/></p>
+            </div>
+            <div className="col-md-6">
+              <p><strong>Subtotal:</strong> {formatCurrency(order.subtotal)}</p>
+              <p><strong>Desconto:</strong> {formatCurrency(order.discount * order.subtotal)}</p>
+              <p><strong>Taxas:</strong> {formatCurrency(order.tax)}</p>
+              <p><strong>Frete:</strong> {formatCurrency(order.shippingCost)}</p>
+              <p><strong className="h6">Total: {formatCurrency(order.total)}</strong></p>
+            </div>
+          </div>
+        </div>
+
+        {/* Itens do Pedido */}
+        <div className="mb-4">
+          <h5 className="mb-3">Itens do Pedido</h5>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário</th>
+                <th>Subtotal</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.items.map((item) => (
+                <tr key={item.game.id}>
+                  <td>
+                    <div className="d-flex align-items-center">
+                      <img
+                        src={item.game.imageUrl}
+                        alt={item.game.title}
+                        style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                        className="me-3"
+                      />
+                      <div>
+                        <strong>{item.game.title}</strong>
+                        <br />
+                        <small className="text-muted">ID: {item.game.id}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="align-middle">{item.quantity}</td>
+                  <td className="align-middle">{formatCurrency(item.unitPrice)}</td>
+                  <td className="align-middle">
+                    {formatCurrency(item.unitPrice * item.quantity)}
+                  </td>
+                  <td className="align-middle"><StatusBadge status={item.status}/></td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+
+        {/* Endereço de Entrega */}
+        <div className="mb-4">
+          <h5 className="mb-3">Endereço de Entrega</h5>
+          <div className="border rounded p-3">
+            <p><strong>Endereço:</strong> {order.address.street}, {order.address.number}</p>
+            <p><strong>Bairro:</strong> {order.address.neighborhood}</p>
+            <p><strong>Cidade/Estado:</strong> {order.address.city}</p>
+            <p><strong>CEP:</strong> {order.address.zipCode}</p>
+            {order.address.label && (
+              <p><strong>Label:</strong> {order.address.label}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Método de Pagamento */}
+        <div className="mb-3">
+          <h5 className="mb-3">Método de Pagamento</h5>
+          <div className="border rounded p-3">
+            <p>
+              <strong>Tipo:</strong> {order.paymentMethod?.type === 'credit_card'
+                ? 'Cartão de Crédito'
+                : order.paymentMethod?.type === 'debit_card'
+                  ? 'Cartão de Débito'
+                  : order.paymentMethod?.type === 'pix'
+                    ? 'PIX'
+                    : order.paymentMethod?.type || 'Não especificado'}
+            </p>
+            <p>
+              <strong> {order.paymentMethod?.type === 'credit_card' || 'debit_card'
+                ? 'Número do Cartão: '
+                : order.paymentMethod?.type === 'pix'
+                  ? 'Chave: '
+                  : order.paymentMethod?.type || 'Descrição: '}
+              </strong>
+              {order.paymentMethod?.description}
+            </p>
+          </div>
+        </div>
       </Modal.Body>
 
       <Modal.Footer className={styles.modalFooter}>

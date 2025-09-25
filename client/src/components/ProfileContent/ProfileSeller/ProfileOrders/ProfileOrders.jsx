@@ -130,7 +130,7 @@ const ProfileOrders = () => {
       <OrderDetailsModal
         show={showModal}
         onHide={handleCloseModal}
-        order={selectedOrder}
+        parentOrder={selectedOrder}
         refreshFetch={fetchOrdesItems}
       />
     </main>

@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { Dropdown, Spinner } from 'react-bootstrap';
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Table from "react-bootstrap/Table";
@@ -14,10 +15,78 @@ import StatusBadge from "./../../../../utils/StatusBadge";
 
 import styles from "./orderDetailsModal.module.css";
 
+const ItemActionsDropdown = ({ item, onUpdateStatus, updatingItemId }) => {
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const handleStatusChange = async (newStatus) => {
+    await onUpdateStatus(item.id, newStatus);
+    setShowDropdown(false);
+  };
+
+  const canCancel = item.status !== 'cancelled' && item.status !== 'delivered';
+  const canProcess = item.status === 'pending';
+  const canShip = item.status === 'processing' //&& item.paymentStatus === "paid";
+
+  return (
+    <Dropdown
+      show={showDropdown}
+      onToggle={setShowDropdown}
+      align="end"
+    >
+      <Dropdown.Toggle
+        variant="outline-secondary"
+        size="sm"
+        disabled={updatingItemId === item.id}
+      >
+        {updatingItemId === item.id ? (
+          <Spinner animation="border" size="sm" />
+        ) : (
+          'Ações'
+        )}
+      </Dropdown.Toggle>
+
+      <Dropdown.Menu>
+        {canProcess && (
+          <Dropdown.Item
+            onClick={() => handleStatusChange('processing')}
+            className="text-center"
+          >
+            Preparar item
+          </Dropdown.Item>
+        )}
+
+        {canShip && (
+          <Dropdown.Item
+            onClick={() => handleStatusChange('shipped')}
+            className="text-warning text-center"
+          >
+            Enviar item
+          </Dropdown.Item>
+        )}
+
+        {canCancel && (
+          <Dropdown.Item
+            onClick={() => handleStatusChange('cancelled')}
+            className="text-danger text-center"
+          >
+            Cancelar Item
+          </Dropdown.Item>
+        )}
+
+        {(item.status === 'shipped' || item.status === 'delivered' || item.status === 'cancelled') && (
+          <Dropdown.Item disabled className="text-center">
+            Indisponível
+          </Dropdown.Item>
+        )}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+};
+
 const OrderDetailsModal = ({
   show,
   onHide,
-  order,
+  parentOrder,
   refreshFetch = () => {},
 }) => {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -25,6 +94,8 @@ const OrderDetailsModal = ({
 
   const [cancelling, setCancelling] = useState(false);
   const [confirmingDelivery, setConfirmingDelivery] = useState(false);
+  const [updatingItemId, setUpdatingItemId] = useState(null);
+  const [order, setOrder] = useState(parentOrder)
 
   const alertRef = useRef(null);
   const modalBodyRef = useRef(null);
@@ -33,6 +104,66 @@ const OrderDetailsModal = ({
 
   const { user, syncData } = useAuth();
   const [cookies] = useCookies(["authToken"]);
+
+  // Atualiza o estado interno quando parentOrder mudar
+  useEffect(() => {
+    setOrder(parentOrder);
+  }, [parentOrder]);
+
+  const refreshOrder = async (orderID) => {
+    try {
+      const response = await fetch(`http://localhost:4500/seller/orders/${orderID}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${cookies.authToken}`,
+        }
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        notifyError(`${data?.message}`);
+        console.error(response?.message);
+        return;
+      }
+
+      setOrder( data.order )
+
+    } catch (error) {
+      notifyError(`${error}`);
+    }
+  }
+
+  const handleUpdateItemStatus = async (orderItemID, status) => {
+    setUpdatingItemId(orderItemID)
+
+    try {
+      const response = await fetch(`http://localhost:4500/seller/orders/me/${order.id}/${orderItemID}`, {
+        method: "PATCH",
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${cookies.authToken}`,
+        },
+        body: JSON.stringify({ status }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        notifyError(`${data?.message}`);
+        setUpdatingItemId(null)
+        return;
+      }
+
+      notifySuccess("Status alterado com sucesso");
+      refreshFetch();
+      refreshOrder( order.id );
+      setUpdatingItemId(null)
+
+    } catch (error) {
+      setUpdatingItemId(null)
+      notifyError(`${error}`);
+      console.error('Erro ao confirmar entrega ', error);
+    }
+  }
 
   async function changeStatus(status) {
     try {
@@ -270,6 +401,7 @@ const OrderDetailsModal = ({
                 <th>Preço Unitário</th>
                 <th>Subtotal</th>
                 <th>Status</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -303,6 +435,13 @@ const OrderDetailsModal = ({
                   </td>
                   <td className="align-middle">
                     <StatusBadge status={item.status} />
+                  </td>
+                  <td className="align-middle text-center">
+                    <ItemActionsDropdown
+                      item={item}
+                      onUpdateStatus={handleUpdateItemStatus}
+                      updatingItemId={updatingItemId}
+                    />
                   </td>
                 </tr>
               ))}

@@ -159,7 +159,10 @@ const ProfileSecurity = () => {
       return regex.test(email);
     };
 
-    if (!emailData.confirmPassword || !emailData.newEmail) return;
+    if (!emailData.confirmPassword || !emailData.newEmail){
+      notifyError("Preencha todos os campos");
+      return
+    };
 
     if (!validaEmail(emailData.newEmail)) {
       notifyError("Email inválido");

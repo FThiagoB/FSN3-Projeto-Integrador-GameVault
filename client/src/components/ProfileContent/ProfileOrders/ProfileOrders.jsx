@@ -55,6 +55,7 @@ const ProfileOrders = () => {
 
   useEffect(() => {
     if (!user) navigate("/login");
+
     fetchOrdersItems();
   }, [user, navigate]);
 
@@ -120,7 +121,7 @@ const ProfileOrders = () => {
       <OrderDetailsModal
         show={showModal}
         onHide={handleCloseModal}
-        order={selectedOrder}
+        parentOrder={selectedOrder}
         refreshFetch={fetchOrdersItems}
       />
     </main>

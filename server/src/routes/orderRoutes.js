@@ -10,7 +10,9 @@ router.delete("/orders/me/:orderID", auth, clientOnly, orderController.cancelOrd
 router.put("/orders/me/:orderID", auth, clientOnly, orderController.setStateOrderByClient);
 
 router.get("/seller/orders/me", auth, sellerOnly, orderController.getTransactionsBySellerJWT);
+router.get("/seller/orders/:orderID", auth, sellerOnly, orderController.getTransactionBySellerJWT);
 router.delete("/seller/orders/me/:orderID", auth, sellerOnly, orderController.cancelOrderBySeller);
+router.patch("/seller/orders/me/:orderID/:itemID", auth, sellerOnly, orderController.changeStatusOrderItemBySeller);
 
 router.get("/checkout", auth, clientOnly, orderController.getCheckoutInfo);
 router.post("/checkout", auth, clientOnly, orderController.processCheckout);

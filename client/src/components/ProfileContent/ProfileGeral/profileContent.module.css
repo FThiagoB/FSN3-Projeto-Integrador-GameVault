@@ -104,6 +104,10 @@
   cursor: not-allowed;
 }
 
+.profileFileInput{
+  display: none;
+}
+
 .profileFormRow {
   display: flex;
   gap: 1rem;

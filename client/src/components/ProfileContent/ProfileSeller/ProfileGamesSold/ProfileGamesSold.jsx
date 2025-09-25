@@ -66,7 +66,7 @@ const ProfileGamesSold = () => {
     <>
       <main className={styles.profileMainContent}>
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 className={styles.profileOrdersTitle}>My Games</h2>
+          <h2 className={styles.profileOrdersTitle}>Meus Jogos</h2>
         </div>
 
         <div className={styles.gamesList}>

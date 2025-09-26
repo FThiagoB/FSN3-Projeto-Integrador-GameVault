@@ -1,4 +1,4 @@
-const { hashPassword } = require("./src/utils/miscellaneous");
+const { hashPassword, getImagesFromGamesData } = require("./src/utils/miscellaneous");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
@@ -12,37 +12,37 @@ const getRandomSeller = () => {
 
 // Cupons a serem criados
 const discountCoupons = [
-    { 
-        code: "VERAO10", 
-        discount: 0.1, 
+    {
+        code: "VERAO10",
+        discount: 0.1,
         isActive: false,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 dias a partir de agora
         minValue: 50.00
     },
-    { 
-        code: "PRIMEIRACOMPRA", 
-        discount: 0.15, 
+    {
+        code: "PRIMEIRACOMPRA",
+        discount: 0.15,
         isActive: false,
         expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 dias
         minValue: 30.00
     },
-    { 
-        code: "GAMER20", 
-        discount: 0.2, 
+    {
+        code: "GAMER20",
+        discount: 0.2,
         isActive: true,
         expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 dias
         minValue: 100.00
     },
-    { 
-        code: "FREEGAME5", 
-        discount: 0.05, 
+    {
+        code: "FREEGAME5",
+        discount: 0.05,
         isActive: true,
         expiresAt: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), // 45 dias
         minValue: 20.00
     },
-    { 
-        code: "BLACKFRIDAY30", 
-        discount: 0.3, 
+    {
+        code: "BLACKFRIDAY30",
+        discount: 0.3,
         isActive: true,
         expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 dias
         minValue: 150.00
@@ -354,7 +354,7 @@ async function createPaymentMethods() {
         await prisma.paymentMethod.create({
             data: {
                 ...paymentMethods[0],
-                userID: 10 
+                userID: 10
             }
         });
 
@@ -365,7 +365,7 @@ async function createPaymentMethods() {
                 userID: 9
             }
         });
-        
+
         console.log("Adicionando método de pagamentos");
     } catch (error) {
         console.error(`problemas com createPaymentMethods(): ${error.message}`);
@@ -398,29 +398,38 @@ async function createGames() {
 
 // Semeia as tabelas com dados de exemplo
 async function seed() {
-    await createAdmin();
-    await createUsers();
-    await createAddresses();
-    await createGames();
-    await createShippingMethods();
-    await createCoupons();
-    await createPaymentMethods();
+    try {
+        // Realiza download das capas e atualiza o JSON
+        await getImagesFromGamesData(games)
 
-    // Como o id é informado de forma explicita devemos atualizar o contador do autoincrement da tabela de jogos
-    await prisma.$executeRaw`SELECT setval('"Game_id_seq"', (SELECT MAX(id) FROM "Game"))`;
+        // Cria as tabelas
+        await createAdmin();
+        await createUsers();
+        await createAddresses();
+        await createGames();
+        await createShippingMethods();
+        await createCoupons();
+        await createPaymentMethods();
 
-    // Como o id é informado de forma explicita devemos atualizar o contador do autoincrement da tabela de usuários
-    await prisma.$executeRaw`SELECT setval('"User_id_seq"', (SELECT MAX(id) FROM "User"))`;
+        // Como o id é informado de forma explicita devemos atualizar o contador do autoincrement da tabela de jogos
+        await prisma.$executeRaw`SELECT setval('"Game_id_seq"', (SELECT MAX(id) FROM "Game"))`;
 
-     // Atualizar sequências para as novas tabelas
-    await prisma.$executeRaw`SELECT setval('"ShippingMethod_id_seq"', (SELECT MAX(id) FROM "ShippingMethod"))`;
-    await prisma.$executeRaw`SELECT setval('"Coupon_id_seq"', (SELECT MAX(id) FROM "Coupon"))`;
-    await prisma.$executeRaw`SELECT setval('"PaymentMethod_id_seq"', (SELECT MAX(id) FROM "PaymentMethod"))`;
+        // Como o id é informado de forma explicita devemos atualizar o contador do autoincrement da tabela de usuários
+        await prisma.$executeRaw`SELECT setval('"User_id_seq"', (SELECT MAX(id) FROM "User"))`;
+
+        // Atualizar sequências para as novas tabelas
+        await prisma.$executeRaw`SELECT setval('"ShippingMethod_id_seq"', (SELECT MAX(id) FROM "ShippingMethod"))`;
+        await prisma.$executeRaw`SELECT setval('"Coupon_id_seq"', (SELECT MAX(id) FROM "Coupon"))`;
+        await prisma.$executeRaw`SELECT setval('"PaymentMethod_id_seq"', (SELECT MAX(id) FROM "PaymentMethod"))`;
+
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 seed().then(async () => {
-        await prisma.$disconnect();
-    })
+    await prisma.$disconnect();
+})
     .catch(async (e) => {
         console.error(e);
         await prisma.$disconnect();
